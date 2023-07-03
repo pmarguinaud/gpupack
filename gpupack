@@ -5,25 +5,16 @@ set -e
 
 type gmkpack
 type gitpack
+type cmake
+type fypp
 
 PREFIX=$HOME/gpupack
 
-#ARCH=NVHPC2303
-ARCH=INTEL1805
-
-INSTALL=$PREFIX/install/$ARCH
-SOURCES=$PREFIX/sources
-TMP=$PREFIX/tmp/$ARCH
-
-export CC=$HOME/gpupack/support/wrap/$ARCH/cc
-export FC=$HOME/gpupack/support/wrap/$ARCH/f90
-export CXX=$HOME/gpupack/support/wrap/$ARCH/cxx
-export F90=$HOME/gpupack/support/wrap/$ARCH/f90
-export F77=$HOME/gpupack/support/wrap/$ARCH/f90
-
-export ROOTPACK=$HOME/gpupack
-export HOMEPACK=$HOME/gpupack
+export ROOTPACK=$HOME/gpupack/pack
+export HOMEPACK=$HOME/gpupack/pack
 export GMK_SUPPORT=$HOME/gpupack/support
+
+
 
 function eccodes_install ()
 {
@@ -420,64 +411,96 @@ function clone_FieldAPI ()
   git clone --branch parkind1Style https://github.com/pmarguinaud/field_api.git
 }
 
+function libraries_install ()
+{
+  eccodes_install 
+  hdf5_install
+  netcdf_install
+  netcdf_fortran_install
+  lapack_install
+  eigen_install
+  oasisdummy_install
+  mpidummy_install
+  ibmdummy_install
+  naglitedummy_install
+  wamdummy_install
+  fdbdummy_install
+  gribex_install
+  bufr_install
+  rgb_install
+}
 
-mkdir -p $INSTALL
-mkdir -p $SOURCES
-mkdir -p $TMP
+function pack_compile ()
+{
+  PACK=$HOME/gpupack/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
+  
+  if [ ! -d "$PACK" ]
+  then
+  
+  gmkpack -r $CYCLE -b $BRANCH -a -n 01 -l $ARCH -o $OPT -p masterodb -K
+  
+  cd $PACK
+  
+  perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=16; export ARCH=$ARCH/go" ics_masterodb
+  perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
+  
+  gitpack --init --repo $REPO --branch $BRANCH
+  
+  clone_ecSDK    $PACK
+  clone_Fiat     $PACK
+  clone_Ectrans  $PACK
+  clone_OOPS     $PACK
+  clone_FieldAPI $PACK
 
+  cd $PACK
 
-if [ 0 -eq 1 ]
+  sbatch ics_packages ics_masterodb
+
+  exit
+
+  fi
+}
+  
+if [ ! -f "gmkpack.sh" ]
 then
-eccodes_install 
-hdf5_install
-netcdf_install
-netcdf_fortran_install
-lapack_install
-eigen_install
-fi
+  path=$(dirname $(which fypp))
+  echo "export PATH=$path:\$PATH" >> gmkpack.sh
 
-if [ 0 -eq 1 ]
-then
-oasisdummy_install
-mpidummy_install
-ibmdummy_install
-naglitedummy_install
-wamdummy_install
-fdbdummy_install
-gribex_install
-bufr_install
-rgb_install
-fi
+  path=$(dirname $(which gmkpack))
+  echo "export PATH=$path:\$PATH" >> gmkpack.sh
 
-CYCLE=49t0
-BRANCH=compile_with_pgi_2303-field_api
-REPO=https://github.com/pmarguinaud/IAL.git
-OPT=xs
-PACK=$HOME/gpupack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
-
-if [ ! -d "$PACK" ]
-then
-
-if [ 1 -eq 1 ]
-then
-gmkpack -r $CYCLE -b $BRANCH -a -n 01 -l $ARCH -o $OPT -p masterodb -K
-fi
-
-cd $PACK
-
-if [ 1 -eq 1 ]
-then
-gitpack --init --repo $REPO --branch $BRANCH
-fi
-
-if [ 1 -eq 1 ]
-then 
-clone_ecSDK    $PACK
-clone_Fiat     $PACK
-clone_Ectrans  $PACK
-clone_OOPS     $PACK
-clone_FieldAPI $PACK
-fi
+  path=$(dirname $(which cmake))
+  echo "export PATH=$path:\$PATH" >> gmkpack.sh
 
 fi
 
+for ARCH in NVHPC2303 INTEL1805
+do
+
+  INSTALL=$PREFIX/install/$ARCH
+  SOURCES=$PREFIX/sources
+  TMP=$PREFIX/tmp/$ARCH
+
+  mkdir -p $INSTALL
+  mkdir -p $SOURCES
+  mkdir -p $TMP
+  
+  export CC=$HOME/gpupack/support/wrap/$ARCH/cc
+  export FC=$HOME/gpupack/support/wrap/$ARCH/f90
+  export CXX=$HOME/gpupack/support/wrap/$ARCH/cxx
+  export F90=$HOME/gpupack/support/wrap/$ARCH/f90
+  export F77=$HOME/gpupack/support/wrap/$ARCH/f90
+    
+# libraries_install  
+
+  for OPT in xs xd
+  do
+  
+    CYCLE=49t0
+    BRANCH=compile_with_pgi_2303-field_api
+    REPO=https://github.com/pmarguinaud/IAL.git
+
+    pack_compile 
+    
+  done
+done

@@ -485,7 +485,7 @@ GMK_ICS = ics_
 # Submission cards : number of nodes
 # ----------------------------------
 
-GMK_NQS_NODES = 
+GMK_NQS_NODES = #SBATCH -N 1
 
 # Submission cards : large memory
 # -------------------------------
@@ -495,7 +495,7 @@ GMK_NQS_LARGE =
 # Submission cards : time limit
 # -----------------------------
 
-GMK_NQS_TIME  = 
+GMK_NQS_TIME  = #SBATCH --time=01:30:00
 
 # Submission cards : output file KEY
 # ----------------------------------
@@ -515,9 +515,9 @@ GMK_NQS_JOBID =
 # Submission cards : other directives
 # -----------------------------------
  
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
-GMK_NQS_OTHER = 
+GMK_NQS_OTHER = #SBATCH --export=NONE
+GMK_NQS_OTHER = #SBATCH --exclusive
+GMK_NQS_OTHER = . $HOME/gpupack/gmkpack.sh
 GMK_NQS_OTHER = 
 GMK_NQS_OTHER = 
 GMK_NQS_OTHER = 
