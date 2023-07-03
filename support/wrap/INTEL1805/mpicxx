@@ -1,0 +1,17 @@
+#!/bin/bash
+
+module () 
+{ 
+    eval `/usr/bin/modulecmd bash $*`
+}
+
+module purge 2>/dev/null
+module load intel/2018.5.274_mkl_nightly_2019u2 2>/dev/null
+module load intelmpi/2018.5.274 2>/dev/null
+module load gcc/5.3.0 2>/dev/null
+
+# IntelMPI x Intel C++     compiler
+
+export TMP=/tmp
+# Command
+mpiicpc $* -mkl=sequential -lirc $(echo $LD_LIBRARY_PATH | sed -e "s/:/ -Wl,-rpath,/g" -e "s/^/-Wl,-rpath,/")

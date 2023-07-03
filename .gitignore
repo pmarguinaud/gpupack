@@ -1,0 +1,5 @@
+install
+tmp
+pack
+slurm-*.out
+49t0*

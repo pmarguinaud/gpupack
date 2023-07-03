@@ -1,0 +1,30 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $NVHPC_PREFIX = "/opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.3";
+my $OMPI_PREFIX = "comm_libs/openmpi4/openmpi-4.0.5";
+my $CUDA_PREFIX= "cuda/11.8";
+
+local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX/comm_libs/nccl/lib:$NVHPC_PREFIX/$OMPI_PREFIX/lib:$NVHPC_PREFIX/math_libs/lib64:$NVHPC_PREFIX/compilers/lib:$NVHPC_PREFIX/cuda/lib64";
+local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
+local $ENV{NVHPC_CUDA_HOME} = "$NVHPC_PREFIX/$CUDA_PREFIX";
+
+my @cmd = ("$NVHPC_PREFIX/$OMPI_PREFIX/bin/mpif90", @ARGV, "-L$NVHPC_PREFIX/compilers/lib", '-lnvhpcatm', "-Wl,-rpath,$NVHPC_PREFIX/compilers/lib",
+           "-L$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt');
+
+for (@cmd)
+  {
+    s/^-l\[(\d+)\]/-l_${1}_/go;
+  }
+
+for my $f (<*.a>)
+  {
+    if ((my $g = $f) =~ s/^lib\[(\d+)\]\.a$/lib_${1}_.a/o)
+      {
+        link ($f, $g);
+      }
+  }
+
+exec (@cmd);
+
