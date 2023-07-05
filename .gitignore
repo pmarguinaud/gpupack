@@ -4,4 +4,4 @@ pack
 slurm-*.out
 49t0*
 gmkpack.sh
-
+.nfs*
