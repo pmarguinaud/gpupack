@@ -131,9 +131,6 @@ export DATADIR=$HOME/gpupack/cy49
 
 for method in nominal openmp openmpsinglecolumn openaccsinglecolumn
 do
-
-# Spawn new shell
-(
   mkdir -p $method
   cd $method
   
@@ -165,7 +162,7 @@ do
   
   # Set forecast term; reduce it for debugging
   
-  STOP=12
+  STOP=6
   
   # Modify namelist
   
@@ -225,7 +222,10 @@ do
   
   ls -lrt
 
-)
+  mkdir -p       $HOME/gpupack/cy49/arp/$GRID/ref/$method/$ARCH.$OPT
+  cp NODE.001_01 $HOME/gpupack/cy49/arp/$GRID/ref/$method/$ARCH.$OPT/.
+
+  cd ..
 
 done
 
