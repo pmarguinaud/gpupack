@@ -222,8 +222,16 @@ do
   
   ls -lrt
 
-  mkdir -p       $HOME/gpupack/cy49/arp/$GRID/ref/$method/$ARCH.$OPT
-  cp NODE.001_01 $HOME/gpupack/cy49/arp/$GRID/ref/$method/$ARCH.$OPT/.
+  ref="$HOME/gpupack/cy49/arp/$GRID/ref/$method/$ARCH.$OPT/NODE.001_01"
+  if [ ! -f "$ref" ]
+  then
+    dir=$(dirname $ref)
+    mkdir -p $dir
+    cp drhook.prof.1 $dir/drhook.prof.1
+    cp NODE.001_01 $ref
+  else
+    diffNODE $ref NODE.001_01
+  fi
 
   cd ..
 
