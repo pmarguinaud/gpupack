@@ -492,6 +492,8 @@ do
     REPO=https://github.com/pmarguinaud/IAL.git
 
     pack_compile 
+
+    $HOME/gpupack/scripts/parallelmethod.pl .
     
   done
 
