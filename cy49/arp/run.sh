@@ -105,8 +105,27 @@ mkdir -p $TMPDIR
 
 cd $TMPDIR
 
-export PACK=$HOME/gpupack/pack/49t0_compile_with_pgi_2303-field_api.01.NVHPC2303.xd  
-export GRID=t0031
+ARCH=$1
+OPT=$2
+GRID=$3
+
+if [ "x$ARCH" = "x" ]
+then
+  ARCH=NVHPC2303
+fi
+
+if [ "x$OPT" = "x" ]
+then
+  OPT=xd
+fi
+
+if [ "x$GRID" = "x" ]
+then
+  GRID=t0031
+fi
+
+export PACK=$HOME/gpupack/pack/49t0_compile_with_pgi_2303-field_api.01.$ARCH.$OPT
+export GRID
 export DATADIR=/home/gmap/mrpm/marguina/gpupack/cy49
 
 for method in nominal openmp openmpsinglecolumn openaccsinglecolumn
@@ -123,7 +142,7 @@ do
     ln -s $f .
   done
   
-  ln -s arp/$GRID/ICMSHFCSTINIT
+  cat arp/$GRID/ICMSHFCSTINIT.* > ICMSHFCSTINIT
   
   cp arp/fort.4 .
   chmod 644 fort.4
@@ -132,7 +151,7 @@ do
   
   NNODE_FC=$SLURM_NNODES
   NTASK_FC=4
-  NOPMP_FC=2
+  NOPMP_FC=32
   
   # Set the number of nodes, tasks, threads for the IO server
   
@@ -211,9 +230,12 @@ done
 
 for method in openmp openmpsinglecolumn openaccsinglecolumn
 do
-  echo "==> $method <=="
+  echo "==> openmp - $method <=="
   diffNODE nominal/NODE.001_01 $method/NODE.001_01
 done
+
+echo "==> openmpsinglecolumn - openaccsinglecolumn <=="
+diffNODE openmpsinglecolumn/NODE.001_01 openaccsinglecolumn/NODE.001_01
 
 /opt/softs/adm/slurm/bin/ja
 
