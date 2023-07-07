@@ -349,8 +349,8 @@ print "\n";
 my $diff_cumul = 0;
 my $perc_cumul = 0;
 
-print "zero=$zero\n";
-print &Dumper (\%diff);
+#print "zero=$zero\n";
+#print &Dumper (\%diff);
 
 for my $n1 (sort { $a <=> $b } keys (%diff))
   {
