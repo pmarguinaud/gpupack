@@ -447,7 +447,10 @@ function pack_compile ()
   
   perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=16; export ARCH=$ARCH/go" ics_masterodb
   perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
-  perl -i -pe "s/\\\$ARCH/$ARCH/go;" .gmkfile/$ARCH
+  perl -i -pe "
+    s/\\\$ARCH\b/$ARCH/go; 
+    s/\\\$HOME\b/$HOME/go;
+  " .gmkfile/$ARCH
   
   gitpack --init --repo $REPO --branch $BRANCH
   

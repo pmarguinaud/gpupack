@@ -10,6 +10,7 @@
 #SBATCH --switches=3
 
 set -x
+set -e
 
 function grib_api_setup ()
 {
@@ -157,8 +158,10 @@ do
   NTASK_IO=8
   NOPMP_IO=4
   
+  set +e
   let "NPROC_FC=$NNODE_FC*$NTASK_FC"
   let "NPROC_IO=$NNODE_IO*$NTASK_IO"
+  set -e
   
   # Set forecast term; reduce it for debugging
   

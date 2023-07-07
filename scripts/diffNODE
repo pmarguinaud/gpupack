@@ -330,12 +330,12 @@ while (defined (my $fx1 = shift (@fx1)) && defined (my $fx2 = shift (@fx2)))
       }
   }
 
-printf " $tag1 | %-19s | %-19s | %-19s | %-19s\n", 
-        &center ("NORM(REF)", 19), &center ("NORM(EXP)", 19), 
+printf " $tag1 | %-20s | %-18s | %-19s | %-19s | %-19s\n", 
+        &center ("FIELD", 20), &center ("NORM(REF)", 18), &center ("NORM(EXP)", 19), 
         &center ("NORM(REF)-NORM(EXP)", 19), &center ("(NORM(REF)-NORM(EXP))", 19);
 
-printf " $tag1 | %-19s | %-19s | %-19s | %-19s\n", 
-        '', '', '', &center ("/NORM(REF)", 19);
+printf " $tag1 | %-20s | %-18s | %-19s | %-19s | %-19s\n", 
+        '', '', '', '', &center ("/NORM(REF)", 19);
 
 for (my $i = 0; $i <= $#x; $i++)
   {
