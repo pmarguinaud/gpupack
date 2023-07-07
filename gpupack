@@ -449,7 +449,7 @@ function pack_compile ()
   perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
   perl -i -pe "
     s/\\\$ARCH\b/$ARCH/go; 
-    s/\\\$HOME\b/$HOME/go;
+    s/\\\$HOME\b/\$ENV{HOME}/go;
   " .gmkfile/$ARCH
   
   gitpack --init --repo $REPO --branch $BRANCH
