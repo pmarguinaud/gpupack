@@ -24,16 +24,16 @@ function submit ()
 }
 
 
-#submit 1 ndl       cy49/arp/arp.sh NVHPC2303 xs t0031
-#submit 1 ndl       cy49/arp/arp.sh NVHPC2303 xd t0031
+submit 1 ndl       cy49/arp/arp.sh NVHPC2303 xs t0031
+submit 1 ndl       cy49/arp/arp.sh NVHPC2303 xd t0031
 
-#submit 3 ndl       cy49/arp/arp.sh NVHPC2303 xs t0798
-#submit 3 ndl       cy49/arp/arp.sh NVHPC2303 xd t0798
+submit 3 ndl       cy49/arp/arp.sh NVHPC2303 xs t0798
+submit 3 ndl       cy49/arp/arp.sh NVHPC2303 xd t0798
 
-#submit 1 normal256 cy49/arp/arp.sh INTEL1805 xs t0031
+submit 1 normal256 cy49/arp/arp.sh INTEL1805 xs t0031
 submit 1 normal256 cy49/arp/arp.sh INTEL1805 xd t0031
 
-#submit 3 normal256 cy49/arp/arp.sh INTEL1805 xs t0798
+submit 3 normal256 cy49/arp/arp.sh INTEL1805 xs t0798
 submit 3 normal256 cy49/arp/arp.sh INTEL1805 xd t0798
 
 
