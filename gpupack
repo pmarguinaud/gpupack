@@ -467,6 +467,8 @@ function pack_compile ()
     ./$prog > $prog.eo 2>&1
   done
 
+  $HOME/gpupack/scripts/parallelmethod.pl .
+    
   fi
 }
   
@@ -496,8 +498,6 @@ do
 
     pack_compile 
 
-    $HOME/gpupack/scripts/parallelmethod.pl .
-    
   done
 
 done
