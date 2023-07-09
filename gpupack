@@ -467,6 +467,9 @@ function pack_compile ()
     ./$prog > $prog.eo 2>&1
   done
 
+  lockpack -y*
+  \rm -rf hub/local/build/
+
   $HOME/gpupack/scripts/parallelmethod.pl .
     
   fi
