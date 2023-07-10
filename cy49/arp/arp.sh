@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --export=NONE
+#SBATCH --export=PREFIX
 #SBATCH --job-name=arp
 #SBATCH --nodes=1
 #SBATCH --time=00:45:00
@@ -90,7 +90,7 @@ export MKL_CBWR=AUTO,STRICT
 export MKL_DEBUG_CPU_TYPE=5
 export MKL_NUM_THREADS=1
 
-export PATH=$HOME/gpupack/scripts:$PATH
+export PATH=$PREFIX/scripts:$PATH
 
 # Change to a temporary directory
 
@@ -126,9 +126,9 @@ then
   GRID=t0031
 fi
 
-export PACK=$HOME/gpupack/pack/49t0_compile_with_pgi_2303-field_api.01.$ARCH.$OPT
+export PACK=$PREFIX/pack/49t0_compile_with_pgi_2303-field_api.01.$ARCH.$OPT
 export GRID
-export DATADIR=$HOME/gpupack/cy49
+export DATADIR=$PREFIX/cy49
 
 for method in nominal openmp openmpsinglecolumn openaccsinglecolumn
 do
@@ -225,7 +225,7 @@ do
   
   ls -lrt
 
-  ref="$HOME/gpupack/cy49/arp/$GRID/ref/$ARCH.$OPT/$method/NODE.001_01"
+  ref="$PREFIX/cy49/arp/$GRID/ref/$ARCH.$OPT/$method/NODE.001_01"
   if [ ! -f "$ref" ]
   then
     dir=$(dirname $ref)

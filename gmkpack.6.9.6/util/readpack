@@ -20,7 +20,7 @@
 #
 export LC_ALL=C
 
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 #
 # When called from inside a compilation script TARGET_PACK will be initialized
 # Otherwise users will get the "default" arch file.

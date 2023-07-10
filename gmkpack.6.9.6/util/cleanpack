@@ -21,7 +21,7 @@ if [ "$ZSH_NAME" = "zsh" ] ; then
   setopt +o nomatch
 fi
 
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 export GMKTMP=${GMKTMP:=/tmp}
 

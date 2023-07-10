@@ -3,6 +3,8 @@
 set -x
 set -e
 
+. ./gpupack.sh
+
 function submit ()
 {
   N=$1
@@ -12,7 +14,7 @@ function submit ()
   opt=$5
   grid=$6
 
-  out="$HOME/gpupack/cy49/arp/$grid/ref/$arch.$opt/slurm.out"
+  out="$PREFIX/cy49/arp/$grid/ref/$arch.$opt/slurm.out"
   
   if [ -f "$out" ]
   then

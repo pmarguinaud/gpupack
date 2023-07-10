@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# options 'show' of mpi and 'show' of ifort conflict ; therefore we don't execute the mpi wrapper directly :
-# need also to remove these sob quotes, or the wrapper would not link :-(
-$(mpiifort -show | sed 's/"//g') $*

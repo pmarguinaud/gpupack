@@ -26,7 +26,7 @@ else
   GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
 fi
 export GMKTMP=${GMKTMP:=/tmp}
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 # All executables, from different origins :
 # Priority directory : executables in $HOME directory

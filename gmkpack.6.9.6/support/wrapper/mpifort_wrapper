@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# options 'show' of mpi and 'show' of ifort conflict ; therefore we don't execute the mpi wrapper directly :
-$(mpifort -showme) $*

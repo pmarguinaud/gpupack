@@ -28,7 +28,7 @@ if [ $? -ne 0 ] ; then
 else
   GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
 fi
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 FLAG=""
 set -- `getopt f $*`

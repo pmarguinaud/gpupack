@@ -30,7 +30,7 @@ if [ "$ZSH_NAME" = "zsh" ] ; then
   setopt +o nomatch
 fi
 
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 $GMKROOT/aux/licensepack.sh
 if [ $? -ne 0 ] ; then

@@ -79,7 +79,7 @@ fi
 if [ "$GMK_SUPPORT" ] ; then
   echo "GMK_SUPPORT             = $GMK_SUPPORT"
 else
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 #
   echo "GMK_SUPPORT             = default value ($GMK_SUPPORT)"
 fi

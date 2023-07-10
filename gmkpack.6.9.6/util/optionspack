@@ -26,7 +26,7 @@ if [ ! -d $GMKTMP ] ; then
   echo "can t make dir $GMKTMP"
   exit 1
 fi
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 if [ ! -d $HOME/.gmkpack/arch ] ; then
   mkdir -p $HOME/.gmkpack/arch

@@ -1,5 +1,0 @@
-if [ "$LOADLBATCH" = "yes" ] ; then
-  eoj 2>/dev/null
-else
-  echo Finished on $(date)
-fi

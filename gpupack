@@ -441,7 +441,7 @@ function pack_compile ()
   " ics_masterodb
   perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
   perl -i -pe "
-    s/\\\$PREFIX\b/$PREFIX/go; 
+    s,\\\$PREFIX\b,$PREFIX,go; 
     s/\\\$ARCH\b/$ARCH/go; 
     s/\\\$HOME\b/\$ENV{HOME}/go;
   " .gmkfile/$ARCH
@@ -530,13 +530,14 @@ function common_install ()
 
 export PATH=$PREFIX/install/common/fypp/bin:$PREFIX/install/common/cmake/bin:$PREFIX/vimpack:$PREFIX/gmkpack/util:$PATH
 
-if [ ! -f "gmkpack.sh" ]
+if [ ! -f "gpupack.sh" ]
 then
   cd $PREFIX
+  echo "export PREFIX=$PREFIX" > gpupack.sh
   for prog in gmkpack cmake gitpack
   do
     path=$(dirname $(which $prog))
-    echo "export PATH=$path:\$PATH" >> gmkpack.sh
+    echo "export PATH=$path:\$PATH" >> gpupack.sh
   done
 fi
 

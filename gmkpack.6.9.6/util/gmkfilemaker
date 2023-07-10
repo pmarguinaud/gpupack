@@ -28,7 +28,7 @@ TMPDIR=$GMKTMP/gmkfilemaker.$$
 trap "cd $GMKTMP ; \rm -rf gmkfilemaker.$$ ; echo Working directory removed ; exit 1" 2 6 9 14 15 20
 mkdir -p $TMPDIR
 
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 echo
 echo "                    WELCOME TO GMKFILEMAKER !"

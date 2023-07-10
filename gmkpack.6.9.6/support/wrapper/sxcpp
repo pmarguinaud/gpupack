@@ -1,9 +1,0 @@
-
-# sxcpp exits with status 2 on a line "#error"
-# Fortunately the file is properly preprocessed.
-# NEC & Ryad El khatib 27/07/2006
-# Now fixed and not used anymore.
-
-#/SX/opt/crosskit/inst/lib0/sxcpp $*
-sxcpp $*
-exit 0

@@ -15,7 +15,7 @@
 export LC_ALL=C
 
 if [ ! "$GMKFILEPATH" ] || [ ! "$FLAVOUR" ] ; then
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
   TARGET_GMKFILE=$(\ls -1t $TARGET_PACK/.gmkfile 2>/dev/null | tail -1)
   if [ "$TARGET_GMKFILE" ] ; then
 #   At the creation of a pack, the TARGET_GMKFILE would not exist :

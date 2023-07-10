@@ -16,7 +16,7 @@
 ########################################################################
 export LC_ALL=C
 
-GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
 
 if [ "$(\ls -1t $TARGET_PACK/.gmkfile 2>/dev/null | tail -1)" ] ; then
   GMKFILEPATH=$TARGET_PACK/.gmkfile
