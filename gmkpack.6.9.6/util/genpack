@@ -1,0 +1,50 @@
+#!/bin/bash
+########################################################################
+#
+#    Script genpack
+#    --------------
+#
+#    Purpose : to get the genesis of the current pack
+#    -------   
+#
+#    Usage :  genpack [packname]
+#    -----           
+#
+########################################################################
+#
+export LC_ALL=C
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+if [ "$1" ] ; then
+  DIRNAME=$1
+else
+  DIRNAME="."
+fi
+# Find whether we are inside a pack or not : test the presence of directory .gmkfile:
+if [ -d ${DIRNAME}/.gmkfile ] ; then
+  export TARGET_PACK=$PWD/${DIRNAME}
+  GENFILE=${DIRNAME}/$($GMKROOT/util/readpack GMK_GENESIS | cut -d '"' -f2)
+elif [ -f ${DIRNAME}/.genesis ] ; then
+# another chance for older packs:
+  GENFILE=.genesis
+elif [ -f ${DIRNAME}/genesis ] ; then
+# another chance for oldest packs:
+  GENFILE=genesis
+else
+  echo "This directory is not the main directory of a pack."
+  exit 1
+fi
+
+if [ -s $GENFILE ] ; then
+  cat $GENFILE
+else
+  echo "Broken pack."
+  exit 1
+fi

@@ -1,0 +1,73 @@
+.TH envpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+envpack \- display the environment variables related to
+.B gmkpack
+.PP
+.SH SYNOPSIS
+.B envpack
+.PP
+.SH DESCRIPTION
+.B envpack
+displays the environment variables related to the use of 
+.B gmkpack
+in the current session, as well as the version of gmkpack used and its path.
+.br
+.B envpack
+reminds you if you are your own pack administrator. This happens when the
+environment variables HOMEPACK and ROOTPACK are the same.
+.PP
+.SH ENVIRONNEMENT
+.IP ROOTPACK
+The default directory of reference packs as an alternative to
+.I $HOME/rootpack
+.IP HOMEPACK
+The default directory of user packs as an alternative to
+.I $HOME/pack
+.IP ROOTBIN
+The root directory for executables of all reference packs. It enables to store
+executables in another file system (larger and possibly semi-permanent).
+.IP HOMEBIN
+The root directory for executables of all user packs. It enables to store
+executables in another file system (larger and possibly semi-permanent).
+.IP ROOTLIB
+The root directory for libraries of all reference packs. It enables to store
+libraries in another file system (larger and permanent).
+.IP HOMELIB
+The root directory for libraries of all user packs. It enables to store
+libraries in another file system (larger and permanent).
+.IP GMKTMP
+.br
+A temporary directory. For optimal performance, it is recommended to use a 
+local disk space.
+.IP GMKFILE
+The basename of the configuration file used to run 
+.B gmkpack\fR.
+If not defined, the use of the option 
+.B -l
+of
+.B gmkpack
+is mandatory.
+.IP GMK_OPT
+The extension name of the configuration file used to run 
+.B gmkpack\fR.
+.IP GMK_IMPORT_PLUGIN
+The external script (plug-in) run by
+.B gmkpack
+to import source code while creating a main pack.
+.IP GMK_TIMER
+The command used to count the compile time of each file.
+.IP GMK_SUPPORT
+The directory of support files to run
+.B gmkpack\fR (wrappers, configuration files, external scripts).
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR readpack(1),
+.BR admpack(1),
+.BR usrpack(1),
+.BR rlspack(1),
+.BR gmkpack(1),
+.BR gmkfilemaker(1).

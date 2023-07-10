@@ -1,0 +1,331 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Creation of a working pack</TITLE>
+<META NAME="description" CONTENT="Creation of a working pack">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="previous" HREF="node22.html">
+<LINK REL="up" HREF="node20.html">
+<LINK REL="next" HREF="node24.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html483"
+  HREF="node24.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html477"
+  HREF="node20.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html473"
+  HREF="node22.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html479"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html481"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html484"
+  HREF="node24.html">Basics about the compilation</A>
+<B> Up:</B> <A NAME="tex2html478"
+  HREF="node20.html">Making a working pack</A>
+<B> Previous:</B> <A NAME="tex2html474"
+  HREF="node22.html">Directory of working packs</A>
+ &nbsp; <B>  <A NAME="tex2html480"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html482"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00363000000000000000">
+Creation of a working pack</A>
+</H2>
+<P>
+<FONT SIZE="-2">As an example, here is how to build the branch <code>opt</code> on top of the branch <code>bf</code> of cycle <code>31t1</code> for the executable <SMALL>ALADIN</SMALL> : 
+ </FONT>
+<P>
+<PRE>
+% gmkpack -r31t1 -bbf -uopt -p aladin
+</PRE><FONT SIZE="-2">
+</FONT><PRE>
+/home/khatib/bin/gmkpack/util/gmkpack starts.
+Creating pack /home/khatib/pack/opt upon /home/khatib/rootpack/31t1_bf.01.PGI616.x ...
+Architecture file directory :
+.gmkfile/
+copy PGI.LXGMAP from directory /home/khatib/rootpack/31t1_bf.01.PGI616.x/.gmkfile
+Programs system directories :
+sys
+sys/odb98.x -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/sys/odb98.x
+sys/bl95.x -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/sys/bl95.x
+Basic directories :
+src
+src/local
+lib
+bin
+Unsatisfied external references directories :
+src/unsxref/quiet
+src/unsxref/verbose
+Sources control directory :
+src/.gmak
+Sources view :
+local
+inter.1
+main
+Links :
+src/inter.1 -&gt; /home/khatib/rootpack/31t1_bf.01.PGI616.x/src/local
+src/main -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/src/local
+Background source descriptors files :
+inter.1.sds
+main.sds
+"main" tree for ald ...
+"main" tree for arp ...
+"main" tree for bla ...
+no tree for coh
+"main" tree for mpa ...
+"main" tree for mse ...
+"main" tree for odb ...
+no tree for ost
+"main" tree for sat ...
+"main" tree for sur ...
+"main" tree for tal ...
+"main" tree for tfl ...
+"main" tree for uti ...
+"main" tree for xrd ...
+libarp.inter.1.a -&gt; /home/khatib/rootpack/31t1_bf.01.PGI616.x/lib/libarp.local.a
+libald.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libald.local.a
+libarp.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libarp.local.a
+libbator-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libbator-uti.local.a
+libbla.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libbla.local.a
+libcma-odb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libcma-odb.local.a
+libdummyald.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummyald.local.a
+libdummybla.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummybla.local.a
+libdummympa.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummympa.local.a
+libdummymse.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummymse.local.a
+libdummyodb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummyodb.local.a
+libdummysat.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummysat.local.a
+libdummytal.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libdummytal.local.a
+libextrtovs-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libextrtovs-uti.local.a
+libfcq-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libfcq-uti.local.a
+libgrib-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libgrib-uti.local.a
+libmain-odb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libmain-odb.local.a
+libmpa.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libmpa.local.a
+libmse.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libmse.local.a
+libmtocomp-odb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libmtocomp-odb.local.a
+libodb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libodb.local.a
+liboulan-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/liboulan-uti.local.a
+libport-odb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libport-odb.local.a
+libpregpssol-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libpregpssol-uti.local.a
+libprescat-uti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libprescat-uti.local.a
+libprograms-ald.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libprograms-ald.local.a
+libsat.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libsat.local.a
+libscr-odb.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libscr-odb.local.a
+libsur.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libsur.local.a
+libtal.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libtal.local.a
+libtfl.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libtfl.local.a
+libunsxref-verbose.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libunsxref-verbose.local.a
+libuti.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libuti.local.a
+libxrd.main.a -&gt; /home/khatib/rootpack/31t1_main.01.PGI616.x/lib/libxrd.local.a
+Background include/module paths ...
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/ald/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/arp/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/chem/internals
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/chem/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/conv/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/micro/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/turb/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mse/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/sat/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/sur/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/tal/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/tfl/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/uti/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/uti/prescat/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/fa
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/module
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/bla/library
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/bla/old2new
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/aux
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/lib
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/tools
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/support
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/svipc
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/utilities
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/ddl.CCMA
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/ddl.ECMA
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/ddl.ECMASCR
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/ddl.MTOCOMP
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/arp/ald_inc/function
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/arp/ald_inc/namelist
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/arp/common
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/arp/function
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/arp/namelist
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/bla/include
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/chem/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/chem/internals
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/conv/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/micro/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mpa/turb/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/mse/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/include
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/odb/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/sat/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/sur/function
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/sur/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/tal/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/tfl/interface
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/uti/include
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/uti/namelist
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/ddh
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/fa
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/include
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/lfi
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/xrd/svipc/include
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/.intfb/ald
+-I/home/khatib/rootpack/31t1_main.01.PGI616.x/src/local/.intfb/arp
+done.
+Genesis :
+/home/khatib/bin/gmkpack.6.3/util/gmkpack -r 31t1 -b bf -v 01 -u opt -l PGI616 -o x -p aladin
+
+Prepare script(s) ...
+
+&gt;  copy compilation and load script on /home/khatib/pack/opt/ics_aladin ...
+/home/khatib/bin/gmkpack/util/gmkpack ends.
+</PRE><FONT SIZE="-2"></FONT>
+<P>
+<FONT SIZE="-2"><I>GmkPack </I>has created a pack named <code>opt</code> with a compilation script inside, named <code>ics_aladin</code>. <BR>
+Remarks :
+</FONT>
+<UL>
+<LI>If the argument <code>-u</code> had been omitted, then the pack would have been named 
+<BR><code>31t1_bf.01.PGI616.x</code>, which is not very accurate : the names refers to the reference pack, not to the modification label.
+</LI>
+<LI>If <code>ROOTPACK</code> and <code>HOMEPACK</code> had the same value, then the pack would have been named 
+<BR><code>31t1_opt.01.PGI616.x</code>. Having <code>ROOTPACK=HOMEPACK</code> offers this special facility : thanks to its expanded name the new working pack will be able to be used a reference pack for another working pack.
+</LI>
+</UL>
+<P>
+<FONT SIZE="-2"><I>Discussion : together with a new naming convention as described in the introduction, the use of the option -u should be mandatory for working pack, 
+so that any working pack could serve as a reference pack. Today this is possible only if the option -u is omitted, which would make unclear the 
+stacking of reference packs.</I>
+</FONT>
+<P>
+<FONT SIZE="-2"> </FONT>
+<P>
+<FONT SIZE="-2">This pack is lying upon the reference pack <code>31t1_bf.01.PGI616.x</code>, as shown in the logfile :
+</FONT>
+<UL>
+<LI>inside the directory <code>sys</code> the precompilers are linked from the bottom (main) pack <BR><code>31t1_main.01.PGI616.x</code>
+</LI>
+<LI>inside the directory <code>src</code> various directories are created :
+
+<OL>
+<LI>''<code>main</code>'' is a symbolic link to the directory <code>local</code> of the main pack <BR><code>31t1_main.01.PGI616.x</code>
+</LI>
+<LI>''<code>inter.1</code>'' is a symbolic link to the directory <code>local</code> of the reference pack <BR><code>31t1_bf.01.PGI616.x</code>  
+</LI>
+<LI>''<code>local</code>'' is the working source code directory and is mapped from the directory tree of the main pack.
+</LI>
+</OL>
+</LI>
+<LI>inside the directory <code>lib</code> all the libraries from the reference pack are present as symbolic links.
+</LI>
+<LI>all the directories from the reference pack which contain include files or modules are identified to be used for the local
+ compilation.
+</LI>
+</UL><FONT SIZE="-2">
+ </FONT>
+<P>
+<FONT SIZE="-2">Note that at this stage, the pack is always <I>empty</I>, that is : it does not contain any new source file (apart the source code
+ coming from the reference pack) though subdirectories have been created.
+<BR>
+The source code directories <code>src/local/*</code> have to be filled by yourself (for the time being there is no option in <I>GmkPack </I>to 
+<I>import</I> source code).
+<BR>
+Once this is done, you can submit or execute the compilation script :
+</FONT><PRE>
+./ics_aladin 2&gt;&amp;1 | tee ics_aladin.out
+</PRE><FONT SIZE="-2">
+Here the output of <code>ics_aladin</code> is piped to <code>tee</code> in order to keep a logile of the execution. If there is no batch scheduler in the machine, 
+another way to do that is to mimic the behavior of a scheduler in a script like the one below :
+</FONT><PRE>
+if [ -f $HOME/.qsub ] ; then
+  i=$(cat $HOME/.qsub)
+else
+  i=0
+fi
+i=$(($i+1))
+echo $i &gt; $HOME/.qsub
+chmod 755 $1
+time ./$1 2&gt;&amp;1 | tee $1.o$i
+</PRE><FONT SIZE="-2">
+ </FONT>
+<P>
+<FONT SIZE="-2">If everything works fine you should get at the end new libraries in the directory <code>lib</code> and executables in the directory
+ <code>bin</code>. Unless the source code added is huge the compilation should be fast.
+</FONT>
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html483"
+  HREF="node24.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html477"
+  HREF="node20.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html473"
+  HREF="node22.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html479"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html481"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html484"
+  HREF="node24.html">Basics about the compilation</A>
+<B> Up:</B> <A NAME="tex2html478"
+  HREF="node20.html">Making a working pack</A>
+<B> Previous:</B> <A NAME="tex2html474"
+  HREF="node22.html">Directory of working packs</A>
+ &nbsp; <B>  <A NAME="tex2html480"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html482"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Creation of a main pack</TITLE>
+<META NAME="description" CONTENT="Creation of a main pack">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="previous" HREF="node18.html">
+<LINK REL="up" HREF="node17.html">
+<LINK REL="next" HREF="node20.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html426"
+  HREF="node20.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html420"
+  HREF="node17.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html416"
+  HREF="node18.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html422"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html424"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html427"
+  HREF="node20.html">Making a working pack</A>
+<B> Up:</B> <A NAME="tex2html421"
+  HREF="node17.html">Making a main pack</A>
+<B> Previous:</B> <A NAME="tex2html417"
+  HREF="node18.html">Directory of main packs</A>
+ &nbsp; <B>  <A NAME="tex2html423"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html425"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00352000000000000000">
+Creation of a main pack</A>
+</H2>
+As an example, here is how to build the main pack of cycle 31T1 for the executables 
+<SMALL>ALDODB</SMALL>, <SMALL>ODBTOOLS</SMALL>, <SMALL>IOASSIGN</SMALL> and <SMALL>BATOR</SMALL> : 
+ 
+<P>
+<PRE>
+% gmkpack -a -r31t1 -p aldodb/odbtools/ioassign/bator
+</PRE>
+<PRE>
+/home/khatib/bin/gmkpack/util/gmkpack starts.
+### configuration for main pack ###
+Creating main pack 31t1_main.01.PGI616.x ...
+Architecture file directory :
+.gmkfile/
+copy PGI.LXGMAP.x from directory /home/khatib/bin/gmkpack/arch
+Programs system directories :
+sys
+Basic directories :
+src
+src/local
+lib
+bin
+Unsatisfied external references directories :
+src/unsxref/quiet
+src/unsxref/verbose
+Sources control directory :
+src/.gmak
+Sources view :
+local
+Projects directories :
+src/local/sur
+src/local/mpa
+src/local/mse
+src/local/xrd
+src/local/tfl
+src/local/tal
+src/local/arp
+src/local/ald
+src/local/sat
+src/local/odb
+src/local/uti
+src/local/bla
+done.
+Genesis :
+/home/khatib/bin/gmkpack.6.3/util/gmkpack -r 31t1 -b main -a -l PGI616 -o x -p aldodb/odbtools/ioassign/bator
+
+Prepare script(s) ...
+
+&gt;  copy compilation and load script on /home/khatib/pack/31t1_main.01.PGI616.x/ics_aldodb_etc ...
+/home/khatib/bin/gmkpack/util/gmkpack ends.
+</PRE>
+<P>
+<FONT SIZE="-2"><I>GmkPack </I>has created a main pack named <code>31t1_main.01.PGI616.x</code> with a compilation script inside, named <code>ics_aldodb_etc</code>.
+ </FONT>
+<P>
+<FONT SIZE="-2">Remark : at this stage, the pack is <I>empty</I>, that is : it does not contain any source file.
+<BR>
+The source code directories <code>src/local/*</code> have to be filled by yourself (for the time being there is no option in <I>GmkPack </I>to 
+<I>import</I> source code).
+<BR>
+Once the pack has been populated with source code you can submit or execute the compilation script :
+</FONT><PRE>
+./ics_aldodb_etc 2&gt;&amp;1 | tee ics_aldodb_etc.out
+</PRE><FONT SIZE="-2">
+Here the output of <code>ics_aldodb_etc</code> is piped to <code>tee</code> in order to keep a logfile of the execution. If there is no batch scheduler in the machine, another way to do that is to mimic the behavior of a scheduler in a script like the one below :
+</FONT><PRE>
+if [ -f $HOME/.qsub ] ; then
+  i=$(cat $HOME/.qsub)
+else
+  i=0
+fi
+i=$(($i+1))
+echo $i &gt; $HOME/.qsub
+chmod 755 $1
+time ./$1 2&gt;&amp;1 | tee $1.o$i
+</PRE><FONT SIZE="-2">
+ </FONT>
+<P>
+<FONT SIZE="-2">If everything works fine you should get at the end libraries in the directory <code>lib</code> and executables in the directory <code>bin</code>.
+ </FONT>
+<P>
+<FONT SIZE="-2">The installation of the full cycle 31T1 of ARPEGE/ALADIN/AROME/ODB (from the compilation of the source code to the link of libraries)
+ takes about 90 minutes on a PC. The precise time depends on the processor, the compiler, the compilation options and the disks
+ access velocity.
+</FONT>
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html426"
+  HREF="node20.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html420"
+  HREF="node17.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html416"
+  HREF="node18.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html422"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html424"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html427"
+  HREF="node20.html">Making a working pack</A>
+<B> Up:</B> <A NAME="tex2html421"
+  HREF="node17.html">Making a main pack</A>
+<B> Previous:</B> <A NAME="tex2html417"
+  HREF="node18.html">Directory of main packs</A>
+ &nbsp; <B>  <A NAME="tex2html423"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html425"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,9 @@
+# Wrapper for Intel Fortran compiler 10.x
+# The ifort version 10.x compilers have a problem with not placing the 
+# --start_group and --end_group flags correctly when calling ld.
+# This happens when ifort is called with only .o and .a files (for pure
+# linking), but not when there is also a .F file on the command line.
+
+echo "SUBROUTINE IFORT_10_DUMMY;END" > ifort_10_dummy.f90
+ifort ifort_10_dummy.f90 $*
+/bin/rm -f ifort_10_dummy.f90 ifort_10_dummy.o

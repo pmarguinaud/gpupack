@@ -1,0 +1,135 @@
+#!/bin/bash
+########################################################################
+#
+#    Script resetpack
+#    ----------------
+#
+#    Purpose : In the framework of a pack : to remove the control files used
+#    -------   for faster compilation management.
+#
+#    Usage :  resetpack [-f] [pack1] [pack2] ...
+#    -----           
+#
+#    Environment variables
+#    ---------------------
+#
+########################################################################
+#
+export LC_ALL=C
+
+DIR=$PWD
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+FLAG=""
+set -- `getopt f $*`
+if [ $? != 0 ] ; then
+ echo "usage: resetpack [-f] [pack1] [pack2]..." >&2
+ exit 2
+fi
+for i in $*
+do
+     case $i in
+     -f)  FLAG=force; shift;;
+     --)  shift; break;;
+     esac
+done
+
+PACKLIST="$*"
+if [ ! "$PACKLIST" ] ; then
+  PACKLIST=$(basename $PWD)
+  cd ..
+fi
+
+for target in $PACKLIST; do
+  if [ -d $target ] ; then
+    cd $target
+
+# Find whether we are inside a pack or not :
+    IERR=0
+# Test the presence of directory .gmkfile :
+    if [ -d .gmkfile ] ; then
+      export TARGET_PACK=$PWD
+      GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+      GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+    else
+#     another chance for oldest packs:
+      if [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+        GMKINTFB=.intfb
+        GMKSRC=src
+      else
+        IERR=1
+      fi
+    fi
+#   Confirm with the presence of directory .gmak :
+    if [ $IERR -eq 0 ] ; then
+      if [ ! -d $GMKSRC/.gmak ] ; then
+        IERR=1
+      fi
+    fi
+    if [ $IERR -eq 1 ] ; then
+#     Find upwards whether we are inside a pack or not : test the presence of directory .gmak :
+      while [ ! -d .gmak ] && [ "$PWD" != "/" ] ; do
+        cd ..
+      done
+      if [ "$PWD" != "/" ] ; then
+#       If there is a .gmak directory, then the parent directory must be the pack
+#       itself : test the presence of .gmkfile:
+        SRC_DIR=$PWD
+        cd ..
+        if [ "$PWD" != "$SRC_DIR" ] ; then
+          if [ -d .gmkfile ] ; then
+            export TARGET_PACK=$PWD
+            GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+            GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+            IERR=0
+          elif [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+#           another chance for oldest packs:
+            GMKINTFB=.intfb
+            GMKSRC=src
+            IERR=0
+          fi
+        fi
+      fi
+    fi
+    if [ $IERR -eq 1 ] ; then
+      echo "The working directory looks neither like the main directory of a pack nor the inside of a pack. No reset."
+    fi
+
+#   Confirm:
+    if [ ! "$FLAG" ] && [ $IERR -eq 0 ] ; then
+      echo -n "resetpack $(basename $PWD) ? (y/n) "
+      read answer
+      if [ "$answer" != "y" ] ; then
+        IERR=1
+      fi
+    elif [ "$*" ] ; then
+      echo "reseting pack $(basename $PWD)"
+    fi
+
+#   Reset:
+    if [ $IERR -eq 0 ] ; then
+       cd $GMKSRC
+       \rm -f .incpath.local .modpath.local .ghostpath.local
+       cd .gmak
+       \rm -f local.sds.old view local.sds ics_list.tar istart
+    fi
+
+  else
+
+    echo skip non-existant directory $target
+
+  fi
+
+  cd $DIR
+done
+
+if [ "$*" ] ; then
+  echo done.
+fi

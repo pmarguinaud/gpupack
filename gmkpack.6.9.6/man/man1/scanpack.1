@@ -1,0 +1,30 @@
+.TH scanpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+scanpack \- scan the source code files within a pack.
+.PP
+.SH SYNOPSIS
+.B scanpack
+.PP
+.SH DESCRIPTION
+.B scanpack
+recursively lists from the current directory and below all the files which are 
+compilable source files or include files as interpreted by 
+.B gmkpack
+, that is all files with any of the following extensions will be listed :
+.br
+"c" (C code), "F90", "F", "f90", "f" (fortran code), "h", "inc" (include files),
+"sql", "ddl" (odb98 code), "b" (bl95 code), "mnh", "MNH" (Meso-NH fortran code).
+.PP
+.SH DIAGNOSTICS
+If the working directory is lower than the local source directory then the pack
+content will not be fully listed.
+.br
+Auto-generated interfaces, and more generally hidden files are not listed.
+.br
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR lspack(1).

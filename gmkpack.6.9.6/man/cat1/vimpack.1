@@ -1,0 +1,98 @@
+vimpack(1)		    General Commands Manual		    vimpack(1)
+
+
+
+1mNAME0m
+       vimpack - navigate and edit files within a pack
+
+1mSYNOPSIS0m
+       1mvimpack 4m22m[24m 4m-i24m 4m]24m 4m[24m 4m-d24m 4m]24m 4m[filename]0m
+
+1mDESCRIPTION0m
+       1mvimpack 22mis a navigator/editor for packs, based on vim.
+       It  requires  a	version	 of vim compiled with the embedded Perl inter‐
+       preter available in your PATH.
+       1mvimpack 22menables you to navigate in the source code, edit files and save
+       your  modifications  without  caring about the branches of code in your
+       pack.
+
+       1mvimpack  22mshould be run always from the root directory of a pack.
+       The first time you run it, 1mvimpack  22mcreates an  index  file.   You	may
+       create  explicitely  this  index by running 'vimpack -i' the first time
+       you invoke 1mvimpack  22m; otherwise it will  be	 automatically	created	 as
+       soon as necessary. The creation of this index file may take a couple of
+       minutes.
+
+       To edit a file, invoke it with 1mvimpack	 22m; For instance :
+
+	    vimpack cnt4.F90
+
+       This  will edit the last version of this file. If  you  modify  it  and
+       save it, it will be saved automatically in the 'local' directory of the
+       pack.
+       It is possible to commit temporary edited files using  the  command  :C
+       from the editor window.	Writing a temporary file (using :w) will auto‐
+       matically commit the file if it has been modified.
+
+       To navigate, move the cursor on a word and press <TAB>.
+       To go back, press <BACKSPACE>.
+
+       To dive directly from a subroutine (or a module or a defined  type)  to
+       another	one  called  by it (or a USE statement or a declaration state‐
+       ment), move the cursor on its name and press <Â²> or <Å>.
+       If this definition is not found, then the ordinary search results  will
+       be displayed.
+
+       To  search  for a word, use the command :F from the editor window ; for
+       instance :
+
+	    :F MYPROC
+
+       The text research is such that :
+       - case are insensitive
+       - strings and comments are taken into acount
+       - keywords are searched as well
+
+       If the cursor is over a word, this word can be looked up using <TAB> as
+       well.
+
+       When  viewing  a	 search result, it is possible to jump to a particular
+       location : just move the cursor to a file name or  a  line  number  and
+       press <TAB>.
+
+       To  edit a file in 'diff' mode (assuming this file has been modified in
+       an intermediate or local pack), invoke 1mvimpack	 22mwith the  option  -d  ;
+       example :
+
+
+	    vimpack -d cnt0.F90
+
+       List of commands from the editor window :
+
+       :F 4mstring24m	     Finds all occurrences of 4mstring24m in the code.
+       :C		Commit a temporary file (if modified) to src/local.
+       :Cq		Commit to src/local (if file was modified) and exit.
+       :E 4mfilename24m	     Edit 4mfilename0m
+       :D		Difference of the current file with the N-1 version.
+       <TAB>		Search for the word under the cursor.
+       <Â²>		  Search  for  entity  definition and dive to it (when
+       possible).
+       <Å>		same as <Â²>
+       <BACKSPACE>	Go back in the history.
+       :NF 4mnewfilename24m  Edit a new file named  4mnewfilename24m  in  the  directory
+       src/local
+       <SHIFT-TAB>	Same as <TAB> but in an new split window
+       :help vimpack	On-line help
+
+
+1mENVIRONNEMENT0m
+       VIMPACKVIM
+	      vim editor used. Default is 'vim'. Export VIMPACKVIM=gvim if you
+	      wish to use the graphical interface of vim.
+
+1mAUTHOR0m
+       Philippe Marguinaud  <philippe.marguinaud@meteo.fr>
+
+
+
+								    vimpack(1)

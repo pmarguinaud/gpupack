@@ -1,0 +1,1 @@
+../../aux/satrad_intfbF90.sh

@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Structure of a pack : overview</TITLE>
+<META NAME="description" CONTENT="Structure of a pack : overview">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="node4.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html228"
+  HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html222"
+  HREF="node4.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html216"
+  HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html224"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html226"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html229"
+  HREF="node7.html">Naming conventions</A>
+<B> Up:</B> <A NAME="tex2html223"
+  HREF="node4.html">Bundling source code, libraries</A>
+<B> Previous:</B> <A NAME="tex2html217"
+  HREF="node5.html">Definition of a ''pack''</A>
+ &nbsp; <B>  <A NAME="tex2html225"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html227"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00222000000000000000">
+Structure of a pack : overview</A>
+</H2>
+
+<P>
+A pack is composed of the following four directories :
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>src</code> : source codes directory
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>sys</code> : installation  directory of the precompilers 
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>lib</code> : directory of the archived object codes libraries
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>bin</code> : directory of the executables
+</DL>
+The directory <code>src</code> is composed of two or more directories :
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>local</code> is the directory where the pack owner will copy the source code to compile
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>unsxref</code> is a directory where the pack owner can signal that an unsatisfied symbol should be considered non-fatal at linking time
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>main</code> is the bottom source code directory. It will exist only if the current pack is not a main pack. It contains the source
+ code (and partly the object code) corresponding to the code release on top of which the pack is lying.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>inter.*</code> are stacked source code directories : <code>inter.1</code>, <code>inter.2</code>, <code>inter.3</code> ...They exist only if the current pack is not a main pack and is not lying directly on top of a main pack. ''The reference'' pack corresponds to the stack directory with the highest number.
+</DL>
+Any directory <code>local</code> is expected to have a directory tree mapped from the directory <code>main</code>. A modified source file should be copied inside the same subdirectory of the directory <code>local</code> as the original file is in the directory <code>main</code>.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html228"
+  HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html222"
+  HREF="node4.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html216"
+  HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html224"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html226"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html229"
+  HREF="node7.html">Naming conventions</A>
+<B> Up:</B> <A NAME="tex2html223"
+  HREF="node4.html">Bundling source code, libraries</A>
+<B> Previous:</B> <A NAME="tex2html217"
+  HREF="node5.html">Definition of a ''pack''</A>
+ &nbsp; <B>  <A NAME="tex2html225"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html227"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

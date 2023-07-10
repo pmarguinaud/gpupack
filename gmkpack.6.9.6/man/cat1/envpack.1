@@ -1,0 +1,79 @@
+envpack(1)		    General Commands Manual		    envpack(1)
+
+
+
+1mNAME0m
+       envpack - display the environment variables related to 1mgmkpack0m
+
+1mSYNOPSIS0m
+       1menvpack0m
+
+1mDESCRIPTION0m
+       1menvpack  22mdisplays  the environment variables related to the use of 1mgmk‐0m
+       1mpack 22min the current session, as well as the version of gmkpack used and
+       its path.
+       1menvpack  22mreminds  you if you are your own pack administrator. This hap‐
+       pens when the environment variables HOMEPACK and ROOTPACK are the same.
+
+1mENVIRONNEMENT0m
+       ROOTPACK
+	      The default directory of reference packs as  an  alternative  to
+	      4m$HOME/rootpack0m
+
+       HOMEPACK
+	      The  default  directory  of  user	 packs	as  an	alternative to
+	      4m$HOME/pack0m
+
+       ROOTBIN
+	      The root directory for executables of all	 reference  packs.  It
+	      enables  to store executables in another file system (larger and
+	      possibly semi-permanent).
+
+       HOMEBIN
+	      The root directory for executables of all user packs. It enables
+	      to store executables in another file system (larger and possibly
+	      semi-permanent).
+
+       ROOTLIB
+	      The root directory for libraries	of  all	 reference  packs.  It
+	      enables  to  store  libraries in another file system (larger and
+	      permanent).
+
+       HOMELIB
+	      The root directory for libraries of all user packs.  It  enables
+	      to  store	 libraries  in	another file system (larger and perma‐
+	      nent).
+
+       GMKTMP
+	      A temporary directory. For optimal  performance,	it  is	recom‐
+	      mended to use a local disk space.
+
+       GMKFILE
+	      The  basename of the configuration file used to run 1mgmkpack22m.	 If
+	      not defined, the use of the option 1m-l 22mof 1mgmkpack 22mis mandatory.
+
+       GMK_OPT
+	      The extension name of the configuration file used	 to  run  1mgmk‐0m
+	      1mpack22m.
+
+       GMK_IMPORT_PLUGIN
+	      The  external  script  (plug-in) run by 1mgmkpack 22mto import source
+	      code while creating a main pack.
+
+       GMK_TIMER
+	      The command used to count the compile time of each file.
+
+       GMK_SUPPORT
+	      The directory of support files to run 1mgmkpack 22m(wrappers, config‐
+	      uration files, external scripts).
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mreadpack(1),  admpack(1),  usrpack(1), rlspack(1), gmkpack(1), gmkfile‐0m
+       1mmaker(1).0m
+
+
+
+								    envpack(1)

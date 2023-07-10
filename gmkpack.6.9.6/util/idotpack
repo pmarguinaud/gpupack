@@ -1,0 +1,20 @@
+#!/bin/bash
+########################################################################
+#
+#    Script idotpack
+#    ---------------
+#
+#    Purpose : In the framework of a pack : to recursively list all files 
+#    -------   with prefix "i." and suffix not ".L"
+#
+#    Usage :  idotpack
+#    -----
+#
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+find * -name "i.*" | grep -v "\.L$"

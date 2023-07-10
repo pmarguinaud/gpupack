@@ -1,0 +1,58 @@
+behomepack(1)		    General Commands Manual		 behomepack(1)
+
+
+
+1mNAME0m
+       behomepack - setup the environment to be packs developer
+
+1mSYNOPSIS0m
+       1m. behomepack0m
+
+1mDESCRIPTION0m
+       1mbehomepack  22mchanges	 the  user  environment to be packs developer, then
+       displays the summary of environment variables used by 1mgmkpack22m.
+       Though this status is the default one, this command is helpful  if  the
+       environment  has	 been  switched previously to packs administrator with
+       the command 1mberootpack22m.
+       Note that the dot character (".") ahead from the command is mandatory :
+       this  is	 because  the command will export environment variables to the
+       current shell, so this command has to be sourced.
+
+1mENVIRONNEMENT0m
+       ROOTPACK
+	      The default directory of reference packs as  an  alternative  to
+	      4m$HOME/rootpack0m
+
+       HOMEPACK
+	      The  default  directory  of  user	 packs	as  an	alternative to
+	      4m$HOME/pack0m
+
+       ROOTBIN
+	      The root directory for executables of all	 reference  packs.  It
+	      enables  to store executables in another file system (larger and
+	      possibly semi-permanent).
+
+       HOMEBIN
+	      The root directory for executables of all user packs. It enables
+	      to store executables in another file system (larger and possibly
+	      semi-permanent).
+
+       ROOTLIB
+	      The root directory for libraries	of  all	 reference  packs.  It
+	      enables  to  store  libraries in another file system (larger and
+	      permanent).
+
+       HOMELIB
+	      The root directory for libraries of all user packs.  It  enables
+	      to  store	 libraries  in	another file system (larger and perma‐
+	      nent).
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mberootpack(1), envpack(1).0m
+
+
+
+								 behomepack(1)

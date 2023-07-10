@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Object libraries</TITLE>
+<META NAME="description" CONTENT="Object libraries">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node29.html">
+<LINK REL="previous" HREF="node25.html">
+<LINK REL="up" HREF="node24.html">
+<LINK REL="next" HREF="node29.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html558"
+  HREF="node29.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html552"
+  HREF="node24.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html546"
+  HREF="node27.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html554"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html556"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html559"
+  HREF="node29.html">Executables</A>
+<B> Up:</B> <A NAME="tex2html553"
+  HREF="node24.html">Basics about the compilation</A>
+<B> Previous:</B> <A NAME="tex2html547"
+  HREF="node27.html">Compilation step</A>
+ &nbsp; <B>  <A NAME="tex2html555"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html557"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00372000000000000000">
+Object libraries</A>
+</H2><FONT SIZE="-2">
+Lower in the script you will find such lines :
+</FONT><PRE>
+# Do you want to update users libraries ? (yes/no)
+# -------------------------------------
+export ICS_UPDLIBS=yes
+</PRE><FONT SIZE="-2">
+By default the object code in pack is compared to the archive object libraries. The missing libraries will be archived while the
+ existing one may be rearchived if the list of object files in pack does not fit the content of the library, or if the library is
+ older than an object file. You can skip this step completely by setting <code>export ICS_UPDLIBS=no</code>. Of course, doing this is
+ unsecure because then your executables might be unstable. You should do this only to save time if you are absolutely sure that all
+ your libraries are up to date.
+</FONT>
+<P>
+<BR><HR>
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

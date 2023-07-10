@@ -1,0 +1,32 @@
+.TH usrpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+usrpack \- display user's packs
+.PP
+.SH SYNOPSIS
+.B usrpack
+[
+.BI "-h " "homepack"
+]
+.PP
+.SH DESCRIPTION
+.B usrpack
+displays the user existing packs names.
+.PP
+.SH OPTIONS
+.IP "\fB -h \fIhomepack\fR"
+Directory where to look for packs.
+.br
+The default is to consider the directory
+.I $HOME/pack
+.PP
+.SH ENVIRONNEMENT
+.IP HOMEPACK
+The default directory where to look for packs as an alternative to 
+.I $HOME/pack
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR admpack(1).

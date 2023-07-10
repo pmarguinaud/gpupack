@@ -1,0 +1,58 @@
+#!/bin/bash
+########################################################################
+#
+#    Script readpack
+#    ---------------
+#
+#    Purpose : to read a variable from the architecture file
+#    -------   
+#
+#    Usage :  readpack $1
+#    -----           
+#            $1 : variable to read
+#                 If not specified, all variables are read.
+#
+#    Environment variables :
+#    ---------------------
+#            GMKFILE  : architecture file
+#
+########################################################################
+#
+export LC_ALL=C
+
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+#
+# When called from inside a compilation script TARGET_PACK will be initialized
+# Otherwise users will get the "default" arch file.
+if [ ! "$GMK_OPT" ] ; then
+  GMK_OPT=x
+fi
+if [ "$(\ls -1t $TARGET_PACK/.gmkfile 2>/dev/null | tail -1)" ] ; then
+  GMKFILEPATH=$TARGET_PACK/.gmkfile
+  FLAVOUR=$(\ls -1t $GMKFILEPATH | tail -1)
+  N=$(\ls -1t $TARGET_PACK/.gmkfile 2>/dev/null | wc -l)
+elif [ -f $HOME/.gmkpack/arch/$GMKFILE.$GMK_OPT ] ; then
+  GMKFILEPATH=$HOME/.gmkpack/arch
+  FLAVOUR=$GMKFILE.$GMK_OPT
+  N=1
+elif [ -f $GMK_SUPPORT/arch/$GMKFILE.$GMK_OPT ] ; then
+  GMKFILEPATH=$GMK_SUPPORT/arch
+  FLAVOUR=$GMKFILE.$GMK_OPT
+  N=1
+elif [ -d .gmkfile ] ; then
+  GMKFILEPATH=.gmkfile
+  FLAVOUR=$(\ls -1t $GMKFILEPATH | tail -1)
+  N=$(\ls -1t .gmkfile 2>/dev/null | wc -l)
+else
+  echo "readpack internal error : GMKFILE is not set and no configuration file could be found." 1>&2
+  exit 1
+fi
+if [ $N -gt 1 ] ; then
+  echo "readpack internal error : GMKFILE is not unique inside the directory ~/.gmkfile" 1>&2
+  exit 1
+fi
+if [ "$1" ] ; then
+  echo $1=\"$(grep "^$1 " $GMKFILEPATH/$FLAVOUR | sed "s/= /=/1" | cut -d "=" -f2-)\"
+else
+   grep -v "^ *#" $GMKFILEPATH/$FLAVOUR | grep = | sed 's/= /= "/1' | sed 's/$/"/1' | sed 's/="$/= ""/1'
+fi

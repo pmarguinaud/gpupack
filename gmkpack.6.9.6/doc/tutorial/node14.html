@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Developers</TITLE>
+<META NAME="description" CONTENT="Developers">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="previous" HREF="node13.html">
+<LINK REL="up" HREF="node12.html">
+<LINK REL="next" HREF="node15.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html356"
+  HREF="node15.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html350"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html346"
+  HREF="node13.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html352"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html354"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html357"
+  HREF="node15.html">Configuring and building</A>
+<B> Up:</B> <A NAME="tex2html351"
+  HREF="node12.html">Environnment variables</A>
+<B> Previous:</B> <A NAME="tex2html347"
+  HREF="node13.html">Administrator</A>
+ &nbsp; <B>  <A NAME="tex2html353"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html355"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00322000000000000000">
+Developers</A>
+</H2>
+
+<P>
+In this subsection we consider that an administrator has installed <I>GmkPack </I>on a public place for a community of developers and
+ that he has build reference packs on top of which developers can make their own packs.
+ 
+<P>
+ 
+<P>
+The following variables should be set and exported in the Shell profile file (<code>.bash_profile</code> in <I>Bash</I>,
+ <code>.profile</code> in <I>Ksh</I>, <code>.user_profile</code> at ECMWF ...) :
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>GMKROOT</code> : the directory where <I>GmkPack </I>has been installed by the administrator
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>GMKFILE</code> : the filename inside <I>GmkPack </I>which contains the operating system characteristics :
+ compilers names, compilers options, loading options, ...
+<BR>
+The absolute filename is <code>$GMKROOT/arch/$GMKFILE</code>. This variable is provided by
+ the administrator.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>GMKTMP</code> : a temporary working directory for <I>GmkPack </I>. It can be set to <code>$TMPDIR</code> if the system administrator of the
+ computer has provided it.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>ROOTPACK</code> : the administrator's packs directory.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>HOMEPACK</code> : the the developer's packs directory.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>HOMEBIN</code> : the developer's executables directory. It can be <code>$HOMEPACK</code> if there is much disk space ;
+ otherwise it is better to choose a semi-temporary directory. Inside a pack, the executables are visible in the directory
+ <code>bin</code> but actually this directory is a symbolic link to <code>$HOMEBIN/$(packname)/bin</code> where <code>$(packname)</code> is the name of the pack.
+</DL>
+
+<P>
+Then the paths should be modified respectively to access the toolbox and the man pages of <I>GmkPack </I>:
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>export PATH=$GMKROOT/util:$PATH</code>
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>export MANPATH=$GMKROOT/man:$MANPATH</code>
+</DL>
+Note that on some systems the variable <code>MANPATH</code> could be replaced by <code>CATMAN</code>.
+ 
+<P>
+Exemple :
+<PRE>
+export GMKROOT=/home/khatib/bin/gmkpack
+export ROOTPACK=/home/master/rootpack
+export HOMEPACK=$HOME/pack
+export HOMEBIN=$WORKDIR/pack
+export GMKFILE=PGI.LXGMAP
+export GMKTMP=$TMPDIR
+export PATH=$GMKROOT/util:$PATH
+export MANPATH=$GMKROOT/man:$MANPATH
+</PRE>
+
+<P>
+Make sure that these variables are properly set and exported, either by executing your profile again, or by opening a new session.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html356"
+  HREF="node15.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html350"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html346"
+  HREF="node13.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html352"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html354"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html357"
+  HREF="node15.html">Configuring and building</A>
+<B> Up:</B> <A NAME="tex2html351"
+  HREF="node12.html">Environnment variables</A>
+<B> Previous:</B> <A NAME="tex2html347"
+  HREF="node13.html">Administrator</A>
+ &nbsp; <B>  <A NAME="tex2html353"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html355"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

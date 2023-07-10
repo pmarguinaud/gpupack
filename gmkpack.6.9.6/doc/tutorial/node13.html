@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Administrator</TITLE>
+<META NAME="description" CONTENT="Administrator">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node14.html">
+<LINK REL="previous" HREF="node12.html">
+<LINK REL="up" HREF="node12.html">
+<LINK REL="next" HREF="node14.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html344"
+  HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html338"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html332"
+  HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html340"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html342"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html345"
+  HREF="node14.html">Developers</A>
+<B> Up:</B> <A NAME="tex2html339"
+  HREF="node12.html">Environnment variables</A>
+<B> Previous:</B> <A NAME="tex2html333"
+  HREF="node12.html">Environnment variables</A>
+ &nbsp; <B>  <A NAME="tex2html341"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html343"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00321000000000000000">
+Administrator</A>
+</H2>
+
+<P>
+In this subsection we consider that the user has to install <I>GmkPack </I>for private usage on an individual machine, or for a community
+ of developpers on a public place ; and that this user, as an administrator for this community or for himself, has to build
+ reference packs. 
+
+<P>
+If you do not belong to this category of people you can skip this section (or read it later).
+ 
+<P>
+ 
+<P>
+The following variables should be set and exported in the Shell profile file (<code>.bash_profile</code> in <I>Bash</I>, <code>.profile</code>
+ in <I>Ksh</I>, <code>.user_profile</code> at ECMWF ...) :
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>GMKROOT</code> : the directory where <I>GmkPack </I>should be installed
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>GMKFILE</code> : the relative filename inside <I>GmkPack </I>which contains the operating system characteristics :
+ compilers names, compilers options, loading options, ...The absolute name is <code>$GMKROOT/arch/$GMKFILE</code>. It is called ''the
+ architecture file''. The (arbitrary) custom has been to name it with the machine architecture and the machine nickname ; for instance :
+ <code>VPP5000.TORA</code>, <code>IBMP690.HPCE</code>, <code>SX6.DANA</code>, ...
+<BR>
+The easiest way to start is to benefit from an existing architecture file ; otherwise you will have to copy an existing one and to adapt it
+ (see the installation details).
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>GMKTMP</code> : a temporary working directory for <I>GmkPack </I>. It can be set to <code>$TMPDIR</code> if the system administrator of the
+ computer has provided it. The actual working directory is <code>$GMKTMP/gmktmp.$$</code>.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>ROOTPACK</code> : the reference packs directory
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>HOMEPACK</code> : the administrator's packs directory. Usually for an administrator, <code>HOMEPACK</code> will be 
+<code>ROOTPACK</code> ; but a different directory can be set temporary if the administrator wants to make the difference between some ''public''
+ packs and some ''private'' packs.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>HOMEBIN</code> : the directory of the executables. It can be <code>$HOMEPACK</code> if there is much disk space, or another path
+ to benefit of a bigger disk space. Inside a pack, the executables are visible in the directory <code>bin</code> but actually this
+ directory is a symbolic link to <code>$HOMEBIN/$(packname)/bin</code> where <code>$(packname)</code> is the name of the pack.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>ROOTBIN</code> : like the previous variable, but for the reference packs. This variable is usefull only if <code>ROOTPACK</code> and <code>HOMEPACK</code> 
+have different values. Then if not set, this variable will be assumed as <code>ROOTPACK</code>
+</DL>
+Then the paths should be modified respectively to access the toolbox and the man pages of <I>GmkPack </I>:
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>export PATH=$GMKROOT/util:$PATH</code>
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> <code>export MANPATH=$GMKROOT/man:$MANPATH</code>
+</DL>
+Note that on some systems the variable <code>MANPATH</code> could be replaced by <code>CATMAN</code>.
+ 
+<P>
+Exemple :
+<PRE>
+export GMKROOT=/home/khatib/bin/gmkpack.6.3
+export ROOTPACK=$HOME/rootpack
+export HOMEPACK=$HOME/pack
+export HOMEBIN=$HOME/pack
+export GMKFILE=PGI.LXGMAP
+export GMKTMP=$TMPDIR
+export PATH=$GMKROOT/util:$PATH
+export MANPATH=$GMKROOT/man:$MANPATH
+</PRE>
+
+<P>
+Make sure that these variables are properly set and exported, either by executing your profile again, or by opening a new session.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html344"
+  HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html338"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html332"
+  HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html340"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html342"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html345"
+  HREF="node14.html">Developers</A>
+<B> Up:</B> <A NAME="tex2html339"
+  HREF="node12.html">Environnment variables</A>
+<B> Previous:</B> <A NAME="tex2html333"
+  HREF="node12.html">Environnment variables</A>
+ &nbsp; <B>  <A NAME="tex2html341"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html343"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Directory of main packs</TITLE>
+<META NAME="description" CONTENT="Directory of main packs">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node19.html">
+<LINK REL="previous" HREF="node17.html">
+<LINK REL="up" HREF="node17.html">
+<LINK REL="next" HREF="node19.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html414"
+  HREF="node19.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html408"
+  HREF="node17.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html402"
+  HREF="node17.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html410"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html412"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html415"
+  HREF="node19.html">Creation of a main</A>
+<B> Up:</B> <A NAME="tex2html409"
+  HREF="node17.html">Making a main pack</A>
+<B> Previous:</B> <A NAME="tex2html403"
+  HREF="node17.html">Making a main pack</A>
+ &nbsp; <B>  <A NAME="tex2html411"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html413"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00351000000000000000">
+Directory of main packs</A>
+</H2>
+Packs are always created in the directory <code>HOMEPACK</code>. However, as suggested by the existence of two environment variables <code>ROOTPACK</code> and 
+<code>HOMEPACK</code>, reference packs (including main packs) and working packs can be stored in different directories.
+
+<P>
+Since <I>GmkPack </I>creates packs only inside <code>HOMEPACK</code>, to be able to make packs inside the directory <code>ROOTPACK</code> (if directories are different)
+ the environmernt variables <code>HOMEPACK</code> and <code>HOMEBIN</code> should be temporarily overwritten by <code>ROOTPACK</code> and <code>ROOTBIN</code>.
+
+<P>
+To work in the <code>ROOTPACK</code> framework and to come back to the <code>HOMEPACK</code> framework, run the commands <code>berootpack</code> and <code>behomepack</code> 
+preceeded with a ''dot'' :
+<PRE>
+% . berootpack
+GMKROOT  = /home/khatib/bin/gmkpack
+ROOTPACK = /home/khatib/rootpack
+HOMEPACK = /home/khatib/rootpack
+HOMEBIN  = /home/khatib/rootpack
+GMKTMP   = /home/khatib/tmp
+gmkpack is /home/khatib/bin/gmkpack/util/gmkpack
+registered as : /home/khatib/bin/gmkpack.6.3/util/gmkpack
+### Your are packs administrator ###
+% . behomepack
+GMKROOT  = /home/khatib/bin/gmkpack
+ROOTPACK = /home/khatib/rootpack
+HOMEPACK = /home/khatib/pack
+HOMEBIN  = /home/khatib/pack
+GMKTMP   = /home/khatib/tmp
+gmkpack is /home/khatib/bin/gmkpack/util/gmkpack
+registered as : /home/khatib/bin/gmkpack.6.3/util/gmkpack
+</PRE>
+
+<P>
+<BR><HR>
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

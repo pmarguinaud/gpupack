@@ -1,0 +1,38 @@
+readpack(1)		    General Commands Manual		   readpack(1)
+
+
+
+1mNAME0m
+       readpack - display variables from a configuration file used by 1mgmkpack.0m
+
+1mSYNOPSIS0m
+       1mreadpack 22m[ 4mvariable24m ]
+
+1mDESCRIPTION0m
+       1mreadpack  22mdisplays	either the whole configuration file used by 1mgmkpack0m
+       or only the variable given as argument.
+
+1mENVIRONNEMENT0m
+       GMKFILE
+	      The basename of the configuration file used to run 1mgmkpack22m.
+
+       GMK_OPT
+	      The extension name of the configuration file used	 to  run  1mgmk‐0m
+	      1mpack22m.
+
+1mDIAGNOSTICS0m
+       The development of the option 1m-l 22mof 1mgmkpack 22mhas partly broken this com‐
+       mand. For now, to make it work one has to be either in the  top	direc‐
+       tory  of	 a  pack,  or  have  at least the environment variable GMKFILE
+       exported. The environment variable GMK_OPT should be exported as	 well,
+       unless the default value (x) is correct.
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mgmkpack(1).0m
+
+
+
+								   readpack(1)

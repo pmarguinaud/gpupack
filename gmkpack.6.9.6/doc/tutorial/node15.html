@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Configuring and building</TITLE>
+<META NAME="description" CONTENT="Configuring and building">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node16.html">
+<LINK REL="previous" HREF="node12.html">
+<LINK REL="up" HREF="node10.html">
+<LINK REL="next" HREF="node16.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html370"
+  HREF="node16.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html364"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html358"
+  HREF="node14.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html366"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html368"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html371"
+  HREF="node16.html">Usage</A>
+<B> Up:</B> <A NAME="tex2html365"
+  HREF="node10.html">Getting started</A>
+<B> Previous:</B> <A NAME="tex2html359"
+  HREF="node14.html">Developers</A>
+ &nbsp; <B>  <A NAME="tex2html367"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html369"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00330000000000000000">
+Configuring and building</A>
+</H1>
+
+<P>
+If <I>GmkPack </I>has already been installed by an administrator, you can skip this section.
+ 
+<P>
+ 
+<P>
+Before using <I>GmkPack </I>, you have to ''configure'' it and ''build'' it. Because <I>GmkPack </I>has been written in a very primitive way, this configuration 
+step consists just in filling properly the configuration file (<code>GMKFILE</code>) so that the building process can run. <BR>
+The building process does very few things actually : it is a shell script which checks some environment variables, checks some variables from 
+the configuration file and sets the files permissions ; then it might build a program (for distributed compilation) and finally it installs 
+the man pages. All that is very fast to run.
+<BR>
+The building process can abort if the configuration file does not fit. However all that is in the configuration file is not needed at the time of the building process, so that you can finalize the configuration file much later after you have build <I>GmkPack </I>. However, it is better to start with a proper configuration file !
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> Your Shell should be <code>ksh</code> or <code>bash</code>. Other Shell may work but they have not been tested. You need Perl, too, and at least <code>perl</code> 5.0 version 6 subversion 1 ; <code>perl</code> 5.0 patchlevel 4 subversion 4 has been proven not to be a sufficient version.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> Change to the directory where <I>GmkPack </I>is installed and invoke <code>build_gmkpack</code> ; the standard output should look so :
+<PRE>
+Environment variables :
+SHELL=/bin/bash
+PERL=/usr/bin/perl
+GMKFILE=PGI.LXGMAP
+Directories/files permissions :
+Overview of architecture file :
+GMKWRKDIR=/home/khatib/tmp/gmktmp.12895
+LIBFRT=PGI616
+Install codes configuration files :
+Install scripts :
+aux/bl95stuffpack.sh ...
+aux/catenvpack.sh ...
+aux/cplpack.sh ...
+aux/create_odbglue.sh ...
+aux/depspack.sh ...
+aux/dummylibspack.sh ...
+aux/envvarpack.sh ...
+aux/ggetpack.sh ...
+aux/icspack.sh ...
+aux/intfbF90.sh ...
+aux/libspack.sh ...
+aux/licensepack.sh ...
+aux/lnkpack.sh ...
+aux/loadpack.sh ...
+aux/mkcplpack.sh ...
+aux/mkdirpack.sh ...
+aux/mkintfb.sh ...
+aux/noupdpack.sh ...
+aux/odbstuffpack.sh ...
+aux/pathpack.sh ...
+aux/Pcplpack.sh ...
+aux/privarpack.sh ...
+aux/Psystem.sh ...
+aux/Pupdpack.sh ...
+aux/Pviewpack.sh ...
+aux/sizepack.sh ...
+aux/sortpack.sh ...
+aux/splitpack.sh ...
+aux/syspack.sh ...
+aux/unsxrpack.sh ...
+aux/updpack.sh ...
+aux/viewpack.sh ...
+aux/vppstuffpack.sh ...
+aux/wrkpack.sh ...
+aux/gmak.pl ...
+aux/lib-file.pl ...
+aux/lib-shell.pl ...
+aux/make_intfbl.pl ...
+aux/my_check_inc_intfb.pl ...
+aux/my_check_norm.pl ...
+aux/sun_specific.pl ...
+util/admpack ...
+util/clearpack ...
+util/envpack ...
+util/flushpack ...
+util/genpack ...
+util/gmkpack ...
+util/idotpack ...
+util/lockpack ...
+util/logpack ...
+util/lspack ...
+util/progpack ...
+util/Psize ...
+util/readpack ...
+util/resetpack ...
+util/rlspack ...
+util/rmpack ...
+util/scanpack ...
+util/showpack ...
+util/usrpack ...
+util/vipack ...
+spl/mpsh.pl ...
+Install man pages :
+Installation finished for SERIAL execution (Maximum number of threads on this machine : 1).
+</PRE><FONT SIZE="-2"><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> If the procedure stops before the installation is finished, then you should fix your configuration file.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> Once the installation is successful, you can run the command <code>envpack</code> which will print out some information about your environment 
+related to <I>GmkPack </I>:
+</FONT><PRE>
+GMKROOT  = /home/khatib/bin/gmkpack.6.3
+ROOTPACK = /home/khatib/rootpack
+HOMEPACK = /home/khatib/pack
+HOMEBIN  = /home/khatib/pack
+GMKTMP   = /home/khatib/tmp
+gmkpack is /home/khatib/bin/gmkpack.6.3/util/gmkpack
+registered as : /home/khatib/bin/gmkpack.6.3/util/gmkpack
+</PRE><FONT SIZE="-2">
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> To make the maintenance and upgrade of <I>GmkPack </I>transparent to the developers, the administrator is invited to create a symbolic link from <code>gmkpack</code> to the last version installed :
+</FONT><PRE>
+% cd $(dirname $GMKROOT)
+% ln -s $(basename $GMKROOT) gmkpack
+</PRE><FONT SIZE="-2"></DL></FONT>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html370"
+  HREF="node16.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html364"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html358"
+  HREF="node14.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html366"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html368"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html371"
+  HREF="node16.html">Usage</A>
+<B> Up:</B> <A NAME="tex2html365"
+  HREF="node10.html">Getting started</A>
+<B> Previous:</B> <A NAME="tex2html359"
+  HREF="node14.html">Developers</A>
+ &nbsp; <B>  <A NAME="tex2html367"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html369"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

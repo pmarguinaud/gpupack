@@ -1,0 +1,5 @@
+mse/programs/prep.o
+mse/internals/prep.o
+surfex/OFFLIN/prep.o
+arp/*/yommp.o arp/*/yomct0.o
+arpifs/*/yommp.o arpifs/*/yomct0.o

@@ -1,0 +1,35 @@
+.TH gmkfilemaker 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+gmkfilemaker \- configuration file setup assistant
+.PP
+.SH SYNOPSIS
+.B gmkfilemaker
+.PP
+.SH DESCRIPTION
+.B gmkfilemaker
+is an interactive procedure to assist the users making configuration files for
+.B gmkpack\fR.
+.br
+This command is expected to be run after the first installation of
+.B gmkpack
+and before making the first pack with it.
+.br
+As "configure" would do, it tries to get informations from the system and ask
+the user for complementary informations.
+.br
+This command can be run more than once, especially to run
+.B gmkpack
+with different compilers.
+.PP
+.SH DIAGNOSTICS
+After running this command, it is recommended to edit the resulting
+configuration file and make sure the setup looks correct. It is also an
+opportinity to improve the customisation of the configuration files.
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR gmkpack(1),
+.BR optionspack(1).

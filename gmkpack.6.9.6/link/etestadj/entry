@@ -1,0 +1,6 @@
+tal/programs/test_adjoint.o
+etrans/programs/test_adjoint.o
+arp*/utility/abor1.o
+arp*/module/yomlun.o
+arp*/module/yomct0.o
+arp*/module/yommp.o

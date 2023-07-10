@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>flushpack</TITLE>
+<META NAME="description" CONTENT="flushpack">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node51.html">
+<LINK REL="previous" HREF="node49.html">
+<LINK REL="up" HREF="node48.html">
+<LINK REL="next" HREF="node51.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html884"
+  HREF="node51.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html878"
+  HREF="node48.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html872"
+  HREF="node49.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html880"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html882"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html885"
+  HREF="node51.html">clearpack</A>
+<B> Up:</B> <A NAME="tex2html879"
+  HREF="node48.html">Working tools</A>
+<B> Previous:</B> <A NAME="tex2html873"
+  HREF="node49.html">rmpack</A>
+ &nbsp; <B>  <A NAME="tex2html881"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html883"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00620000000000000000">
+flushpack</A>
+</H1>
+<P>
+<FONT SIZE="-2"><code>flushpack</code> recursively removes all the files which are not ''source files'' to <I>GmkPack </I>; in other words, all files except the
+ ones which have any of the following extension will be removed : <code>F90</code> <code>F</code> <code>f90</code> <code>f</code> <code>h</code> <code>inc</code>
+ <code>sql</code> <code>c</code> <code>ddl</code> <code>mnh</code> <code>odb98.flags</code> <code>l</code> <code>y</code> <code>b</code>. The libraries and the executables are
+ removed as well. If the pack is a main pack <code>flushpack</code> removes the precompilers as well.
+Notice :
+</FONT>
+<UL>
+<LI>Hidden files will not be removed.
+</LI>
+<LI>The working directory can be <code>$HOMEPACK/src/local</code> or any of its subdirectory. If the working directory is lower than
+ the local source directory then the pack may not be completely ''flushed''. If the working directory is higher than the local
+ source directory then the pack will not be ''flushed''.
+</LI>
+</UL><FONT SIZE="-2">
+Examples :
+</FONT><PRE>
+% cd $ROOTPACK/31t0_t1.02.PGI616.x/src/local
+% flushpack
+flushpack active
+  Remove objects files ...
+  Remove odb intermediate headers and C files ...
+  Remove preprocessed files ...
+  Remove auto-generated interfaces ...
+  Remove precompilers ...
+  Remove libraries ...
+  Remove binaries ...
+flushpack finished.
+% cd $HOMEPACK/toto/src/local
+% flushpack
+flushpack active
+  Remove objects files ...
+  Remove odb intermediate headers and C files ...
+  Remove preprocessed files ...
+  Remove auto-generated interfaces ...
+    Warning ! No directory .intfb has been found below the curent directory.
+    Flushout might have been uncomplete.
+  Remove libraries ...
+  Remove binaries ...
+flushpack finished.
+</PRE>
+<P>
+<BR><HR>
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

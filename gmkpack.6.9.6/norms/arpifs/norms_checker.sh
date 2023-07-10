@@ -1,0 +1,1 @@
+../../aux/arpifs_norms_checker.sh

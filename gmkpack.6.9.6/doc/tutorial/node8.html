@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Main features of the toolbox</TITLE>
+<META NAME="description" CONTENT="Main features of the toolbox">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node9.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="node2.html">
+<LINK REL="next" HREF="node9.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html254"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html248"
+  HREF="node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html242"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html250"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html252"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html255"
+  HREF="node9.html">About the evolution of</A>
+<B> Up:</B> <A NAME="tex2html249"
+  HREF="node2.html">Introduction</A>
+<B> Previous:</B> <A NAME="tex2html243"
+  HREF="node7.html">Naming conventions</A>
+ &nbsp; <B>  <A NAME="tex2html251"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html253"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00230000000000000000">
+Main features of the toolbox</A>
+</H1>
+
+<P>
+At its invokation <I>GmkPack </I>creates a pack and a script inside this pack to compile the source code, to archive objects libraries and to load executables. 
+
+<P>
+The compilation script is written in Shell and can be edited for modifications. For instance one can modify
+ the compilation options, decide whether libraries and/or executables should be made after the compilation is successfull, etc.
+
+<P>
+To run fast, only the source that needs to be recomputed will be recomputed (like <code>Make</code>, <I>GmkPack </I>will compile a source file only if the corresponding object file does not exist or is older than the source file).
+
+<P>
+The source code dependencies are analysed so that what should be recompiled will be (for instance, should a module be modified,then its dependencies would be taken into account by <I>GmkPack </I>itself).
+
+<P>
+<I>GmkPack </I>tries to protect the user from any mistake ; for instance an object libraries will not be made unless the compilation is successfull (unless the user forces <I>GmkPack </I>to ignore the compilation).
+
+<P>
+A huge amount of source code can be compiled using more than one processor. The algorithm is so that <I>GmkPack </I>analyses the code dependencies in order to parallelize partially the compilation of modules.
+
+<P>
+The compilation of such ''non-standard'' pieces of code like ODB or the blacklisting (which require the compilation and use of a precompiler) is fully supported and transparent to the user.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html254"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html248"
+  HREF="node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html242"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html250"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html252"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html255"
+  HREF="node9.html">About the evolution of</A>
+<B> Up:</B> <A NAME="tex2html249"
+  HREF="node2.html">Introduction</A>
+<B> Previous:</B> <A NAME="tex2html243"
+  HREF="node7.html">Naming conventions</A>
+ &nbsp; <B>  <A NAME="tex2html251"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html253"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

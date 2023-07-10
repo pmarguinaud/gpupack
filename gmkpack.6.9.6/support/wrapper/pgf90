@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Wrapper for pgf90 compiler version 6.0
+# In version 6.1.6 it is not needed anymore :-)
+# Do not use -g option in modules defining a
+# namelist where variables are the same than the ones in a used module (!).
+# Such thing happens for files named : 
+# "modn_*.mnh" but not "*/module/modn_*_n.mnh"
+# but here below mnh is already transformed into f90
+# Ryad El khatib
+
+command="pgf90 $*"
+last=$#
+shift $((last-1))
+file="$@"
+N=$(echo $file | grep -c "^modn_")
+if [ $N -eq 0 ] ; then
+  $command
+else
+  N=$(echo $file | grep -c "\.f90$")
+  if [ $N -eq 0 ] ; then
+    $command
+  else
+    N=$(echo $file | grep -c "_n\.f90$")
+    if [ $N -ne 0 ] ; then
+      $command
+    else
+      echo "WARNING ! option -g will be ignored"
+      NEWCOMMAND=$(echo $command | sed "s/ -g / /")
+      $NEWCOMMAND
+    fi
+  fi
+fi
+set +x
+exit $?

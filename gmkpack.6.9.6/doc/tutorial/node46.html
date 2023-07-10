@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Executables</TITLE>
+<META NAME="description" CONTENT="Executables">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node47.html">
+<LINK REL="previous" HREF="node45.html">
+<LINK REL="up" HREF="node35.html">
+<LINK REL="next" HREF="node47.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html819"
+  HREF="node47.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html813"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html807"
+  HREF="node45.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html815"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html817"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html820"
+  HREF="node47.html">Verbosity</A>
+<B> Up:</B> <A NAME="tex2html814"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html808"
+  HREF="node45.html">Load map</A>
+ &nbsp; <B>  <A NAME="tex2html816"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html818"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION005110000000000000000">
+Executables</A>
+</H1>
+<P>
+<FONT SIZE="-2">You can ask <I>GmkPack </I>to switch off the building of all executables :
+</FONT><PRE>
+# Do you want to make any executable ? (yes/no)
+# ----------------------------------
+Load=no
+</PRE><FONT SIZE="-2">
+Notice :
+</FONT>
+<UL>
+<LI>The default value is ''<code>yes</code>'' for all packs.
+</LI>
+<LI>Switching off the building of executable is interesting when you are at the stage of porting the source code on a new
+ machine or with a new compiler and you are not ready with bottom level object libraries.
+</LI>
+</UL><FONT SIZE="-2">
+If you build executables you can tune several parameters for each of them. Example :
+</FONT><PRE>
+# Binary "odbtools" :
+cat &lt;&lt;end_of_odbtools_link&gt; $GMKWRKDIR/.odbtools_link
+EXEC=ODBTOOLS
+ENTRY=odb/odbmain/Odbtools.o odb/misc/Odbtools.o odb/tools/Odbtools.o
+end_of_odbtools_link
+# BACKGROUND LIBRARIES (from top to bottom) :
+cat &lt;&lt;end_of_odbtools_libs&gt; $GMKWRKDIR/.odbtools_libs
+/home/khatib/pack/opt/lib/libarp.inter.1.a
+/home/khatib/pack/opt/lib/libarp.main.a
+/home/khatib/pack/opt/lib/libxrd.main.a
+/home/khatib/pack/opt/lib/libodb.main.a
+/home/khatib/pack/opt/lib/libcma-odb.main.a
+/home/khatib/pack/opt/lib/libmtocomp-odb.main.a
+/home/khatib/pack/opt/lib/libport-odb.main.a
+/home/khatib/pack/opt/lib/libscr-odb.main.a
+/home/khatib/pack/opt/lib/libunsxref-verbose.main.a
+end_of_odbtools_libs
+# LOW-LEVEL LIBRARIES (from top to bottom) :
+cat &lt;&lt;end_of_odbtools_sys&gt; $GMKWRKDIR/.odbtools_sys
+-L$GMAPLIBPATH -lbufrdcR64 -lecR64 -lgribexR64 -lmpidummyR64 -libmdummyR64
+end_of_odbtools_sys
+# LOADER AND OPTIONS :
+cat &lt;&lt;end_of_odbtools_load&gt; $GMKWRKDIR/.odbtools_load
+pgf90
+end_of_odbtools_load
+</PRE><DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>EXEC</code> is the name of the executable file. The default names can be changed in a user's preferences file.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ENTRY</code> is the list of object files to be loaded prior to any object library. This list can contain non-existent object
+ files ; in this case these missing files will be ignored (in the example above several names are given for <code>Odbtools.o</code>,
+ corresponding its changes of location in the past cycles). 
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>BACKGROUND LIBRARIES</code> : you can modify the file <code>$GMKWRKDIR/.xxxxxxxx_libs</code> so that it will contains in the proper
+ order (from top one ahead to last one) the background libraries from the reference pack. 
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>LOW-LEVEL LIBRARIES</code> : you can modify the file <code>$GMKWRKDIR/.xxxxxxxx_sys</code> so that it will contains in the proper
+ order (from first one ahead to last one) the needed libraries which are out of the current pack and out of the reference pack.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>LOADER AND OPTIONS</code> : you can modify the file <code>$GMKWRKDIR/.xxxxxxxx_load</code> so that it will contains the loader and
+ its command line options to link the executable.
+</DL><FONT SIZE="-2">
+Notice :
+</FONT>
+<UL>
+<LI>In main packs the file <code>$GMKWRKDIR/.xxxxxxxx_libs</code> is empty because the reference pack is the current pack itself ; this
+ file cannot contain libraries made from the local source files.
+</LI>
+<LI>By default the parameters described above should have been set by <I>GmkPack </I>properly. 
+</LI>
+</UL>
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html819"
+  HREF="node47.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html813"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html807"
+  HREF="node45.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html815"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html817"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html820"
+  HREF="node47.html">Verbosity</A>
+<B> Up:</B> <A NAME="tex2html814"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html808"
+  HREF="node45.html">Load map</A>
+ &nbsp; <B>  <A NAME="tex2html816"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html818"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

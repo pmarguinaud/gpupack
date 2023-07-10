@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Compilation of selected dependencies</TITLE>
+<META NAME="description" CONTENT="Compilation of selected dependencies">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node41.html">
+<LINK REL="previous" HREF="node39.html">
+<LINK REL="up" HREF="node35.html">
+<LINK REL="next" HREF="node41.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html735"
+  HREF="node41.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html729"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html723"
+  HREF="node39.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html731"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html733"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html736"
+  HREF="node41.html">Explicit interfacing</A>
+<B> Up:</B> <A NAME="tex2html730"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html724"
+  HREF="node39.html">Selective list of files</A>
+ &nbsp; <B>  <A NAME="tex2html732"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html734"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00550000000000000000">
+Compilation of selected dependencies</A>
+</H1>
+<P>
+<FONT SIZE="-2">When you modify a module or a header file, you should recompile itself and all its dependencies as well. By default <I>GmkPack </I>determines
+ and compile all the dependencies for a given module or header. You can decide not to compile the dependencies, or to compile only
+ a part of them (choosing the <I>projects</I>) :
+</FONT><PRE>
+# Do you want to compile dependencies ? (yes/no)
+# -----------------------------------
+export DEP=yes
+# If you compile dependencies, approve the following projects list :
+export MKPROJECT="sur mpa mse xrd tfl tal arp ald sat odb uti bla"
+</PRE><FONT SIZE="-2">
+Notice :
+</FONT>
+<UL>
+<LI><B>Changing the default behaviour is highly unsafe !</B> This option had been developped in order to run <I>GmkPack </I>faster and
+ before the cycle 28 of <SMALL>ARPEGE</SMALL>/<SMALL>IFS</SMALL> was released. Since this cycle and its numerous explicit interfaces, this
+ option has become quite dangerous. Don't change it unless you are a code expert or you are sure that you did not change any
+ module nor any header nor any subroutine interface.
+</LI>
+<LI>This option does not appear in compilation scripts from main packs, where the whole code should be compiled.
+</LI>
+</UL>
+<P>
+<BR><HR>
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

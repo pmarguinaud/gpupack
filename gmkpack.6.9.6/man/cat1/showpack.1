@@ -1,0 +1,33 @@
+showpack(1)		    General Commands Manual		   showpack(1)
+
+
+
+1mNAME0m
+       showpack - find the last two versions of source files
+
+1mSYNOPSIS0m
+       1mshowpack 4m22mfile124m [ 4mfile224m ]	...
+
+1mDESCRIPTION0m
+       1mshowpack  22mrecursively  find the last two versions of each file given as
+       argument.
+       The files extensions can be omitted.
+       The working directory can be any directory inside a pack.
+       This command is helpful to find which file  should  be  copied  to  the
+       local source code directory to be modified.
+
+1mDIAGNOSTICS0m
+       This  command will not work if the current directory does not look like
+       the inside of a pack. Then the following message would be displayed :
+       "The working directory looks neither like the main directory of a  pack
+       nor the inside of a pack. No show."
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mgmkpack(1).0m
+
+
+
+								   showpack(1)

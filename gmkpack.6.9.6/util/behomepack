@@ -1,0 +1,45 @@
+if [ ! -d $HOME/.gmkpack ] ; then
+  mkdir $HOME/.gmkpack
+fi
+
+if [ -s $HOME/.gmkpack/env_homepack ] ; then
+# Recover HOMEPACK
+  HOMEPACK=$(cat $HOME/.gmkpack/env_homepack)
+  if [ "$HOMEPACK" = "$HOME/pack" ] ; then
+#   Default value :
+    unset HOMEPACK
+  else
+    export HOMEPACK
+  fi
+# Remove mark file
+  \rm $HOME/.gmkpack/env_homepack
+fi
+
+if [ -s $HOME/.gmkpack/env_homelib ] ; then
+# Recover HOMELIB
+  HOMELIB=$(cat $HOME/.gmkpack/env_homelib)
+  if [ "$HOMELIB" = "$HOME/pack" ] ; then
+#   Default value :
+    unset HOMELIB
+  else
+    export HOMELIB
+  fi
+# Remove mark file
+  \rm $HOME/.gmkpack/env_homelib
+fi
+
+if [ -s $HOME/.gmkpack/env_homebin ] ; then
+# Recover HOMEBIN
+  HOMEBIN=$(cat $HOME/.gmkpack/env_homebin)
+  if [ "$HOMEBIN" = "$HOME/pack" ] ; then
+#   Default value :
+    unset HOMEBIN
+  else
+    export HOMEBIN
+  fi
+# Remove mark file
+  \rm $HOME/.gmkpack/env_homebin
+fi
+
+# Report status
+envpack

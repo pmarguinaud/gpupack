@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Incremental compilation facility</TITLE>
+<META NAME="description" CONTENT="Incremental compilation facility">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node44.html">
+<LINK REL="previous" HREF="node42.html">
+<LINK REL="up" HREF="node35.html">
+<LINK REL="next" HREF="node44.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html777"
+  HREF="node44.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html771"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html765"
+  HREF="node42.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html773"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html775"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html778"
+  HREF="node44.html">Listings</A>
+<B> Up:</B> <A NAME="tex2html772"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html766"
+  HREF="node42.html">Recursive update control</A>
+ &nbsp; <B>  <A NAME="tex2html774"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html776"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00580000000000000000">
+Incremental compilation facility</A>
+</H1>
+<P>
+<FONT SIZE="-2">The compilation is performed per step. The step 0 corresponds to a setup ; each other one corresponds to a set of files that can be compiled independently and thus, simultaneously. With the incremental compilation facility you can specify various modes of the compilation part :
+</FONT><PRE>
+# Three compilation modes are possible :
+# full = full compilation (default value)
+# incr = incremental compilation (from a starting to an ending level)
+# off  = No compilation at all
+# Choose compilation mode (full/incr/off) :
+# ---------------------------------------
+export ICS_ICFMODE=full
+# If you use the incremental compilation facility, select top and bottom levels:
+export ICS_START=
+export ICS_STOP=
+# Reduced starting list :
+cat &lt;&lt;end_of_reduced_starting_list&gt; $GMKWRKDIR/.reduced_starting_list
+end_of_reduced_starting_list
+</PRE><DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ICFMODE=off</code> : the compilation part is completely skipped. This option is unsafe, unless you are completely sure
+ that all your object files are <I>up to date</I>.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ICFMODE=incr</code> : the compilation part is performed from the step <code> ICS_START</code> to the step <code> ICS_STOP</code> both
+ included. If <code> ICS_START</code> is not specified <I>GmkPack </I>will determine it by itself. If <code> ICS_STOP</code> is not specified <I>GmkPack </I>will
+ adopt the highest value (ie : the final step). A reduced list of source files can be specified from the list of source files of
+ the step <code> ICS_START</code>, by filling the file <code>$GMKWRKDIR/.reduced_starting_list</code> inside the script.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ICFMODE=full</code> : the compilation will run through all the steps. This is the default mode.
+</DL><FONT SIZE="-2">
+Notice :
+</FONT>
+<UL>
+<LI>The incremental mode can be helpful to do faster debugging of a huge code.
+</LI>
+<LI>If specified in the incremental mode, the source files names should be the <I>absolute</I> source filenames (ie : from the
+</LI>
+<LI>Source files specified in the incremental mode must be files actually existing in the <I>local</I> directory of the pack
+ (not only in a main directory or an intermediate branch).
+</LI>
+<LI>In the incremental mode, if <code> ICS_START</code> is not specified <I>GmkPack </I>will run through the step 0 anyhow. Then it will go to
+ the step where the previous compilation attempt failed, unless the pack content has changed in between. 
+</LI>
+<LI>If the incremental mode is selected then the compilation will run through all the steps from <code> ICS_START</code> to 
+<code> ICS_STOP</code> : it is not possible to skip some intermediate steps. It is not possible to provide a discontinuous list of steps
+ because, due to the files dependencies, the (re)compilation of files of a given step may have consequences on the following steps.
+ If you do want to run the compilation through discontinuous lists of steps, then you should run successively as many compilation
+ scripts as necessary, each one with continuous lists of steps. 
+</LI>
+</UL>
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html777"
+  HREF="node44.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html771"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html765"
+  HREF="node42.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html773"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html775"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html778"
+  HREF="node44.html">Listings</A>
+<B> Up:</B> <A NAME="tex2html772"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html766"
+  HREF="node42.html">Recursive update control</A>
+ &nbsp; <B>  <A NAME="tex2html774"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html776"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

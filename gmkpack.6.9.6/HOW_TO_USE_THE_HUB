@@ -1,0 +1,165 @@
+INTRODUCTION
+============
+
+The hub is a new facility to build libraries which are provided as packages with their own build material.
+
+Once installed, their headers, modules or libraries can be directly used to build the usual executables.
+
+Though these libraries could be installed separately, using the hub of gmkpack enables to install a consistant
+bundle of source codes from different origins. Also it warranties that all packages and source codes can be compiled
+with the same compilers and compiler options.
+
+Furthermore, withing gmkpack the mechanism of stacking branches can be used also to packages in the hub.
+It does not mean that a package can be partly modified and recompiled ; but at least a new version of a given package
+can be compiled on a local branch, and its new libraries will be used to re-link the subsequent executables.
+Not that in case modules or headers are modified, then it is (for now, at least) up to the user to recompile in the 
+subsequent source code the files using the modified headers or modules.  
+
+For now, only packages using cmake can be plugged in the hub ; but configure&make or any other exotic build system
+can be easily added.
+
+The mechanism of the hub relies on a set of variables to be defined in the configuration file of gmkpack.
+The particularity of these variables is that they will be evaluated on the fly. For instance, instead of defining 
+the C compiler to be, say, gcc, one can define it as $VCCNAME which is the name of the C compiler currently used
+in gmkpack. 
+
+GETTING STARTED
+===============
+
+To enable the hub facility, the following three variables should be defined in the configuration file of gmkpack :
+1) GMK_HUB_DIR : name of the hub general directory below the pack (relative name) 
+2) GMK_HUB_INSTALL : hub general installation directory. It must be a fixed place inside the pack in order to be 
+   propagated, therefore it is a relative name.
+3) GMK_HUB_BUILD : hub general build directory. It is defined as an absolute path because it may be a non-permanent
+   directory in production mode.
+Example :
+GMK_HUB_DIR      = hub
+GMK_HUB_INSTALL  = install
+GMK_HUB_BUILD    = \${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMKLOCAL}/build
+By default, gmkpack continues to work without a hub even if GMK_HUB_DIR is defined.
+To start a hub, gmkpack should be invoked with an additional argument : -K
+Example : the following command creates a main pack with a hub :
+gmkpack -a -r50 -bmain -n01 -lGNU930 -ox -K
+The following files and directories will appear below the pack :
+bin/
+hub/
+ics_
+ics_packages
+lib/
+src/
+sys/
+
+hub/ is the main directory of the hub ; inside it the following tree can be found :
+hub/local : local branch of the hub
+hub/local/install : directory of installations
+hub/local/src : directory of source packages
+hub/.gmkview : "view" of the hub (stacking branches)
+
+At that stage the hub is empty. Its directory hub/src should be filled with library packages.
+After it is filled the script ics_packages should be executed to compile the libraries.
+Alternatively, the script ics_* can be used : it will compile both the libraries in hub then the traditional
+source code inside src/
+
+INSTALLATION OF LIBRARIES IN THE HUB
+====================================
+
+Libraries should be grouped in projects (if they are tightly linked together).
+There should be one directory by project, but there can be several libraries inside a project.
+
+The following variables should be first defined in the configuration file :
+
+GMK_HUB_PROJECTS : list of projects in hub (sorted in order to enable dependencies).
+Example :
+Building projects ecSDK and Atlas : Atlas needs ecSDK, therefore ecSDK must be installed before Atlas :
+GMK_HUB_PROJECTS = ecSDK Atlas
+
+GMK_HUB_LIBRARIES_IN_${project} : list of libraries in the project ${project} (sorted in order to enable dependencies).
+Example : ecSDK is composed of 3 libraries : ecbuild, eckit and fckit ; eckit needs ecbuild and fckit needs ecbuild and eckit :
+GMK_HUB_LIBRARIES_IN_ecSDK = ecbuild eckit fckit
+GMK_HUB_LIBRARIES_IN_Atlas = atlas
+
+GMK_HUB_METHOD_FOR_${project} : method used to build the project ${project}. For now only "cmake" is supported.
+Example :
+GMK_HUB_METHOD_FOR_Atlas = cmake
+GMK_HUB_METHOD_FOR_ecSDK = cmake
+
+GMK_CMAKE_${library} : cmake options for building the library ${library}, excluding CMAKE_INSTALL_PREFIX which will be
+determined by gmkpack to be at the proper place in the hub.
+The following examples show how complex these variables can be when libraries are interconnected and if they should all use the same
+specific compilers and options :
+
+GMK_CMAKE_ecbuild = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME}
+
+GMK_CMAKE_eckit = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_BUILD_TYPE=NONE -DENABLE_ECKIT_CMD=OFF -DENABLE_ECKIT_SQL=OFF -DENABLE_BZIP2=OFF -DENABLE_SNAPPY=OFF -DENABLE_LAPACK=OFF -DENABLE_CURL=OFF -DENABLE_DOCS=OFF -DENABLE_SSL=OFF
+
+GMK_CMAKE_fckit = -Wno-deprecated -Wno-dev -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_FINAL=OFF
+
+GMK_CMAKE_atlas = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DATLAS_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -DCMAKE_MODULE_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK/share/ecbuild/cmake -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=OFF
+
+Note that the variable GMK_LAST_HUB_BRANCH is evaluated by gmkpack as the last branch of the hub seen from the source pack by the target pack (if there is no source pack it will be the local branch, naturally).
+
+TROUBLESHOOTING
+===============
+
+Porting software with cmake requires a bit of knowledge of cmake. Certain variables are important to know, here are some of them :
+CMAKE_PREFIX_PATH : 
+"Semicolon-separated list of directories specifying installation prefixes to be searched by the find_package(), find_program(), find_library(),
+find_file(), and find_path() commands. Each command will add appropriate subdirectories (like bin, lib, or include) as specified in its own
+documentation."
+This variable can be helfull to make eckit find the proper command 'mpiexec'
+CMAKE_BUILD_TYPE :
+"This statically specifies what build type (configuration) will be built in this build tree."
+Apparently, setting this variable to "NONE" disables all predefined compiler options used in ECMWF ecbuild system.
+CMAKE_MODULE_PATH :
+"Semicolon-separated list of directories specifying a search path for CMake modules to be loaded by the include() or find_package() commands
+before checking the default modules that come with CMake. By default it is empty, it is intended to be set by the project."
+This variable can be helfull to let cmake find ecbuild scripts.
+ENABLE_XXX :
+Options defined in ECMWF packages. Possible values are ON and OFF respectively to activate or deactivate the option named XXX.
+BUILD_SHARED_LIBS :
+Enables to create shared libraries (ON), static libraries (OFF) or both (BOTH).
+However, static libraries may not be created for certain projects (namely : eckit), or shared libraries would be mandatory for 
+certain projects (namely : Atlas needs shared object libraries of eckit, ectrans needs shared object libraries of fiat ), 
+or "BOTH" would make the tests fail (Atlas).
+A workaround could be to build shared libraries only (default value of BUILD_SHARED_LIBS) and let gmkpack build the static libraries afterwards.
+
+
+USING HEADERS OR MODULES FROM THE HUB
+=====================================
+gmkpack will automatically explore the hub to find headers or modules, and it will add the found directories in the include path.
+
+USING LIBRARIES FROM THE HUB
+============================
+Executables in gmkpack can be linked with libraries from the hub, specified in short format with additional variables LD_USR_XXX.
+Example : Fortran executables using Atlas have to be linked with the fortran Atlas library, named libatlas_f.so ; To achieve the links
+one has to add to the linking rules a new library variable which can be named "LD_USR_ATLAS_F" ; in the configuration file this variable
+should be set as follows :
+LD_USR_ATLAS_F = atlas_f
+gmkpack will search that library in priority in the hub (it doesn't matter whether it is a shared object or a static library).
+Notice : if the library is not found, then it is supposed to be in the environment library path (LD_LIBRARY_PATH).
+
+HOW TO CREATE A PACK WITH ONLY A HUB
+====================================
+As explained above, gmkpack should be invoked with the option -K to have a hub created.
+Reversely it is possible du disable the creation of the usual source code tree when gmkpack is invoked with the new option -k.
+Finally we can imagine a stack of 3 packs :
+- a "root" pack containing only a hub, in order to install permanent libraries : % gmkpack -a -K -k -b root -n01 etc...
+- a "main" pack containing the traditional source code tree, on top of the "root" pack above : % gmkpack -b root -v01 -u main -n01 etc...
+- a "user" pack on top of the "main" pack above : % gmkpack -b main -v01 -u dev etc...
+The hub will be visible from the "main" and "user" packs thanks to links, so that their libraries and include files can be used ; but
+there will be no "local" hub in these packs. However, at any time a user can create a pack with a local hub : % gmkpack -K etc...
+or even a pack with only a local hub : % gmkpack -K -k etc...
+
+LIMITATIONS :
+===========
+
+- Should a developper need to recompile a file in library from the hub, then the whole library should be recompiled : it is not possible, 
+like for the traditional source code, to recompile only a part of a library from the hub.
+- There is no dependency analysis between the libraries installed in the hub and the traditional source code. 
+Consequently, if the hub content is modified it is safer to recompile the traditional source code below. Something could be done to alleviate
+this issue, but it is complicated.
+- There is no dependency analysis between libraries inside the hub, because the libraries in hub can have different origins (this is the
+spirit of the hub) : we can have there libraries as different as jpeg, netcfd, oops, lapack, ...
+
+
+

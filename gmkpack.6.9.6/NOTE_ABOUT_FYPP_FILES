@@ -1,0 +1,39 @@
+.fypp files are files to be preprocessed to produce fortran F90 files.
+
+gmkpack is able to handle .fypp files and transform them into .F90 files.
+It doesn't matter if these .fypp files are modules or subroutines with auto-generated interfaces
+to be produced : the files wild be pre-processed first, the the interfaces will be generated from
+the pre-processed files, if relevent.
+
+.fypp files should appear in the source code, but the pre-processed files .F90 will be stored in a hidden
+directory named by default .fypp at the top directory of the source code , with the originating directory tree :
+aladin/
+arpifs/
+.
+.
+.
+.fypp/arpifs/
+
+Unlike the traditional fortran source code below arpifs/, aladin/, etc ... the resulting files (object, listing,
+module, optimization report) will be stored inside the directory .fypp, beside the corresponding .F90 file :
+
+arpifs/module/some_data.fypp
+.fypp/arpifs/module/some_data.F90
+.fypp/arpifs/module/some_data.o
+.fypp/arpifs/module/some_data.mod
+
+In other words, the directory .fypp is a partial build directory.
+
+The .fypp files are transformed by the python preporcessor fypp.
+If you don't have fypp on your machine you can istall it with pip.
+You will need also pyyaml because arpifs .fypp files use it.
+
+To make gmkfile translate the .fypp files of the source code the following three variables should be added in the
+configuration file :
+GMK_FYPP : location of fypp preprocessor (unless fypp is in the PATH)
+GMK_FYPP_FLAGS : flags to use when fypp is invoked (arpifs needs "-m os -m yaml"
+GMKFYPPF90 : hidden directory where to build .fypp files
+Example :
+GMK_FYPP = /Users/mto/Library/Python/3.7/bin/fypp
+GMK_FYPP_FLAGS = -m os -m yaml
+GMKFYPPF90 = .fypp

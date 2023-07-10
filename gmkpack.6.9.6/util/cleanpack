@@ -1,0 +1,253 @@
+#!/bin/bash
+########################################################################
+#
+#    Script cleanpack
+#    ----------------
+#
+#    Purpose : In the framework of a pack : to recursively remove all the files  
+#    -------   which are the result of a compilation or a similar action,
+#              taht is : the files with any of the following extension :
+#
+#    Usage :  cleanpack [-f]
+#    -----           
+#
+#    Environment variables
+#    ---------------------
+#
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+
+export GMKTMP=${GMKTMP:=/tmp}
+
+DIR=$PWD
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+errflg=0
+FLAG=
+while getopts f option
+do
+   case $option in
+   f) FLAG=force;;
+   \?) errflg=1;;
+   esac
+done
+if [ $errflg -ne 0 ] ; then
+ echo "usage: cleanpack [-f] " >&2
+ exit 2
+fi
+# Find whether we are inside a pack or not and position to the proper directory :
+IERR=0
+# Test the presence of directory .gmkfile :
+if [ -d .gmkfile ] ; then
+  export TARGET_PACK=$PWD
+  GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+  GMKFYPPF90=$($GMKROOT/util/readpack GMKFYPPF90 | cut -d '"' -f2)
+  GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+  GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+  GMKVIEWFILE=$($GMKROOT/util/readpack GMK_VIEW | cut -d '"' -f2)
+  GMKSYSDIR=$($GMKROOT/util/readpack GMKSYS | cut -d '"' -f2)
+  LIBPATH=$($GMKROOT/util/readpack GMKLIB | cut -d '"' -f2)
+  GMKBINDIR=$($GMKROOT/util/readpack GMKBIN | cut -d '"' -f2)
+  LIST_EXTENSION=$($GMKROOT/util/readpack LIST_EXTENSION | cut -d '"' -f2)
+  LIST_EXTENSION=$($GMKROOT/util/readpack LIST_EXTENSION | cut -d '"' -f2)
+  GMK_HUB_DIR=$($GMKROOT/util/readpack GMK_HUB_DIR | cut -d '"' -f2)
+  GMK_HUB_BUILD=$($GMKROOT/util/readpack GMK_HUB_BUILD | cut -d '"' -f2)
+  GMK_HUB_INSTALL=$($GMKROOT/util/readpack GMK_HUB_INSTALL | cut -d '"' -f2)
+else
+# another chance for oldest packs:
+  if [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+    GMKINTFB=.intfb
+    GMKSRC=src
+    GMKLOCAL="local"
+    GMKVIEWFILE=.gmkview
+    GMKSYSDIR=sys
+    LIBPATH=lib
+    GMKBINDIR=bin
+    LIST_EXTENSION=
+  else
+    IERR=1
+  fi
+fi
+if [ $IERR -eq 1 ] ; then
+# Find upwards whether we are inside a pack or not : test the presence of directory .gmak :
+  while [ ! -d .gmak ] && [ "$PWD" != "/" ] ; do
+    cd ..
+  done
+  if [ "$PWD" != "/" ] ; then
+#   If there is a .gmak directory, then the parent directory must be the pack
+#   itself : test the presence of .gmkfile:
+    SRC_DIR=$PWD
+    cd ..
+    if [ "$PWD" != "$SRC_DIR" ] ; then
+      if [ -d .gmkfile ] ; then
+        export TARGET_PACK=$PWD
+        GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+        GMKFYPPF90=$($GMKROOT/util/readpack GMKFYPPF90 | cut -d '"' -f2)
+        GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+        GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+        GMKVIEWFILE=$($GMKROOT/util/readpack GMK_VIEW | cut -d '"' -f2)
+        GMKSYSDIR=$($GMKROOT/util/readpack GMKSYS | cut -d '"' -f2)
+        LIBPATH=$($GMKROOT/util/readpack GMKLIB | cut -d '"' -f2)
+        GMKBINDIR=$($GMKROOT/util/readpack GMKBIN | cut -d '"' -f2)
+        LIST_EXTENSION=$($GMKROOT/util/readpack LIST_EXTENSION | cut -d '"' -f2)
+        GMK_HUB_DIR=$($GMKROOT/util/readpack GMK_HUB_DIR | cut -d '"' -f2)
+        GMK_HUB_BUILD=$($GMKROOT/util/readpack GMK_HUB_BUILD | cut -d '"' -f2)
+        GMK_HUB_INSTALL=$($GMKROOT/util/readpack GMK_HUB_INSTALL | cut -d '"' -f2)
+        IERR=0
+      elif [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+#       another chance for oldest packs:
+        GMKINTFB=.intfb
+        GMKSRC=src
+        GMKLOCAL="local"
+        GMKVIEWFILE=.gmkview
+        GMKSYSDIR=sys
+        LIBPATH=lib
+        GMKBINDIR=bin
+        LIST_EXTENSION=
+        IERR=0
+      fi
+    fi
+  fi
+# Position to the local source directory or the local directory :
+  cd $DIR
+  if [ -d .gmak ] && [ $IERR -eq 0 ] ; then
+    cd $GMKLOCAL
+  fi
+else
+# Position to the local source directory if it exists, otherwise the (supposed) starting directory of the pack :
+  if [ -d $DIR/$GMKSRC/$GMKLOCAL ] ; then 
+    cd $DIR/$GMKSRC/$GMKLOCAL
+  else
+    cd $DIR
+  fi
+fi
+if [ $IERR -eq 1 ] ; then
+  echo "The working directory looks neither like the main directory of a pack nor the inside of a pack. No clean."
+  exit 1
+fi
+
+# Confirm:
+if [ ! "$FLAG" ] ; then
+  echo -n "cleanpack $PWD ? (y/n) "
+  read answer
+  if [ "$answer" != "y" ] ; then
+    echo No clean.
+    exit 0
+  fi
+fi
+
+# clean src/local :
+# Beware not to clean the hub and parent hub by mistake if src/local doesn't exist:
+# PWD should be src/local (if it exists, otherwise the pack directory) and DIR is the directory we started from
+if [ "$(basename $PWD)" = "$GMKLOCAL" ] && [ "$(basename $(dirname $PWD))" = "$GMKSRC" ] ; then
+  if [ ! "$GMK_TIMEFILE_EXTENSION" ] ; then
+    GMK_TIMEFILE_EXTENSION="time"
+  fi
+# Remove all kind of object files, including libraries (external softwares could have some), listing, timing files :
+# Remove also preprocessed files produced by NEC compiler and Intel optimization reports :
+  if [ "$LIST_EXTENSION" ] ; then
+    echo "  Remove object files and listings ..."
+    find . -type f \( -name "*.o" -o -name "*.ok" -o -name "*.mod"  -o -name "*.smod" -o -name "*.a" -o -name "*\.${LIST_EXTENSION}" \
+      -o -name "*.${GMK_TIMEFILE_EXTENSION}" -o -name "*.optrpt" -o -name "i\.*.*" \) -follow -depth -print 2>/dev/null | xargs \rm -f 2>/dev/null
+  else
+    echo "  Remove object files ..."
+    find . -type f \( -name "*.o" -o -name "*.ok" -o -name "*.mod"  -o -name "*.smod" -o -name "*.a" -o -name "*.${GMK_TIMEFILE_EXTENSION}" \
+    -o -name "*.optrpt" -o -name "i\.*.*" \) -follow -depth -print 2>/dev/null | xargs \rm -f 2>/dev/null
+  fi
+#
+# Remove odb-related source files :
+  echo "  Remove odb intermediate headers and C files ..."
+  for file in $(find . -name "*.ddl" -follow -depth -print 2>/dev/null) ; do
+    dir=$(dirname $file)
+    BASE=$(basename $file .ddl)
+    \rm -f $dir/${BASE}.c $dir/${BASE}.h $dir/${BASE}.ddl_ $dir/${BASE}_*.c
+  done
+# Remove interfaces :
+  echo "  Remove auto-generated interfaces ..."
+  if [ -d $GMKINTFB ] ; then
+    \rm -rf $GMKINTFB
+  else
+    echo "    Warning ! No directory $GMKINTFB has been found below the curent directory."
+    echo "    Cleaning might have been uncomplete."
+  fi
+# Remove internal include directory :
+  echo "  Remove internal include directory ..."
+  if [ -d .include ] ; then
+    \rm -rf .include
+  else
+    echo "    Warning ! No directory .include has been found below the curent directory."
+    echo "    Cleaning might have been uncomplete."
+  fi
+# Remove F90 files generated from .fypp files :
+  echo "  Remove auto-generated interfaces ..."
+  if [ "$GMKFYPPF90" ] ; then
+    if [ -d $GMKFYPPF90 ] ; then
+      \rm -rf $GMKFYPPF90
+    else
+      echo "    Warning ! No directory $GMKFYPPF90 has been found below the curent directory."
+      echo "    Cleaning might have been uncomplete."
+    fi
+  else
+#   In case the directory name was not setup
+    GMKFYPPF90=.fypp
+    if [ -d $GMKFYPPF90 ] ; then
+      \rm -rf $GMKFYPPF90
+    fi
+  fi
+fi
+
+# Position myself at the main directory of this pack:
+while [ ! -f $GMKVIEWFILE ] ; do
+  cd ..
+done
+
+# Remove precompilers if 'main' pack (ie only 1 branch exists for src/) :
+if [ $(cat $GMKVIEWFILE | wc -l) -eq 1 ] ; then
+  echo "  Remove precompilers ..."
+  \rm -rf ${GMKSYSDIR}/*
+fi
+# Remove local libraries if at least 1 branch exists for src/ :
+if [ $(cat $GMKVIEWFILE | wc -l) -gt 0 ] ; then
+  echo "  Remove libraries ..."
+  for file in $(\ls $LIBPATH) ; do
+# keep links to background libraries
+    if [ ! -h $LIBPATH/$file ] ; then
+      \rm $LIBPATH/$file
+    fi
+  done
+fi
+# Remove binaries if at least 1 branch exists for src/ :
+if [ $(cat $GMKVIEWFILE | wc -l) -gt 0 ] ; then
+  echo "  Remove binaries ..."
+  \rm -rf ${GMKBINDIR}/*  
+fi
+ 
+if [ -d $DIR/$GMKSRC/$GMKLOCAL ] ; then 
+  $GMKROOT/aux/drhook_all.pl --clean
+fi
+
+# And now the hub : remove local build and install directories :
+if [ "$GMK_HUB_DIR" ] ; then
+  if [ -d $GMK_HUB_DIR/$GMKLOCAL ] ; then
+    echo "  Remove Hub build and install directories ..."
+    \rm -rf $GMK_HUB_DIR/$GMKLOCAL/$GMK_HUB_INSTALL
+#   remember that the build directory can be anywhere, therefore it has to be evaluated
+    \rm -rf $(eval echo $(eval echo $GMK_HUB_BUILD))
+  fi
+fi
+
+# That's all !
+echo "cleanpack finished."

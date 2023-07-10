@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>History</TITLE>
+<META NAME="description" CONTENT="History">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node64.html">
+<LINK REL="previous" HREF="node62.html">
+<LINK REL="up" HREF="tutorial.html">
+<LINK REL="next" HREF="node64.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html1064"
+  HREF="node64.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html1058"
+  HREF="tutorial.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html1052"
+  HREF="node62.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html1060"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html1062"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html1065"
+  HREF="node64.html">Index</A>
+<B> Up:</B> <A NAME="tex2html1059"
+  HREF="tutorial.html">GmkPack A portable compilation</A>
+<B> Previous:</B> <A NAME="tex2html1053"
+  HREF="node62.html">Frequently asked questions</A>
+ &nbsp; <B>  <A NAME="tex2html1061"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html1063"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION001000000000000000000">
+History</A>
+</H1><FONT SIZE="-2">
+<I>GmkPack </I>includes developments made by GCO (dependencies procedure) and Eric Sevault (parallelisation management tools)
+ </FONT>
+<P>
+<FONT SIZE="-2"> The first version of this precedure was named <code>mkpack</code> and was based on the use of <code>makefiles</code>. More precisely it was a
+ wrapper of a procedure named <code>mkpack</code> too which had been developped by Eric Sevault at the time he was working in the GCO
+ team. Actually this tool <code>mkpack</code> appeared to be rather oriented to users like GCO was, and it was not so user-friendly for 
+developers who need to tune and debug source codes.
+</FONT>
+<P>
+<FONT SIZE="-2">However it solved the problem of the dependencies research between source files. But unfortunately it was not properly adapted to
+ handle the so-called ''duplicated'' subroutines of the model <SMALL>ALADIN</SMALL>. Furthermore the management of the dependencies was making the compilation slower, while the code was getting more and more cascades of modules.
+ </FONT>
+<P>
+<FONT SIZE="-2">To solve these problems Stephane Martinez (new GCO member) wrote a new procedure which has been named <code>gmak</code>. 
+This procedure was no more working with <code>Makefiles</code> : all was written in Perl scripts. The technical problem were solved, the compilation of dependencies was fast, but still this new procedure appeared to be mostly dedicated to GCO.
+<BR>
+The present procedure started from the previous one
+</FONT>
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html1064"
+  HREF="node64.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html1058"
+  HREF="tutorial.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html1052"
+  HREF="node62.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html1060"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html1062"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html1065"
+  HREF="node64.html">Index</A>
+<B> Up:</B> <A NAME="tex2html1059"
+  HREF="tutorial.html">GmkPack A portable compilation</A>
+<B> Previous:</B> <A NAME="tex2html1053"
+  HREF="node62.html">Frequently asked questions</A>
+ &nbsp; <B>  <A NAME="tex2html1061"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html1063"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

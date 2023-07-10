@@ -1,0 +1,550 @@
+
+# ARCHITECTURE FILE FOR LINUX PC (64 bits) WITH PORTLAND GROUP COMPILER
+# =====================================================================
+
+# Libraries environment profile
+# -----------------------------
+
+GMK_LOCAL_PROFILE =
+
+# Fortran (cross-)compiler
+# ------------------------
+
+FRTNAME = pgf90
+
+# C (cross-)compiler
+# ------------------
+
+VCCNAME = pgcc
+
+# C++ (cross-)compiler
+# ------------------
+
+CXXNAME = pgc++
+
+# CUDA (cross-)compiler
+# ---------------------
+
+CCUNAME = nvcc
+
+# Native C compiler
+# -----------------
+
+CCNATIVE = pgcc
+
+# Native C linker flags
+# ---------------------
+
+LNK_MPCCNATIVE =
+
+# fypp preprocessor
+# -----------------
+
+GMK_FYPP =
+
+# fypp preprocessor background flags
+# ----------------------------------
+
+GMK_FYPP_FLAGS = -m os -m yaml
+
+# Fortran compiler default version (stamp)
+# ----------------------------------------
+
+LIBFRT = echo PGI$(pgf90 -V | grep pgf90 | cut -d ' ' -f2 | sed 's/\.//g' | sed 's/-//g')
+
+# Basic compilation flags
+# -----------------------
+
+FRTFLAGS = -c -byteswapio -mp -Mextend -fpic -Minfo -gopt -Mlarge_arrays
+VCCFLAGS = -c -mp -fpic -Minfo -gopt -Mlarge_arrays
+CCUFLAGS = -c -D__CUDACC__ -DNVCC
+# Option -C in order to create files without compiling inside odb98
+# In order to have any effect from the following -1 or -A options,
+# -O3 optimization level must be activated.
+ODBFLAGS = -C -O3
+
+# Fortran double precision flags
+# ------------------------------
+DBL_FRTFLAGS = -r8 -i4
+
+# Fortran Cpp + extensions flags
+# ------------------------------
+F77_CPPFLAG =
+F90_CPPFLAG =
+F77_NOCPPFLAG =
+F90_NOCPPFLAG =
+
+# Fortran format flag
+# --------------------
+FREE_FRTFLAG =
+FIXED_FRTFLAG =
+
+# Optimized compilation flag
+# --------------------------
+
+OPT_FRTFLAGS = -g -O2
+OPT_VCCFLAGS = -g -O2
+OPT_CCUFLAGS =
+
+# Debugging compilation flag
+# --------------------------
+
+DBG_FRTFLAGS = -g -O0
+
+# Bound checking compilation flag
+# -------------------------------
+
+BCD_FRTFLAGS = -Mbounds
+
+# NaN pre-initialisation flag
+# ---------------------------
+
+NAN_FRTFLAGS = 
+
+# Listing compilation flag
+# ------------------------
+
+LIST_FRTFLAGS = -Mlist -Minfo=loop,inline
+LIST_VCCFLAGS =
+
+# Filename extension for listing
+# ------------------------------
+
+LIST_EXTENSION = lst
+
+# Additive compilation flags
+# --------------------------
+
+MACROS_FRT = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DADDRESS64
+MACROS_CC = -DLINUX -DLITTLE_ENDIAN -DLITTLE
+MACROS_CXX = -std=c++11 
+MACROS_CCU = 
+MACROS_BL95 = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DIS_MAIN_PROG -DSTATIC_LINKING
+MACROS_ODB98 = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DXPRIVATE=PRIVATE -UINTERCEPT_ALLOC -UUSE_ALLOCA_H -DWITHOUT_OML
+
+GMK_FCFLAGS_SATRAD = -D_RTTOV_DO_DISTRIBCOEF -D_RTTOV_HDF -DWITHOUT_EMOSLIB 
+
+GMK_FCFLAGS_MPA = -r8 -i4 
+GMK_FCFLAGS_PHYEX = -r8 -i4 
+GMK_FCFLAGS_MSE = -r8 -i4
+GMK_FCFLAGS_SURFEX = -r8 -i4 -Mbackslash -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA -DSFX_LFI -DARO -DOL -DASC -DTXT -DFA -DLFI
+
+GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS
+GMK_FCFLAGS_ALGOR = -DBLAS
+GMK_CFLAGS_IFSAUX = -DPOINTER_64
+GMK_CFLAGS_ODB = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H -DCANARI -DHAS_LAPACK
+GMK_CFLAGS_BLACKLIST = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H
+
+GMK_FCFLAGS_TRANS = -DWITH_FFTW
+GMK_FCFLAGS_ETRANS = -DWITH_FFTW
+
+# Fortran (cross-)linker
+# ----------------------
+
+LNK_STD = pgf90
+
+# Message Passing Fortran (cross-)linker
+# --------------------------------------
+
+LNK_MPI = pgf90
+
+# C (cross-)linker
+# -----------------
+
+LNK_CC = pgcc -lrt
+
+# CXX (cross-)linker (for mixed langages c++ and fortran)
+# -------------------------------------------------------
+
+LNK_CXX = pgc++
+
+# Fortran linking flags
+# ----------------------
+
+LNK_FLAGS = -mp -lrt
+
+# Additional linking flags to LNK_FLAGS for c++ executable
+# --------------------------------------------------------
+
+LNK_CXX_FLAGS = 
+
+# flags for executable targets
+# ----------------------------
+
+LNK_EXEC =
+
+
+# flags for shared object targets
+# -------------------------------
+
+LNK_SOLIB = -shared
+
+# Fortran Flag for start/end group libraries 
+# ------------------------------------------
+
+LNK_STARTG = -Wl,--start-group
+LNK_ENDG   = -Wl,--end-group
+
+# Flag for linking with whole static libraries
+# ---------------------------------  ---------
+
+LNK_WHOLE_ARCHIVE = -Wl,-whole-archive
+LNK_NO_WHOLE_ARCHIVE = -Wl,-no-whole-archive
+
+# Flags for static/dynamic linking
+# --------------------------------
+
+LNK_STATIC = -Wl,-Bstatic
+LNK_DYNAMIC = -Wl,-Bdynamic
+
+# Load map flag
+# -------------
+
+LNK_MAP = -Wl,-M
+
+# Hub
+# ---
+# Hub general directory
+GMK_HUB_DIR      = hub
+# Hub general installation directory (must be at a fixed place inside the pack in order to be propagated)
+GMK_HUB_INSTALL  = install
+# Hub general build directory (absolute path because it may be a non-permanent directory in production mode) :
+GMK_HUB_BUILD    = \${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMKLOCAL}/build
+
+# List of projects in hub (ordered sort to enable dependencies)
+GMK_HUB_PROJECTS = ecSDK OOPS Atlas Fiat Ectrans
+
+GMK_HUB_LIBRARIES_IN_ecSDK = ecbuild eckit fckit
+GMK_HUB_METHOD_FOR_ecSDK = cmake
+
+GMK_HUB_LIBRARIES_IN_OOPS = oops_src
+GMK_HUB_METHOD_FOR_OOPS = cmake
+
+GMK_HUB_LIBRARIES_IN_Atlas = atlas
+GMK_HUB_METHOD_FOR_Atlas = cmake
+
+GMK_HUB_LIBRARIES_IN_Fiat = fiat
+GMK_HUB_METHOD_FOR_Fiat = cmake
+
+GMK_HUB_LIBRARIES_IN_Ectrans = ectrans
+GMK_HUB_METHOD_FOR_Ectrans = cmake
+
+GMK_CMAKE_ecbuild = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME}
+
+GMK_CMAKE_eckit = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_BUILD_TYPE=NONE -DENABLE_ECKIT_CMD=OFF -DENABLE_ECKIT_SQL=OFF -DENABLE_BZIP2=OFF -DENABLE_SNAPPY=OFF -DENABLE_LAPACK=OFF -DENABLE_CURL=OFF -DENABLE_DOCS=OFF -DENABLE_SSL=OFF -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF
+
+GMK_CMAKE_fckit = -Wno-deprecated -Wno-dev -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_FINAL=OFF -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF
+
+GMK_CMAKE_oops_src = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DECKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DFCKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DEIGEN3_INCLUDE_DIR=
+
+GMK_CMAKE_atlas = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DATLAS_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF
+
+GMK_CMAKE_fiat = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC} -lm\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} -lm ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DBUILD_SHARED_LIBS=BOTH -DENABLE_TESTS=ON -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=OFF
+
+GMK_CMAKE_ectrans = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DENABLE_TRANSI=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=ON -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=OFF -DFFTW_ROOT=
+
+# User libraries (absolute filename or short name) :
+# ------------------------------------------------
+
+# "Read Grib from BDAP":
+LD_USR01 = rgb
+# "Bufr decoding":
+LD_USR02 = bufr
+# "Gribex (or emos)":
+LD_USR04 = gribex
+# "ecmwf field database":
+LD_USR05 = fdb
+# "ecmwf wave model":
+LD_USR06 = wam
+# "C code generated by blacklist":
+LD_USR07 =
+# "Nag":
+LD_USR08 = nag
+# "OASIS":
+LD_USR09 = oasis
+# "Grib_api":
+LD_USR_GRIB_API_F90 = grib_api_f90
+LD_USR_GRIB_API = grib_api
+# "JPEG library":
+LD_USR_JPEG = jpeg2000
+# "EECFI" for aeolus:
+LD_USR_EECFI = eecfi
+# "Netcdf :"
+LD_USR_NETCDF_F = netcdff
+LD_USR_NETCDF = netcdf
+# "HDF5" :
+LD_USR_HDF5_HLFORTRAN = hdf5hl_fortran
+LD_USR_HDF5_FORTRAN = hdf5_fortran
+LD_USR_HDF5_HL = hdf5_hl
+LD_USR_HDF5 = hdf5
+# "Meteo-France dummies library (IFS only):"
+LD_USR_MF_DUMMY = mf_dummy
+# "Magics :"
+LD_USR_MAGPLUS = MagPlus
+LD_USR_MAGICS = MagPlusSingle
+# "xml :"
+LD_USR_XML = xml
+# "Boost" :
+LD_USR_BOOST_THREAD = boost_thread
+LD_USR_BOOST_SYSTEM = boost_system
+LD_USR_BOOST_UNIT_TEST_FRAMEWORK = boost_unit_test_framework
+LD_USR_BOOST_MPI = boost_mpi
+LD_USR_BOOST_SERIALIZATION = boost_serialization
+# "EC kits" :
+LD_USR_FCKIT = fckit
+LD_USR_ECKIT_MPI = eckit_mpi
+LD_USR_ECKIT = eckit
+# "OOPS" :
+LD_USR_OOPS = oops
+# "OOPS-neural" :
+LD_USR_OOPS_NEURAL = neural
+# "Atlas" :
+LD_USR_ATLAS_F = atlas_f
+# parkind :
+LD_USR_PARKIND = parkind_
+# fiat :
+LD_USR_FIAT = fiat
+# mpi_serial :
+LD_USR_MPI_SERIAL = mpi_serial
+# ectrans :
+LD_USR_ECTRANS = trans_
+
+# Language libraries (absolute filename or short name) :
+# ----------------------------------------------------
+
+# Lapack:
+LD_LANG01 = lapack
+# Blas:
+LD_LANG02 = blas
+
+# System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
+# ------------------------------------------------------------------------------
+
+LD_SYS01 = ibm
+LD_SYS02 =
+LD_SYS03 =
+LD_SYS04 =
+LD_SYS05 =
+LD_SYS06 =
+LD_SYS07 =
+
+# MPI libraries (absolute filename or short name) :
+# -----------------------------------------------
+
+LD_MPI01 = mpi
+LD_MPI02 =
+LD_MPI03 =
+
+LD_MPI_DUMMY = mpi_dummy
+
+# Precompiler libraries
+# ---------------------
+
+LD_LIBC  =
+LD_LIBM  = -lm
+LD_LIBVFL =
+
+# External include pathes (path1:path2:...)
+# ------------------------------------------
+
+INCLUDEPATH =
+
+# (Cross-) nm command & options for BSD format
+# --------------------------------------------
+
+NMOPTS = nm
+
+# Native awk program
+# ------------------
+
+AWK = awk
+
+# (Cross-)archive
+# ---------------
+
+AR = ar
+
+# Native archive
+# --------------
+
+ARNATIVE = ar
+
+# Native preprocessor
+# -------------------
+
+CPP = cpp
+
+# cmake executable
+# ----------------
+
+GMK_CMAKE =
+
+# Native lex program
+# ------------------
+
+LEX = flex -l
+
+# Includes & modules
+# ------------------
+
+MODINC = -I
+MODEXT = mod
+
+# gget to recover volatile libraries
+# ----------------------------------
+
+GGET =
+
+# External script used to generate and pre-process th blacklist file
+# ------------------------------------------------------------------
+
+GMK_BL_GENERATOR =
+
+# Epilog of script
+# ----------------
+
+EPILOG = echo Finished on \$(date)
+
+# Prefix of user's $(SHELL)rc file
+# --------------------------------
+
+GMKUSERFILE = 
+
+# Prefix for root packs
+# ---------------------
+
+PACK_PREFIX =
+
+# Suffix for root packs
+# ---------------------
+
+PACK_EXT =
+
+# Binaries directory name
+# -----------------------
+
+GMKBIN = bin
+
+# Libraries directory name
+# ------------------------
+
+GMKLIB = lib
+
+# All-sources directory name
+# --------------------------
+
+GMKSRC = src
+
+# Interfaces directory name for each branch
+# -----------------------------------------
+
+GMKINTFB = .intfb
+
+# directory of .F90 files generated from .fypp files
+# --------------------------------------------------
+
+GMKFYPPF90 = .fypp
+
+# MAIN (ie : bottom background) source directory name
+# ---------------------------------------------------
+
+GMKMAIN = main
+
+# INTERMEDIATE (ie : intermediate background) source directory name
+# -----------------------------------------------------------------
+
+GMKINTER = inter
+
+# LOCAL (ie : top) source directory name
+# --------------------------------------
+
+GMKLOCAL = local
+
+# Unsatisfied external references main directory
+# ----------------------------------------------
+
+GMKUNSX = unsxref
+
+# Quiet unsatisfied external references directory
+# -----------------------------------------------
+
+GMKUNSX_QUIET = quiet
+
+# Verboose unsatisfied external references directory
+# --------------------------------------------------
+
+GMKUNSX_VERBOOSE = verbose
+
+# system-program main directory
+# -----------------------------
+
+GMKSYS = sys
+
+# Genesis file name
+# -----------------
+
+GMK_GENESIS = .genesis
+
+# View file name
+# --------------
+
+GMK_VIEW = .gmkview
+
+# Logfile name
+# ------------
+
+GMK_LOG = .logfile
+
+# Scriptfile prefix
+# -----------------
+
+GMK_ICS = ics_
+
+# Submission cards : number of nodes
+# ----------------------------------
+
+GMK_NQS_NODES = 
+
+# Submission cards : large memory
+# -------------------------------
+
+GMK_NQS_LARGE = 
+
+# Submission cards : time limit
+# -----------------------------
+
+GMK_NQS_TIME  = 
+
+# Submission cards : output file KEY
+# ----------------------------------
+
+GMK_NQS_OUT_P = 
+
+# Submission cards : error file KEY
+# ---------------------------------
+
+GMK_NQS_ERR_P = 
+
+# Submission cards : output/error file stamp
+# ------------------------------------------
+
+GMK_NQS_JOBID = 
+
+# Submission cards : other directives
+# -----------------------------------
+ 
+GMK_NQS_OTHER = 
+GMK_NQS_OTHER = 
+GMK_NQS_OTHER = 
+GMK_NQS_OTHER = 
+GMK_NQS_OTHER = 
+GMK_NQS_OTHER = 
+GMK_NQS_OTHER = 
+
+# Compiler feature extension for aeolus software
+# ----------------------------------------------
+GMK_AEOLUS_F90 = generic
+
+# LatLon handling extension for aeolus software
+# ---------------------------------------------
+GMK_AEOLUS_LATLON_HANDLING = simple

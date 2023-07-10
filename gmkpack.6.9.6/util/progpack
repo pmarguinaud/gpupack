@@ -1,0 +1,114 @@
+#!/bin/bash
+########################################################################
+#
+#    Script progpack
+#    -------------
+#
+#    Purpose : In the framework of a pack : to list the possible 
+#    -------   program names to generate a compilation script
+#
+#    Usage :  progpack
+#    -----
+#
+#
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+export GMKTMP=${GMKTMP:=/tmp}
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+
+# All executables, from different origins :
+# Priority directory : executables in $HOME directory
+/bin/ls -1d $HOME/.gmkpack/link/* 2>/dev/null | awk -F "/" '{print $NF}' | sort -u > $GMKTMP/exec_user
+if [ -s $GMKTMP/exec_user ] ; then 
+  echo "Executables from $HOME/.gmkpack/link :"
+  mkdir -p $GMKTMP/progpack/list
+  cd $GMKTMP/progpack/list
+  touch $(cat $GMKTMP/exec_user)
+  \ls
+  cd $GMKTMP
+  /bin/rm -rf $GMKTMP/progpack/list
+  echo
+fi
+# Secondary directory : executables not in $HOME directory but in $GMK_SUPPORT directory
+/bin/ls -1d $GMK_SUPPORT/link/* 2>/dev/null | awk -F "/" '{print $NF}' | sort -u > $GMKTMP/exec_group
+if [ -s $GMKTMP/exec_group ] ; then
+  if [ -s $GMKTMP/exec_user ] ; then 
+    if [ $(comm -23 $GMKTMP/exec_group $GMKTMP/exec_user | wc -l) -ne 0 ] ; then
+      echo "Executables from $GMK_SUPPORT/link :"
+      mkdir -p $GMKTMP/progpack/list
+      cd $GMKTMP/progpack/list
+      touch $(echo $(comm -23 $GMKTMP/exec_group $GMKTMP/exec_user))
+      \ls
+      cd $GMKTMP
+      /bin/rm -rf $GMKTMP/progpack/list
+      echo
+    fi
+  else
+    echo "Executables from $GMK_SUPPORT/link :"
+    mkdir -p $GMKTMP/progpack/list
+    cd $GMKTMP/progpack/list
+    touch $(cat $GMKTMP/exec_group)
+    \ls
+    cd $GMKTMP
+    /bin/rm -rf $GMKTMP/progpack/list
+    echo
+  fi
+fi
+# Last directory : executables only in $GMKROOT directory 
+/bin/ls -1d $GMKROOT/link/* 2>/dev/null | awk -F "/" '{print $NF}' | sort -u > $GMKTMP/exec_admin
+if [ -s $GMKTMP/exec_admin ] ; then
+  cat $GMKTMP/exec_user $GMKTMP/exec_group 2>/dev/null | sort -u > $GMKTMP/exec_not_admin
+  if [ -s $GMKTMP/exec_not_admin ] ; then
+    if [ $(comm -23 $GMKTMP/exec_admin $GMKTMP/exec_not_admin | wc -l) -ne 0 ] ; then
+      echo "Executables from $GMKROOT/link :"
+      mkdir -p $GMKTMP/progpack/list
+      cd $GMKTMP/progpack/list
+      touch $(echo $(comm -23 $GMKTMP/exec_admin $GMKTMP/exec_not_admin))
+      \ls
+      cd $GMKTMP
+      /bin/rm -rf $GMKTMP/progpack/list
+      echo
+    fi
+  else
+    echo "Executables from $GMKROOT/link :"
+    mkdir -p $GMKTMP/progpack/list
+    cd $GMKTMP/progpack/list
+    touch $(cat $GMKTMP/exec_admin)
+    \ls
+    cd $GMKTMP
+    /bin/rm -rf $GMKTMP/progpack/list
+    echo
+  fi
+fi
+/bin/rm -rf $GMKTMP/exec_user $GMKTMP/exec_group $GMKTMP/exec_admin $GMKTMP/exec_not_admin
+echo Predefined lists :
+II=0
+for file in $(find $GMK_SUPPORT/list $HOME/.gmkpack/support/list -name "*" -type f -print 2>/dev/null) ; do
+  if [ -s $file ] ; then
+    II=$((II+1))
+    list=$(basename $file)
+    echo "list '$list' :"
+    mkdir -p $GMKTMP/progpack/$list
+    cd $GMKTMP/progpack/$list
+    touch $(cat $file)
+    \ls
+    cd  $GMKTMP
+    \rm -rf progpack
+    echo
+  fi
+done
+if [ $II -eq 0 ] ; then
+ echo None.
+fi

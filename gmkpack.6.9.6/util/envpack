@@ -1,0 +1,117 @@
+#!/bin/bash
+########################################################################
+#
+#    Script envpack
+#    --------------
+#
+#    Purpose : to get current environment variables for gmkpack
+#    -------   
+#
+#    Usage :  envpack
+#    -----           
+#
+########################################################################
+#
+export LC_ALL=C
+
+if [ "$ROOTPACK" ] ; then
+  echo "ROOTPACK                = $ROOTPACK"
+  LOC_ROOTPACK=$ROOTPACK
+else
+  echo "ROOTPACK                = default value ($HOME/rootpack)"
+  LOC_ROOTPACK=$HOME/rootpack
+fi
+if [ "$HOMEPACK" ] ; then
+  echo "HOMEPACK                = $HOMEPACK"
+  LOC_HOMEPACK=$HOMEPACK
+else
+  echo "HOMEPACK                = default value ($HOME/pack)"
+  LOC_HOMEPACK=$HOME/pack
+fi
+if [ "$ROOTLIB" ] ; then
+  echo "ROOTLIB                 = $ROOTLIB"
+else
+  if [ "$ROOTPACK" ] ; then
+    echo "ROOTLIB                 = default value ($ROOTPACK)"
+  else
+    echo "ROOTLIB                 = default value ($HOME/rootpack)"
+  fi
+fi
+if [ "$ROOTBIN" ] ; then
+  echo "ROOTBIN                 = $ROOTBIN"
+else
+  if [ "$ROOTPACK" ] ; then
+    echo "ROOTBIN                 = default value ($ROOTPACK)"
+  else
+    echo "ROOTBIN                 = default value ($HOME/rootpack)"
+  fi
+fi
+if [ "$HOMELIB" ] ; then
+  echo "HOMELIB                 = $HOMELIB"
+else
+  echo "HOMELIB                 = default value ($HOME/pack)"
+fi
+if [ "$HOMEBIN" ] ; then
+  echo "HOMEBIN                 = $HOMEBIN"
+else
+  echo "HOMEBIN                 = default value ($HOME/pack)"
+fi
+if [ "$GMKTMP" ] ; then
+  echo "GMKTMP                  = $GMKTMP"
+else
+  echo "GMKTMP                  = default value (/tmp)"
+fi
+if [ "$GMKFILE" ] ; then
+  echo "GMKFILE                 = $GMKFILE"
+else
+  echo "GMKFILE                 = (undefined)"
+fi
+if [ "$GMK_OPT" ] ; then
+  echo "GMK_OPT                 = $GMK_OPT"
+else
+  echo "GMK_OPT                 = default value (x)"
+fi
+if [ "$GMK_IMPORT_PLUGIN" ] ; then
+  echo "GMK_IMPORT_PLUGIN       = $GMK_IMPORT_PLUGIN"
+else
+  echo "GMK_IMPORT_PLUGIN       = (undefined)"
+fi
+if [ "$GMK_SUPPORT" ] ; then
+  echo "GMK_SUPPORT             = $GMK_SUPPORT"
+else
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+#
+  echo "GMK_SUPPORT             = default value ($GMK_SUPPORT)"
+fi
+if [ "$GMK_USER_PACKNAME_STYLE" ] ; then
+  echo "GMK_USER_PACKNAME_STYLE = $GMK_USER_PACKNAME_STYLE"
+else
+  echo "GMK_USER_PACKNAME_STYLE = default value (\${RELATIVE_TARGET_PACK})"
+fi
+if [ "$GMK_NORMS_CHECKER" ] ; then
+  echo "GMK_NORMS_CHECKER       = $GMK_NORMS_CHECKER"
+  echo "WHITELIST               = $WHITELIST"
+else
+  echo "GMK_NORMS_CHECKER       = default value (not set)"
+fi
+if [ "$GMK_TIMER" ] ; then
+  echo "GMK_TIMER               = $GMK_TIMER"
+else
+  echo "GMK_TIMER               = /usr/bin/time"
+fi
+
+if [ "$LOC_HOMEPACK" = "$LOC_ROOTPACK" ] ; then
+  echo
+  echo "### Your are packs administrator ###"
+fi
+
+echo
+type gmkpack >/dev/null 2>&1
+if [ $? -eq 0 ] ; then
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+  THIS_GMKPACK=$(grep THIS_GMKPACK $GMKROOT/util/gmkpack | head -1)
+  echo gmkpack version : $(echo $(dirname $(dirname $THIS_GMKPACK)) | cut -d "." -f2-)
+  type gmkpack
+else
+  echo Warning : no gmkpack in PATH.
+fi

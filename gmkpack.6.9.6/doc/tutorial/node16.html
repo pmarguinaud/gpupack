@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Usage</TITLE>
+<META NAME="description" CONTENT="Usage">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node17.html">
+<LINK REL="previous" HREF="node15.html">
+<LINK REL="up" HREF="node10.html">
+<LINK REL="next" HREF="node17.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html384"
+  HREF="node17.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html378"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html372"
+  HREF="node15.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html380"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html382"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html385"
+  HREF="node17.html">Making a main pack</A>
+<B> Up:</B> <A NAME="tex2html379"
+  HREF="node10.html">Getting started</A>
+<B> Previous:</B> <A NAME="tex2html373"
+  HREF="node15.html">Configuring and building</A>
+ &nbsp; <B>  <A NAME="tex2html381"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html383"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00340000000000000000">
+Usage</A>
+</H1>
+
+<P>
+The procedure <code>gmkpack</code> is used to create a pack.  
+<P>
+You can get on-line details about the options and the mechanism of <code>gmkpack</code> from the man pages :
+<PRE>
+% man gmkpack
+</PRE>
+If you just type <code>% gmkpack</code> you will get a short description of the arguments of the command :
+<PRE>
+% gmkpack
+Usage: gmkpack -r release [-b branch ] [-n local-pack-version ] [-a -s |
+ -u target-pack [-v reference-pack-version ]] [-l compiler-label ]
+ [-o compiling-flag ] [-f rootpack-directory ] [-p program ] [-m]
+
+Parameters :
+----------
+ -r = reference release label
+ -a = To create a main pack
+ -b = reference branch name (optional, default is "main")
+ -u = target pack name
+ -v = reference pack version number (optional, default is the latest)
+ -n = local pack version number (optional, default is the latest existing one)
+ -p = program name for the compilation script
+ -s = To create the scripts to compile the system programs
+ -f = alternative rootpack directory (optional)
+ -l = reference compiler version (optional, default is "PGI616")
+ -o = compiler options family, (optional, default is "x")
+ -m = quiet mode (optional ; to make the compilation script only)
+</PRE>
+
+<P>
+Meaning of this options :
+<DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -r : label of the source code release ; this parameter is mandatory. In case of a non-main pack, it should be the label of the source code release of the reference pack. It is a string starting with two numerics. Metacharacters should not be used.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -a : tells <I>GmkPack </I>to create a main pack
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -b : for a non-main pack, label of the source code modification in the reference pack ; the default is <code>main</code>
+ (arbitrary name recommended for a ''main'' pack). It should be an alphanumeric string.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -u : label of the source code modification of the user pack. Options <code>-a</code> and <code>-u</code> are exclusive. This argument is optional ; if not provided, the pack will be given the name of the reference pack. It should be an alphanumeric string. While developping from an external source code manager, it is recommended to adopt the same label of modification than the one used in this source code manager.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -v : version number of the source code modification in the reference pack ; it should be a string of two numerics. If not provided, the highest version found among the existing reference packs on this release and branch is assumed.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -n : version number of the source code modification for an <I>administrator</I> pack. It should be a string of two numerics. If not provided, the value <code>01</code> is assumed.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -p : list of the programs to build, with the character ''slash'' (<code>/</code>) as separator. Optional. If not provided a script to compile and make all the object libraries is created anyhow. Note that if this parameter has been omited, a new script can be made later.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -s : tells <I>GmkPack </I>to create a specific compilation script for the precompilers. This option can be used only with main packs. It is used for debugging <I>GmkPack </I>when the compilation of a precompiler fails.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -f : tells <I>GmkPack </I>to adopt the argument as an alternative to <code>ROOTPACK</code> to localize the reference pack.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -l : stamp to identify the compiler version used. This option does not work (its value is defined in the configuration file). Later it might be used to enable the selection of an alternative configuration file and hence, an alternative compiler.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -o : stamp for the compiler options family used. Its default value is ''<code>x</code>''. This option is used to select an alternative configuration file whhere the compilation options would be modified to enable special studies (debugging, profiling, etc).
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/greenball.png" ALT="*">
+<DD> -m : prevents <I>GmkPack </I>from making a pack : only the compilation script is build. This option has been used for debugging the compilation script made by <I>GmkPack </I>.
+</DL>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html384"
+  HREF="node17.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html378"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html372"
+  HREF="node15.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html380"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html382"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html385"
+  HREF="node17.html">Making a main pack</A>
+<B> Up:</B> <A NAME="tex2html379"
+  HREF="node10.html">Getting started</A>
+<B> Previous:</B> <A NAME="tex2html373"
+  HREF="node15.html">Configuring and building</A>
+ &nbsp; <B>  <A NAME="tex2html381"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html383"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

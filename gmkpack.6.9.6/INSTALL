@@ -1,0 +1,190 @@
+
+   This file tells you how to install gmkpack and how to customize it.
+
+0. - SHELL :
+     You can be in Korn shell or Bourne Again shell (the variable SHELL should
+     be set and exported). zsh is not yet fully supported.
+     Other Shell may work but have not been tested.
+
+1. - GMKTMP : 
+   At the installation time, gmkpack will use /tmp as a temporary working directory.
+   If this default working directory does not fit your installation you should set and
+   export the variable GMKTMP to another directory name before running build_gmkpack. 
+   - GMK_SUPPORT : 
+   it will also create a directory named "gmkpack_support" in the parent directory, 
+   where various files will be stored in order to be customized by the administrator.
+   If this default directory does not fit your installation you should set and export the 
+   variable GMK_SUPPORT to another directory name before running build_gmkpack.
+   - GMK_ALT_PERL : 
+   You must have at least perl5 version 6 subversion 1 ; patchlevel 4 
+   subversion 4 is not enough. Furthermore, to enable gmkpack to work in multithreaded mode,
+   your installation of Perl should support multi-threading. However if your default 
+   installation of Perl doesn't fit any of these requirements you can set and export the 
+   variable GMK_ALT_PERL to another perl and re-run build_gmkpack.
+   - GMK_NO_LINK : 
+   The building script will also create in the parent directory a symbolic link
+   named 'gmkpack' to the current directory, in order to simplify the installation
+   of the next version of gmkpack (the symbolic link would be automatically 
+   updated). If you don't want to use this management of symbolic link, you 
+   should set and export the environment variable GMK_NO_LINK to any non-empty 
+   characters string before installing gmkpack : as an administrator this is 
+   useful if you want to let developers sharing your installation use the 
+   current version while you test simultaneously a new one. You can then manage links
+   by yourself.
+   - PATH/MANPATH : 
+   gmkpack will be installed inside the subdirectory "util" of the current directory,
+   together with various tools, while the man pages will be installed inside the
+   subdirectory "man" of the current directory. Consequently you will have to 
+   update your environment variables PATH and MANPATH (or CATMAN on some 
+   machines) respectively with the directories ~/gmkpack/util and ~/gmkpack/man 
+   preferably in your profile (.profile or .bash_profile ...)
+   An easy way to have these variables updated is just to let yourself be guided
+   by gmkpack : at the end of the installation, you will be invited to update these 
+   variables with the proper pathes (if needed).
+
+2. - Execute the script "build_gmkpack" :
+     % ./build_gmkpack
+   Though it can be repeated many times, this command needs to be done only 
+   once, and by the administrator of gmkpack only. It runs very fast. 
+   Then you will be asked whether you want to run the configuration file maker 
+   assistant at once or later (see next paragraph). For now, let's do it later.
+   - Update the environment variables in your profile and your current session,
+   as recommended (PATH and MANPATH).
+   If you have libemos, then it contains both gribex and bufr; otherwise, you
+   must have separate libgribex and libbufr. 
+
+   Note that For Meteo-France applications : 
+   - fdb is not required 
+   - dummy libraries from the auxlibs package may be used
+   - CANARI support must be enabled
+
+3. Setup your architecture file : 
+   
+   At this stage you can start and use gmkpack but you will not be able to 
+   create any working pack unless you have created at least one configuration file.
+   Configuration files mainly define the compilers and options used. You can create
+   many of them. Unless you are not a beginner with gmkpack (ie : you already 
+   have a configuration file and the environment variable GMKFILE is exported),
+   the easiest way to create one is run the procedure 'gmkfilemaker' and let yourself
+   be guided by this assitant.
+
+5. Basic customisation : 
+   - Each user may export the following environment variables in shell profile :
+     * ROOTPACK is the directory where your mostly used reference packs are made 
+       (default is $HOME/rootpack)
+     * HOMEPACK is the directory where your mostly used developments packs should be.
+       (default is $HOME/pack)
+     * ROOTBIN is the the directory where the reference packs executables are made
+       (default is $HOME/rootpack)
+     * HOMEBIN is the the directory where your developments packs executables should be.
+       (default is $HOME/pack)
+     * GMKTMP is a temporary directory (default is /tmp)
+     * GMKFILE is the default configuration file used ( ie ; the configuration
+       file basename with its extension)
+     * GMK_USER_PACKNAME_STYLE is the style used to construct the user pack names.
+       If not set, the default is equivalent to : 
+         "GMK_USER_PACKNAME_STYLE=\${RELATIVE_TARGET_PACK}"
+       NB : The backslashes are important !
+     * The following variables can be used to build a more complex name :
+         RELEASE_NUMBER       : reference release number
+         RELEASE              : reference release, including the prefix if any
+         BRANCH               : reference branch name
+         LATEST               : reference branch version
+         RELATIVE_TARGET_PACK : user pack short name
+         LIBFRT               : compiler stamp
+         LIBOPT               : compiler options stamp
+         PACK_EXT             : suffix
+       Examples :
+         - Sort packs in one directory per release :
+         GMK_USER_PACKNAME_STYLE=\${RELEASE_NUMBER}/\${RELATIVE_TARGET_PACK}
+         - Extensive information on name :
+         GMK_USER_PACKNAME_STYLE=\${RELEASE}_\${BRANCH}.\${LATEST}%\${RELATIVE_TARGET_PACK}.\${LIBFRT}.\${LIBOPT}\${PACK_EXT}
+         - Paste the root pack name after the user pack name :
+         GMK_USER_PACKNAME_STYLE=\${RELATIVE_TARGET_PACK}@\${RELEASE}_\${BRANCH}.\${LATEST}.\${LIBFRT}.\${LIBOPT}\${PACK_EXT}
+
+6. Advanced customisation : 
+    * GMK_INTFBMODULE_LIB :
+     export this variable to any non-empty string to make gmkpack fill the
+     "unsatisfied reference" archive library with object files resulting from
+     the compilation of autogenerated interfaces encapsulated inside a module.
+     This may be needed to achieve linking edition with certain compilers.
+    * GMK_IGNORE_MULTINAME : 
+     export this variable to any non-empty string to prevent gmkpack from aborting
+     when more than one symbol of the same name is found inside a library
+     (main entries are ignored anyway).
+    * GMK_ENABLE_OBJ_RENAME : 
+     export this variable to "YES" to enable gmkpack to
+     rename object files. This feature reproducts the behavior of the former 
+     version of gmkpack, but it should be obsolescent.
+    * GMK_IMPORT_PLUGIN : 
+      export this variable to the name of an external script
+      that will import source code while making a main pack. GMK_IMPORT_PLUGIN 
+      should work without argument. Anybody is free (en encorouraged) to write
+      such a personal plug-in. Examples are provided in the directory 
+      $GMK_SUPPORT/bin (files import_from_*)
+    * You can create new executables for your own developments.
+     In that case you should create inside $HOME/.gmkpack/link for each new 
+     executable a new directorie like what has been done inside ~gmkpack/link
+    * Various other customisations are possible, setting files inside the hidden
+      directory $HOME/.gmkpack  
+    * GMK_NO_RESET : 
+      export this variable to any non-empty string to disable a pack reset before any
+      full recompilation. The use of this variable is discouraged.
+    * PACK_PREFIX :
+      prefix of pack names
+    * PACK_EXT :
+      suffix of pack names
+    * GMK_IGNORE_USELESS_INTFB : 
+     export this variable to "YES" or 1 to prevent gmkpack from aborting if a useless
+     autogenerated interface block is detected in a subroutine. Beware that using this
+     variable would increase the code dependencies and hence, slow down the compilation.
+    * GMK_RELEASE_CASE_SENSITIVE :
+     export this variable to 1 in order to let the release name be case-sensitive
+     (ie : "48T1" would not be changed into "48t1")
+    * GMK_PREVAIL_CUSTOMNAME :
+     export this variable to 1 in order to arbitrarily name root packs with the value
+     of the option -u. Without this variable the options -a and -u are exclusive.
+     Note that giving an arbitrary name to root packs would break the possibility to build
+     incremental packs on top of them. Therefore this environment variable is for expert users only. 
+    * ROOTLIB and HOMELIB are respectively the directories where the reference and users pack libraries
+     are saved (defaults are respectively ROOTPACK and HOMEPACK).
+     These variables can be used to have the libraries saved in another file system than the resident packs.
+     However, the location of the libraries must remain a permanent file system directory ; otherwise if 
+     the libraries are lost the pack may be broken :
+     - no libraries means that users won't be able to use that pack anymore
+     - if the pack has been locked and the librairies are lost, then the pack would have to be re-made
+       from scratch.
+     Also when a pack is removed and the libraries are stored in a file system directory defined by 
+     ROOTLIB and HOMELIB, the libraries will not be removed unless the command rmpack is used.
+     If rmpack is not used, the libraries will remain until they are manually removed.
+    * GMK_TIMER :
+     Should /usr/bin/time be missing, then GMK_TIMER should be set to the equivalent command, in order
+     to enable timing of the compilation of each file. "time" should not be used : only /usr/bin/time
+     provides the desired output format.
+
+7. Recommendations about "main" packs :
+   Once your compilation is finished and your libraries & binaries are built 
+   (ie : there is nothing more to do in this pack), you should perform 
+   "lockpack", which will remove the files that will become useless.
+   This should be the signal that your main pack is "good for publication".
+
+8. Cleaning/Uninstalling gmkpack :
+   The script clean_gmkpack (to be executed from the current directory) does NOT
+   un-install gmkpack : it is rather the equivalent of 'make distclean'.
+   To uninstall gmkpack you should :
+   - remove the current directory
+   - remove the possibly existing hidden directory ".gmkpack" in your $HOME directory
+   - remove the environment variables related to gmkpack in your profile.
+   - remove the directory corresponding to  $GMK_SUPPORT
+
+9. Norms checker plugin :
+   gmkpack is delivered with two versions of the norms checker : the traditional one (dated 2003),
+   and the new one, updated in 2011 from the former one, and enhanced in 2014.
+   To activate the norms checker "2003", one should export GMK_NORMS_CHECKER=2003 in the session profile.
+   The default checker is the new one (2011). Note that there are no whitelist file for this norms checker
+   inside gmkpack, but the whitelist file can be provided via the environment variable WHITELIST.
+   The norms checker arguments --stats and --gen_whitelist can be accessed by their corresponding
+   environment variables STATS and GEN_WHITELIST ; while the arguments --wcheck_off, --icheck_off and
+   --supress_message are accessible by the interface of the compilation script, like for the 
+   traditional norms checker.
+

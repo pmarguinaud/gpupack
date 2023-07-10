@@ -1,0 +1,55 @@
+if [ ! -d $HOME/.gmkpack ] ; then
+  mkdir $HOME/.gmkpack
+fi
+
+# Save HOMEPACK/HOMELIB/HOMEBIN if not already done
+if [ ! -s $HOME/.gmkpack/env_homepack ] ; then
+  if [ "$HOMEPACK" ] ; then
+    echo $HOMEPACK > $HOME/.gmkpack/env_homepack
+  else
+    echo $HOME/pack > $HOME/.gmkpack/env_homepack
+  fi
+fi
+if [ ! -s $HOME/.gmkpack/env_homelib ] ; then
+  if [ "$HOMELIB" ] ; then
+    echo $HOMELIB  > $HOME/.gmkpack/env_homelib
+  else
+    \cp $HOME/.gmkpack/env_homepack $HOME/.gmkpack/env_homelib
+  fi
+fi
+if [ ! -s $HOME/.gmkpack/env_homebin ] ; then
+  if [ "$HOMEBIN" ] ; then
+    echo $HOMEBIN  > $HOME/.gmkpack/env_homebin
+  else
+    \cp $HOME/.gmkpack/env_homepack $HOME/.gmkpack/env_homebin
+  fi
+fi
+
+# Overwrite HOMEPACK/HOMELIB/HOMEBIN env variables with ROOTPACK/ROOTLIB/ROOTBIN
+if [ "$ROOTPACK" ] ; then
+  export HOMEPACK=$ROOTPACK
+else
+  export HOMEPACK=$HOME/rootpack
+fi
+if [ "$ROOTLIB" ] ; then
+  export HOMELIB=$ROOTLIB
+else
+  if [ "$ROOTPACK" ] ; then
+    export HOMELIB=$ROOTPACK
+  else
+    export HOMELIB=$HOME/rootpack
+  fi
+fi
+if [ "$ROOTBIN" ] ; then
+  export HOMEBIN=$ROOTBIN
+else
+  if [ "$ROOTPACK" ] ; then
+    export HOMEBIN=$ROOTPACK
+  else
+    export HOMEBIN=$HOME/rootpack
+  fi
+fi
+
+
+# Report status
+envpack

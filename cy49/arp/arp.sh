@@ -118,7 +118,7 @@ fi
 
 if [ "x$OPT" = "x" ]
 then
-  OPT=xd
+  OPT=1d
 fi
 
 if [ "x$GRID" = "x" ]

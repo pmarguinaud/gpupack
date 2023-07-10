@@ -1,0 +1,23 @@
+.TH idotpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+idotpack \- list all files with prefix "i." and suffix not ".L"
+.PP
+.SH SYNOPSIS
+.B idotpack
+.PP
+.SH DESCRIPTION
+.B idotpack
+recursively lists all the files with prefix "i." and suffix not ".L" in the
+current directory and below.
+.br
+This command is dedicated to NEC SX platforms, where the pre-processed source
+files are usefull for debugging purpose. Such files are named as the source file
+but with prefix "i." ; the suffix ".L" corresponds to listings files. 
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR scanpack(1),
+.BR lspack(1).

@@ -1,0 +1,3 @@
+mse/programs/pgd.o
+mse/internals/pgd.o
+surfex/OFFLIN/pgd.o

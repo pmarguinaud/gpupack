@@ -1,0 +1,35 @@
+.TH showpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+showpack \- find the last two versions of source files
+.PP
+.SH SYNOPSIS
+.B showpack
+.I file1
+[
+.I file2
+] \0...
+.PP
+.SH DESCRIPTION
+.B showpack
+recursively find the last two versions of each file given as argument.
+.br
+The files extensions can be omitted.
+.br
+The working directory can be any directory inside a pack.
+.br
+This command is helpful to find which file should be copied to the local source
+code directory to be modified.
+.PP
+.SH DIAGNOSTICS
+This command will not work if the current directory does not look like the
+inside of a pack. Then the following message would be displayed :
+.br
+"The working directory looks neither like the main directory of a pack nor the
+inside of a pack. No show."
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR gmkpack(1).

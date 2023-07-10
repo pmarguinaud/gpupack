@@ -1,0 +1,54 @@
+#!/bin/bash
+########################################################################
+#
+#    Script usrpack
+#    --------------
+#
+#    Purpose : to list the user's existing packs
+#    -------   
+#
+#    Usage :  usrpack [-h homepack-directory ]
+#    -----           
+#
+#    Environment variable :
+#    --------------------
+#                HOMEPACK : default homepack directory
+#
+########################################################################
+#
+# Either use -h or have HOMEPACK exported :
+
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+HOMEPACK=${HOMEPACK:=$HOME/pack}
+TO=$HOMEPACK
+errflg=0
+while getopts h: option
+do
+  case $option in
+  h)  TO=$OPTARG;;
+  \?) errflg=1;;
+  esac
+done
+if [ $errflg -eq 0 ] ; then
+  if [ ! "$TO" ] ; then
+    errflg=2
+  fi
+fi
+if [ $errflg -eq 1 ] ; then
+  USAGE1="Usage : usrpack [-h homepack-directory ]"
+  echo $USAGE1 >&2
+  \exit 1
+elif [ $errflg -eq 2 ] ; then
+  USAGE2="HOMEPACK is not set."
+  USAGE1="Set it, or usage : usrpack [-h homepack-directory ]"
+  echo $USAGE2 >&2
+  echo $USAGE1 >&2
+  \exit 1
+fi
+echo Available packs in directory $TO :
+cd $TO
+\ls -1d * 2>/dev/null

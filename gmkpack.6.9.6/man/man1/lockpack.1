@@ -1,0 +1,52 @@
+.TH lockpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+lockpack \- lock packs
+.PP
+.SH SYNOPSIS
+.B lockpack
+[
+.B -f
+] [
+.I pack1
+] [
+.I pack2
+] \0...
+.PP
+.SH DESCRIPTION
+For a single pack or a set of packs,
+.B lockpack
+recursively removes all the "object" files (ie with extension "o" or
+"ok"), except those which are used individually at linking time. The remaining
+files will have permissions changed to readonly.
+.br
+This command should be run once a pack has been finalized, so that it will take
+less disk space. "Locked" packs can be considered as completely safe by end
+users, since they could not be changed later.
+.br
+Arguments are optional and can be a list of packs names (directory) visible
+from the current directory.
+.br
+When invoked without argument, the working directory can be any directory
+inside a pack.
+.PP
+.SH OPTIONS
+.IP \fB-f\fR
+By default,
+.B lockpack
+asks for confirmation before running. Use this option to force the action
+without confirmation.
+.PP
+.SH DIAGNOSTICS
+This command will not work for an argument which does not look like a pack. Then
+the following message would be displayed :
+.br
+"The directory
+.I target
+does not look like a pack. No lock."
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR gmkpack(1).

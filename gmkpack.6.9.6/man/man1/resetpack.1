@@ -1,0 +1,52 @@
+.TH resetpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+resetpack \- remove all control files managing the compilation within a pack.
+.PP
+.SH SYNOPSIS
+.B resetpack
+[
+.B -f
+] [
+.I pack1
+] [
+.I pack2
+] \0...
+.PP
+.SH DESCRIPTION
+.B resetpack
+remove all the control files managing the compilation within a single pack or a
+set of packs. Since
+.B gmkpack
+is supposed to manage the source code in a clever way (ie : check and do not
+re-make control files if they are up to date, in an attempt to save time), this
+command could be useful in case of a failure, or to make sure the compilation
+will restart from scratch.
+.br
+Arguments are optional and can be a list of packs names (directory) visible
+from the current directory.
+.br
+When invoked without argument, the working directory can be any directory
+inside a pack.
+.PP
+.SH OPTIONS
+.IP \fB-f\fR
+By default,
+.B resetpack
+asks for confirmation before running. Use this option to force the action
+without confirmation.
+.PP
+.SH DIAGNOSTICS
+This command will not work if the current directory (if invoked without
+argument) or the targetted packs do not look like the inside of a packs. Then
+the following message would be displayed :
+.br
+"The working directory looks neither like the main directory of a pack nor the
+inside of a pack. No reset."
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR cleanpack(1),
+.BR brushpack(1).

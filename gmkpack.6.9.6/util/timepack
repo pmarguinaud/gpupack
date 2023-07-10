@@ -1,0 +1,108 @@
+#!/bin/bash
+########################################################################
+#
+#    Script timepack
+#    ----------------
+#
+#    Purpose : In the framework of a pack : to print then most time consumming
+#    -------   file at compile time.
+#
+#    Usage :  timepack [-n number-of-lines]
+#    -----           
+#             -n : number of lines to display (default is 20)
+#
+#    Environment variables
+#    ---------------------
+#      GMK_TIMEFILE_EXTENSION : extension of the files
+#                               containing the timing report
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+DIR=$PWD
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+TOPLISTLEN=20
+errflg=0
+while getopts n: option
+do
+  case $option in
+  n)  TOPLISTLEN=$OPTARG; shift;;
+  \?) errflg=1;;
+  esac
+done
+if [ $errflg != 0 ] ; then
+ echo "usage: timepack [-n number-of-lines] " >&2
+ exit 2
+fi
+
+# Find whether we are inside a pack or not :
+IERR=0
+# Test the presence of directory .gmkfile :
+if [ -d .gmkfile ] ; then
+  export TARGET_PACK=$PWD
+  GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+  GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+else
+# another chance for oldest packs:
+  if [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+    GMKINTFB=.intfb
+    GMKSRC=src
+  else
+    IERR=1
+  fi
+fi
+# Confirm with the presence of directory .gmak :
+if [ $IERR -eq 0 ] ; then
+  if [ ! -d $GMKSRC/.gmak ] ; then
+    IERR=1
+  fi
+fi
+if [ $IERR -eq 1 ] ; then
+# Find upwards whether we are inside a pack or not : test the presence of directory .gmak :
+  while [ ! -d .gmak ] && [ "$PWD" != "/" ] ; do
+    cd ..
+  done
+  if [ "$PWD" != "/" ] ; then
+#   If there is a .gmak directory, then the parent directory must be the pack itself : test the presence of .gmkfile:
+    SRC_DIR=$PWD
+    cd ..
+    if [ "$PWD" != "$SRC_DIR" ] ; then
+      if [ -d .gmkfile ] ; then
+        export TARGET_PACK=$PWD
+        GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+        GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+        IERR=0
+      elif [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+#       another chance for oldest packs:
+        GMKINTFB=.intfb
+        GMKSRC=src
+        IERR=0
+      fi
+    fi
+  fi
+fi
+if [ $IERR -eq 1 ] ; then
+  echo "The working directory looks neither like the main directory of a pack nor the inside of a pack. No timing report."
+else
+#   Timing report:
+  if [ $IERR -eq 0 ] ; then
+    GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+    cd $GMKSRC/$GMKLOCAL
+    if [ ! "$GMK_TIMEFILE_EXTENSION" ] ; then
+      GMK_TIMEFILE_EXTENSION="time"
+    fi
+    echo "Top $TOPLISTLEN most expensive files at compile time in the current pack :"
+    find * -name "*.${GMK_TIMEFILE_EXTENSION}" | xargs cat | sort -nbr | head -$TOPLISTLEN | sed "s/:/s : /"
+  fi
+fi

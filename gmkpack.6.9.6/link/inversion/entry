@@ -1,0 +1,4 @@
+uti/ctpini/programs/inversion_master.o
+utilities/ctpini/programs/inversion_master.o
+uti/tsr/inversion_master.o
+utilities/tsr/inversion_master.o

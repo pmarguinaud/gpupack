@@ -1,0 +1,98 @@
+#!/bin/bash
+########################################################################
+#
+#    Script showpack
+#    ---------------
+#
+#    Purpose : In the framework of a pack : to recursively find the last two
+#    -------   files given in argument (extension of source file
+#              included or not in the arguments)
+#
+#    Usage :  showpack $*
+#    -----
+#
+########################################################################
+#
+
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+DIR=$PWD
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+# Find whether we are inside a pack or not :
+IERR=0
+# Test the presence of directory .gmkfile :
+if [ -d .gmkfile ] ; then
+  export TARGET_PACK=$PWD
+  GMK_VIEW=$($GMKROOT/util/readpack GMK_VIEW | cut -d '"' -f2)
+  GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+  GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+else
+# another chance for oldest packs:
+  if [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+    GMK_VIEW=.gmkview
+    GMKLOCAL=local
+    GMKSRC=src
+  else
+    IERR=1
+  fi
+fi
+# Confirm with the presence of directory .gmak :
+if [ $IERR -eq 0 ] ; then
+  if [ ! -d $GMKSRC/.gmak ] ; then
+    IERR=1
+  fi
+fi
+if [ $IERR -eq 1 ] ; then
+#  Find upwards whether we are inside a pack or not : test the presence of directory .gmak :
+  while [ ! -d .gmak ] && [ "$PWD" != "/" ] ; do
+    cd ..
+  done
+  if [ "$PWD" != "/" ] ; then
+#   If there is a .gmak directory, then the parent directory must be the pack
+#       itself : test the presence of .gmkfile:
+    SRC_DIR=$PWD
+    cd ..
+    if [ "$PWD" != "$SRC_DIR" ] ; then
+      if [ -d .gmkfile ] ; then
+        export TARGET_PACK=$PWD
+        GMK_VIEW=$($GMKROOT/util/readpack GMK_VIEW | cut -d '"' -f2)
+        GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+        GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+        IERR=0
+      elif [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+#       another chance for oldest packs:
+        GMK_VIEW=.gmkview
+        GMKLOCAL=local
+        GMKSRC=src
+        IERR=0
+      fi
+    fi
+  fi
+fi
+if [ $IERR -eq 1 ] ; then
+  echo "The working directory looks neither like the main directory of a pack nor the inside of a pack. No show."
+fi
+
+# Show:
+if [ $IERR -eq 0 ] ; then
+   cd $GMKSRC
+  if [ $(grep -c "^$GMKLOCAL$" ../$GMK_VIEW) -eq 0 ] ; then
+    NLINE=-1
+  else
+    NLINE=-2
+  fi
+  for arg in $* ; do
+    find $(cat ../$GMK_VIEW) -type f \( -name "$arg.F90" -o -name "$arg.F" -o -name "$arg.f90" -o -name "$arg.f" -o -name "$arg.sql" -o -name "$arg.c" -o -name "$arg.cpp" -o -name "$arg.ddl" -o -name "$arg.fypp" -o -name "$arg.hypp" -o -name "$arg.b" -o -name "$arg" \) \( ! -type d \) -follow -depth -print 2> /dev/null | egrep -v "(^i\..*\.|/i\..*\.)" | head $NLINE
+  done
+fi

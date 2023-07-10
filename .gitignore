@@ -1,4 +1,5 @@
 install
+vimpack
 tmp
 pack
 slurm-*.out

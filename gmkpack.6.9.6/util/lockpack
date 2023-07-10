@@ -1,0 +1,201 @@
+#!/bin/bash
+########################################################################
+#
+#    Script lockpack
+#    ----------------
+#
+#    Purpose : In the framework of a pack : to remove all object files not
+#    -------   used in links command lines and change permissions to -w
+#
+#    Usage :  lockpack [-f] [pack1] [pack2]...
+#    -----     -f : to force the action without confirmation 
+#
+#    Environment variables
+#    ---------------------
+#
+########################################################################
+#
+
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+
+FLAG=""
+set -- `getopt f $*`
+if [ $? != 0 ] ; then
+ echo "usage: lockpack [-f] pack1 [pack2]..." >&2
+ exit 2
+fi
+for i in $*
+do
+     case $i in
+     -f)  FLAG=force; shift;;
+     --)  shift; break;;
+     esac
+done
+
+PACKLIST="$*"
+if [ ! "$PACKLIST" ] ; then
+  PACKLIST=$(basename $PWD)
+  cd ..
+  DIR=$PWD
+else
+  DIR=$PWD
+fi
+
+for target in $PACKLIST; do
+  if [ -d $target ] ; then
+  cd $target
+
+# Find whether we are inside a pack or not :
+  IERR=0
+# Test the presence of directory .gmkfile :
+  if [ -d .gmkfile ] ; then
+    export TARGET_PACK=$PWD
+    GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+    GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+    GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+    GMK_HUB_DIR=$($GMKROOT/util/readpack GMK_HUB_DIR | cut -d '"' -f2)
+    GMK_HUB_BUILD=$($GMKROOT/util/readpack GMK_HUB_BUILD | cut -d '"' -f2)
+  else
+#   another chance for oldest packs:
+    if [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+      GMKINTFB=.intfb
+      GMKSRC=src
+      GMKLOCAL="local"
+    else
+      IERR=1
+    fi
+  fi
+  if [ $IERR -eq 1 ] ; then
+#   Find upwards whether we are inside a pack or not : test the presence of directory .gmak :
+    while [ ! -d .gmak ] && [ "$PWD" != "/" ] ; do
+      cd ..
+    done
+    if [ "$PWD" != "/" ] ; then
+#     If there is a .gmak directory, then the parent directory must be the pack
+#     itself : test the presence of .gmkfile:
+      SRC_DIR=$PWD
+      cd ..
+      if [ "$PWD" != "$SRC_DIR" ] ; then
+        if [ -d .gmkfile ] ; then
+          export TARGET_PACK=$PWD
+          GMKINTFB=$($GMKROOT/util/readpack GMKINTFB | cut -d '"' -f2)
+          GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+          GMKLOCAL=$($GMKROOT/util/readpack GMKLOCAL | cut -d '"' -f2)
+          GMK_HUB_DIR=$($GMKROOT/util/readpack GMK_HUB_DIR | cut -d '"' -f2)
+          GMK_HUB_BUILD=$($GMKROOT/util/readpack GMK_HUB_BUILD | cut -d '"' -f2)
+          IERR=0
+        elif [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+#         another chance for oldest packs:
+          GMKINTFB=.intfb
+          GMKSRC=src
+          GMKLOCAL="local"
+          IERR=0
+        fi
+      fi
+    fi
+#   Position to the local source directory or the local directory :
+    cd $DIR/$target
+    if [ -d .gmak ] && [ $IERR -eq 0 ] ; then
+      cd $GMKLOCAL
+    fi
+  else
+#   Position to the local source directory if it exists, otherwise the (supposed) starting directory of the pack :
+    if [ -d $DIR/$target/$GMKSRC/$GMKLOCAL ] ; then 
+      cd $DIR/$target/$GMKSRC/$GMKLOCAL
+    else
+      cd $DIR/$target
+    fi
+  fi
+  if [ $IERR -eq 1 ] ; then
+    echo "The directory $target does not look like a pack. No lock."
+  fi
+
+# Confirm:
+  if [ ! "$FLAG" ] && [ $IERR -eq 0 ] ; then
+    echo -n "lockpack $target ? (y/n) "
+    read answer
+    if [ "$answer" != "y" ] ; then
+      IERR=1
+    fi
+  elif [ "$*" ] ; then
+    echo "locking pack $target"
+  fi
+
+  if [ $IERR -eq 0 ] ; then
+
+#   Remove build directories of hub if it exists :
+    if [ "$GMK_HUB_DIR" ] ; then
+      if [ -d $GMK_HUB_DIR/$GMKLOCAL ] ; then
+        echo "  Remove Hub build directory ..."
+#       remember that the build directory can be anywhere, therefore it has to be evaluated
+        \rm -rf $(eval echo $(eval echo $GMK_HUB_BUILD))
+      fi
+    fi
+
+#   Lock local source directory if it exists :
+    if [ -d $DIR/$target/$GMKSRC/$GMKLOCAL ] ; then
+      cd $DIR/$target/$GMKSRC/$GMKLOCAL    
+      echo remove empty directories :
+#     Do it recursively to clean everything:
+      ic=0
+      while [ $ic -eq 0 ] ; do
+        ic=1
+        for dir in $(find * -name "*" -type d -print) ; do
+          if [ $(\ls -1 $dir | wc -l) -eq 0 ] ; then
+            echo $dir ...
+            \rmdir $dir
+            ic=0
+          fi
+        done
+      done
+      echo open remaining directories ...
+      find * -name "*" -type d -print | xargs chmod 755 2>/dev/null
+      echo protect entries :
+      for file in $(cat $HOME/.gmkpack/link/*/entry $GMK_SUPPORT/link/*/entry $GMKROOT/link/*/entry 2>/dev/null | tr -cs "[A-Z][a-z][0-9]"\/\.\*-_ "[\012*]" | sort -u) ; do
+        if [ -f $(eval echo $file) ] ; then
+          echo "   $(eval echo $file)"
+          chmod 444 $(eval echo $file) 
+        fi
+      done
+      echo remove other object files ...
+      find * -name "*.o" ! -perm 444 -print | xargs \rm 2>/dev/null
+      echo remove \*.ok files ...
+      find * -name "*.ok" -print | xargs \rm 2>/dev/null
+      echo readonly other files ...
+      find * -name "*" -type f -print | xargs chmod 644 2>/dev/null
+      echo clear interfaces ...
+      if [ -d $GMKINTFB ] ; then
+        cd $GMKINTFB
+#       case for autogenerated headers :
+        find * -name "*.ok" -print | xargs \rm 2>/dev/null
+#       case for autogenerated modules :
+        find * -name "*.o" -print | xargs \rm 2>/dev/null
+#       keep the rest :
+        find * -name "*" -type d -print | xargs chmod 755 2>/dev/null
+        find * -name "*" -type f -print | xargs chmod 644 2>/dev/null
+      fi
+    fi
+
+  fi
+
+  else
+    echo skip non-existant directory $target
+  fi  
+  cd $DIR
+done
+
+if [ "$*" ] ; then
+  echo done.
+fi

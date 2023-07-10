@@ -1,0 +1,31 @@
+.TH progpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+progpack \- display the programs which can be built by
+.B gmkpack
+.PP
+.SH SYNOPSIS
+.B progpack
+.PP
+.SH DESCRIPTION
+.B progpack
+displays the program names which can be built by
+.B gmkpack\fR.
+These names are the arguments of the option
+.B -p
+of
+.B gmkpack\fR.
+.PP
+.SH FILES
+Any user can create more executables for private usage. Then new executables
+definitions should be stored in the directory
+.I $HOME/.gmkpack/link
+following the pattern of the original exectables (see
+.I $GMKROOT/link
+).
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR gmkpack(1).

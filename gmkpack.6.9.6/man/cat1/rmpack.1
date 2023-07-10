@@ -1,0 +1,34 @@
+rmpack(1)		    General Commands Manual		     rmpack(1)
+
+
+
+1mNAME0m
+       rmpack - remove packs
+
+1mSYNOPSIS0m
+       1mrmpack 22m[ 1m-f 22m] 4mpack124m [ 4mpack224m ]  ...
+
+1mDESCRIPTION0m
+       1mrmpack	 22mremoves  the  packs directories. If the executables directories
+       are links outside the packs, then they are removed as well. If  aliases
+       have  been created in the shell 4mrc24m file, then these aliases are removed
+       as well.
+
+1mOPTIONS0m
+       1m-f	22mBy default, 1mrmpack 22masks for  confirmation  before  running.  Use
+	      this option to force the action without confirmation.
+
+1mDIAGNOSTICS0m
+       This  command  will not work for an argument which does not look like a
+       pack. Then the following message would be displayed :
+       "The directory 4mtarget24m does not look like a pack. No remove."
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mgmkpack(1).0m
+
+
+
+								     rmpack(1)

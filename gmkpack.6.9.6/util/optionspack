@@ -1,0 +1,44 @@
+#!/bin/bash
+########################################################################
+#
+#    Script optionspack
+#    ------------------
+#
+#    Purpose : to list the alternative compilers and compiler options
+#    -------   
+#
+#    Usage :  optionspack
+#    -----           
+#
+#    Environment variables :
+#    ---------------------
+#            GMKTMP
+#
+########################################################################
+#
+export LC_ALL=C
+
+export GMKTMP=${GMKTMP:=/tmp}
+if [ ! -d $GMKTMP ] ; then
+  mkdir -p $GMKTMP
+fi
+if [ ! -d $GMKTMP ] ; then
+  echo "can t make dir $GMKTMP"
+  exit 1
+fi
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+
+if [ ! -d $HOME/.gmkpack/arch ] ; then
+  mkdir -p $HOME/.gmkpack/arch
+fi
+#
+for ARCHFILE in $(find $HOME/.gmkpack/arch $GMK_SUPPORT/arch -type f -name "*" | sort) ; do
+  grep "^LIBFRT = " $ARCHFILE | cut -d " " -f3- > $GMKTMP/libfrt.$$
+  chmod 755 $GMKTMP/libfrt.$$
+  LIBFRT=$(echo $(. $GMKTMP/libfrt.$$ 2>/dev/null))
+  LIBOPT=$(echo $ARCHFILE | awk -F"." '{print $NF}')
+  GMKFILE=$(echo $(basename $ARCHFILE) | sed "s/.${LIBOPT}$//")
+  echo $GMKFILE $LIBFRT $LIBOPT | awk '{printf("GMKFILE=%-24s <= -l %-16s -o %-8s\n", $1,$2,$3)}'
+#  echo " GMKFILE=$GMKFILE    <=    -l $LIBFRT -o $LIBOPT"
+done
+\rm -f $GMKTMP/libfrt.$$

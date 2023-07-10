@@ -1,0 +1,36 @@
+genpack(1)		    General Commands Manual		    genpack(1)
+
+
+
+1mNAME0m
+       genpack - display the genesis of a pack.
+
+1mSYNOPSIS0m
+       1mgenpack0m
+
+1mDESCRIPTION0m
+       1mgenpack  22mdisplays  on the standard output how a pack has been generated
+       at the time of its creation. The working directory  must	 be  the  pack
+       main directory.
+       The  information	 displayed consists in the absolute path of the proce‐
+       dure 1mgmkpack 22minvoked, followed by all the  options	values	explicitely
+       used.
+       This  command  is  helpful  to  create  new  scripts  for  compilation,
+       libraries archiving and/or links editions  with	1mgmkpack  22mupon  a  pack
+       which already exists, because it ensures the compatibility of the back‐
+       ground codes and libraries used.
+
+1mDIAGNOSTICS0m
+       If the working directory is not a pack main directory then the  follow‐
+       ing message is displayed :
+       "No gmkpack genesis file in this directory."
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mlogpack(1), gmkpack(1).0m
+
+
+
+								    genpack(1)

@@ -1,0 +1,1 @@
+odb/tools/ioassign.o odb/aux/memory.o odb/aux/iostuff_init.o odb/aux/ioassign_read.o odb/aux/ioassign_write.o odb/aux/iostrdup.o odb/aux/ioassign_hash.o odb/aux/memmap.o odb/tools/abor1.o odb/tools/abor1fl.o odb/tools/xldummy.o xrd/support/endian.o ifsaux/support/endian.o

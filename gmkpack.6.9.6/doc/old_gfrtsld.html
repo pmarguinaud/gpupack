@@ -1,0 +1,145 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; HP-UX B.11.00 9000/785) [Netscape]">
+</head>
+<body>
+<a href="gmkpack.html#These are special control command to submit the job efficiently">#!/bin/ksh</a>
+<br><a href="gmkpack.html#These are special control command to submit the job efficiently">#
+@$-lP 0</a>
+<br><a href="gmkpack.html#These are special control command to submit the job efficiently">#
+@$-lM 128mb</a>
+<br><a href="gmkpack.html#These are special control command to submit the job efficiently">#
+@$-lT 1200</a>
+<br><a href="gmkpack.html#These are special control command to submit the job efficiently">#
+@$-r aladin</a>
+<br><a href="gmkpack.html#These are special control command to submit the job efficiently">#
+@$-lV 0mb -eo -q compil</a>
+<br>\rm -rf $GMKTMP/. 2>/dev/null
+<br>#
+<br><b># ------ Main settings --------------------------------------</b>
+<br>#
+<br><a href="gmkpack.html#Compilation options"># Fortran compiler options
+:</a>
+<br># optfrt[3] = Optimal, as&nbsp; operations&nbsp;&nbsp;&nbsp; : "-Of
+-Wv,-Of"
+<br># optfrt[2] = Debugging&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+: "-g0 -sc -O0"
+<br># optfrt[1] = Debugging + Bound checking : "-g0 -sc -O0 -Dusa"
+<br># optfrt[0] = User-defined options
+<br>optfrt[0]=""
+<br>#
+<br># Choose subscript (0/1/2/3) :
+<br># --------------------
+<br>Ofrt=3
+<br>#
+<br><a href="gmkpack.html#Compilation options"># C compiler options :</a>
+<br>optvcc="-O"
+<br>#
+<br>#
+<br><a href="gmkpack.html#Files in pack to ignore (obsolete/useless)">#
+Files in pack to ignore (obsolete/useless) :</a>
+<br># ------------------------------
+<br>cat &lt;&lt;end_of_ignored_files> $GMKTMP/.ignored_files
+<br>end_of_ignored_files
+<br>#
+<br><a href="gmkpack.html#Dependencies"># Do you want to compile dependencies
+? (yes/no)</a>
+<br># -----------------------------------
+<br>export DEP=yes
+<br># If you compile dependencies, approve the following projects list
+:
+<br>export MKPROJECT="xrd tfl tal arp ald"
+<br>#
+<br><a href="gmkpack.html#Supplementary projects to be handled with explicit interface bl">#
+Supplementary projects to be handled with explicit interface blocks :</a>
+<br># -------------------------------------------------
+<br>export INTFB_PROJLIST=""
+<br>#
+<br><a href="gmkpack.html#Recursive update control"># Do you want to enable
+the recursive update control ? (yes/no)</a>
+<br># -------------------------------------
+<br>export ICS_RECURSIVE_UPDATE=yes
+<br>#
+<br><a href="gmkpack.html#Incremental compilation facility"># Do you want
+to use the incremental compilation facility (yes/no) ?</a>
+<br># -----------------------------------------------
+<br>export ICS_ICFMODE=no
+<br># If you use the incremental compilation facility, select the top and
+bottom levels :
+<br>export ICS_START=
+<br>export ICS_STOP=
+<br># Reduced starting list :
+<br>cat &lt;&lt;end_of_reduced_starting_list> $GMKTMP/.reduced_starting_list
+<br>end_of_reduced_starting_list
+<br>#
+<br><a href="gmkpack.html#Listing"># Do you want to output the compilation
+listings ? (yes/no)</a>
+<br># -----------------------------------------
+<br>export ICS_LIST=yes
+<br>#
+<br># <a href="gmkpack.html#Norms checker">Norms checker severity </a>:
+<br># -----------------
+<br># ICS_NC_SEVERITY = 0 (No report) or 1 (Severe,Warning) or 2 (+Informative)
+<br># ICS_NC_SUPPRESS = "MESS-n:MESS-m" : suppressed messages
+<br>export ICS_NC_SEVERITY=2
+<br>export ICS_NC_SUPPRESS=""
+<br>#
+<br><a href="gmkpack.html#Map"># Do you want to output the load map(s)
+? (yes/no)</a>
+<br># -------------------------------------
+<br>export ICS_MAP=no
+<br>#
+<br><a href="gmkpack.html#Users libraries update"># Do you want to update
+users libraries ? (yes/no)</a>
+<br># -------------------------------------
+<br>export ICS_UPDLIBS=yes
+<br>#
+<br>#
+<br><a href="gmkpack.html#Executables"># Do you want to make any executable
+? (yes/no)</a>
+<br># ----------------------------------
+<br>Load=yes
+<br>#
+<br># If you want to make any executable, approve the following ones :
+<br># (libraries should be properly ordered from top to bottom for each
+binary)
+<br>#
+<br># Binary "aladin" :
+<br>cat &lt;&lt;end_of_aladin_link> $GMKTMP/.aladin_link
+<br><a href="gmkpack.html#Executable name">EXEC=ALADIN</a>
+<br><a href="gmkpack.html#Entry point">ENTRY=arp/control/master.o</a>
+<br>end_of_aladin_link
+<br><a href="gmkpack.html#Libraries to load"># BACKGROUND LIBRARIES (from
+top to bottom) :</a>
+<br>cat &lt;&lt;end_of_aladin_libs> $GMKTMP/.aladin_libs
+<br>/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/lib/libald.a
+<br>/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/lib/libarp.a
+<br>/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/lib/libtal.a
+<br>/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/lib/libtfl.a
+<br>/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/lib/libxrd.a
+<br>end_of_aladin_libs
+<br><a href="gmkpack.html#Message passing libraries"># SYSTEM LIBRARIES
+(from top to bottom) :</a>
+<br>cat &lt;&lt;end_of_aladin_sys> $GMKTMP/.aladin_sys
+<br>-L/usr/local/lib -lemos_000200 -lec_r8 -lnag
+<br>-L/usr/lang/lib64 -llapackvp -lblasvp -lssl2vp -llang0
+<br>-L/usr/lang/mpi2/lib64 -lmpi -lmp
+<br>end_of_aladin_sys
+<br><a href="gmkpack.html#Loading options"># LOADER AND OPTIONS :</a>
+<br>cat &lt;&lt;end_of_aladin_load> $GMKTMP/.aladin_load
+<br>frt -Wl,-P -KA64 -Hl,/usr/ccs/bin -Wl,-t,-zmuldefs,-zorder,-zdummy_verbose
+<br>end_of_aladin_load
+<br>#
+<br>#
+<br><a href="gmkpack.html#Verboose level"># Verboose level (0 or 1 or 2
+or 3) :</a>
+<br># --------------
+<br>export ICS_ECHO=1
+<br>#
+<br><b># ----------------------------------------------------------------------------------</b>
+<br><b># -------- NO NEED TO CARE WHAT IS BELOW -------------------------------------------</b>
+<br><b># ----------------------------------------------------------------------------------</b>
+</body>
+</html>

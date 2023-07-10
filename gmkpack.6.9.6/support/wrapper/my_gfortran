@@ -1,0 +1,35 @@
+#! /bin/bash
+# gfortran compiler workarouds against bugs or excessively aggresive options
+gfortran $*
+rc=$?
+if [ $rc -ne 0 ] ; then
+  echo Compilation failed, trying with -g1 ...
+  gfortran $(echo "$*" | sed 's/ -g / -g1 /')
+  rc=$?
+fi
+if [ $rc -ne 0 ] ; then
+  echo Compilation failed again, trying again with -O2 ...
+  gfortran $(echo "$*" | sed -e 's/ -O3 / -O2 /' -e 's/ -ftree-vectorize / /')
+  rc=$?
+fi
+if [ $rc -ne 0 ] ; then
+  echo Compilation failed again, trying again with -O0 ...
+  gfortran $(echo "$*" | sed -e 's/ -O[2-3] / -O0 /' -e 's/ -ftree-vectorize / /')
+  rc=$?
+fi
+if [ $rc -ne 0 ] ; then
+  echo Compilation failed again, trying again with both -g1 and -O0 ...
+  gfortran $(echo "$*" | sed -e 's/ -g / -g1 /' -e 's/ -O[2-3] / -O0 /' -e 's/ -ftree-vectorize / /')
+  rc=$?
+fi
+if [ $rc -ne 0 ] ; then
+  echo Compilation failed again, trying again without openmp ...
+  gfortran $(echo "$*" | sed -e 's/ -fopenmp / /')
+  rc=$?
+fi
+if [ $rc -ne 0 ] ; then
+  echo Compilation failed again, trying a last time without openmp, debug or optimizations ...
+  gfortran $(echo "$*" | sed -e 's/ -fopenmp / /' -e 's/ -g / /' -e 's/ -O[2-3] / -O0 /' -e 's/ -ftree-vectorize / /')
+  rc=$?
+fi
+exit $rc

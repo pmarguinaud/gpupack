@@ -1,0 +1,107 @@
+.TH vimpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.PP
+.SH NAME
+vimpack \- navigate and edit files within a pack
+.PP
+.SH SYNOPSIS
+.BI "vimpack " "[ -i ] [ -d ] [filename]"
+.PP
+.SH DESCRIPTION
+.B vimpack
+is a navigator/editor for packs, based on vim.
+.br
+It requires a version of vim compiled with the embedded Perl interpreter available in your PATH.
+.br
+\fBvimpack\fR enables you to navigate in the source code, edit files and save your modifications without caring about the branches of code in your pack.
+
+.br
+\fBvimpack\fR  should be run always from the root directory of a pack.
+.br
+The first time you run it, \fBvimpack\fR  creates an index file.
+You may create explicitely this index by running 'vimpack -i' the first time you invoke \fBvimpack\fR  ; otherwise it will be automatically created as soon as necessary. The creation of this index file may take a couple of minutes.
+
+.br
+To edit a file, invoke it with \fBvimpack\fR  ; For instance :
+
+	vimpack cnt4.F90
+
+.br
+This  will edit the last version of this file. If you modify it and save it, it will be saved automatically in the 'local'
+directory of the pack.
+.br
+It is possible to commit temporary edited files using the command :C from the editor window.
+Writing a temporary file (using :w) will automatically commit the file if it has been modified.
+
+.br
+To navigate, move the cursor on a word and press <TAB>.
+.br
+To go back, press <BACKSPACE>.
+
+.br
+To dive directly from a subroutine (or a module or a defined type) to another one called by it 
+(or a USE statement or a declaration statement), move the cursor on its name and press <²> or <œ>.
+.br
+If this definition is not found, then the ordinary search results will be displayed.
+.br
+
+To search for a word, use the command :F from the editor window ; for instance :
+
+	:F MYPROC
+
+The text research is such that :
+.br
+- case are insensitive
+.br
+- strings and comments are taken into acount
+.br
+- keywords are searched as well
+.br
+
+If the cursor is over a word, this word can be looked up using <TAB> as well.
+
+When viewing a search result, it is possible to jump to a particular location :
+just move the cursor to a file name or a line number and press <TAB>.
+
+.br
+To edit a file in 'diff' mode (assuming this file has been modified in an intermediate or local pack), invoke \fBvimpack\fR  with the option -d ; example :
+
+
+	vimpack -d cnt0.F90
+
+.br
+List of commands from the editor window :
+
+.br
+:F \fIstring\fR        Finds all occurrences of \fIstring\fR in the code.
+.br
+:C               Commit a temporary file (if modified) to src/local.
+.br
+:Cq              Commit to src/local (if file was modified) and exit.
+.br
+:E \fIfilename\fR      Edit \fIfilename\fR
+.br
+:D               Difference of the current file with the N-1 version.
+.br
+<TAB>            Search for the word under the cursor.
+.br
+<²>              Search for entity definition and dive to it (when possible).
+.br
+<œ>              same as <²>
+.br
+<BACKSPACE>      Go back in the history.
+.br
+:NF \fInewfilename\fR  Edit a new file named \fInewfilename\fR in the directory src/local
+.br
+<SHIFT-TAB>      Same as <TAB> but in an new split window
+.br
+:help vimpack    On-line help
+
+.br
+.PP
+.SH ENVIRONNEMENT
+.IP VIMPACKVIM
+vim editor used. Default is 'vim'. Export VIMPACKVIM=gvim if you wish to use the graphical interface of vim.
+.PP
+.SH AUTHOR
+Philippe Marguinaud  <philippe.marguinaud@meteo.fr>

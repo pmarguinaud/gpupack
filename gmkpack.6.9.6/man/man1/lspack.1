@@ -1,0 +1,29 @@
+.TH lspack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+lspack \- list all files within a pack.
+.SH SYNOPSIS
+.B lspack
+[
+.I dir1
+] [
+.I dir2
+] \0...
+.PP
+.SH DESCRIPTION
+.B lspack
+recursively lists all the files below the directories given as arguments, except
+hidden files. 
+.br
+If no directory is specified, then all the files from the current directory and
+below will be listed.
+.PP
+.SH DIAGNOSTICS
+If the working directory is lower than the local source directory then the pack
+content will not be fully listed.
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR scanpack(1).

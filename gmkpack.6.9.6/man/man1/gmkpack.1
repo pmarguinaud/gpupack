@@ -1,0 +1,483 @@
+.TH gmkpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+gmkpack \- Maker of packs and scripts for compilation
+.PP
+.SH SYNOPSIS
+.B gmkpack
+.BI "-r " "release"
+[
+.B -a
+] [
+.BI "-b " "branch"
+]
+.BI "-u " "target-pack"
+]
+.br
+[
+.BI "-v " "reference-pack-version"
+] [
+.BI "-n " "local-pack-version"
+]
+.br
+[
+.BI "-l " "compiler-label"
+] [
+.BI "-o " "compiling-flag"
+] [
+.B -V
+] [
+.B -m
+]
+.br
+[
+.BI "-f " "rootpack"
+] [ 
+.BI "-h " "homepack"
+] [
+.B -s
+] [
+.B -K
+] [
+.B -k
+]
+.br
+[
+.BI "-p " "program1[,program2]...[,programN] | listname | ?"
+]
+.PP
+.SH DESCRIPTION
+.B gmkpack
+is a procedure to create an environment and to compile binaries like Arpege,
+Aladin, ODB, etc.
+.br
+While it is similar to a 
+.B make,
+it has been written in order to support specific features of the arpege/aladin
+system (like the so-called "duplicated routines") that a 
+.B make
+could not handle.
+.br
+.B gmkpack
+aims to be a user-friendly arpege/aladin-oriented procedure, providing the user
+with all the links to object libraries and source codes needed to build an
+executable in a consistent way.
+.PP
+Prior to using
+.B gmkpack
+one should be aware of a few definitions:
+.IP Pack
+.br
+To compile one should copy the compilable source files and possibly other
+various files in a directory.
+.br
+This directory is named a "pack". 
+.br
+A pack is a directory containing specific subdirectories and files that will
+all be created by running 
+.B gmkpack\fR. 
+Below this directory, source code can be compiled, object libraries resulting
+from the compilation are built and executables can be made from this libraries
+and others.
+.br
+The use of arpege/aladin is made complicated by the need of various "include"
+files, modules, libraries and sometimes a pre-compiler (for odb) to achieve an
+executable.
+.B gmkpack
+takes care and provides all this environment in a consistent way.
+This consistency is ensured by the definition of the reference release,
+the reference branch name and its version, the compilation mode and the
+compiler version (these parameters will be described below).
+More generally, we can try to define a pack as follows: 
+.br
+A pack is a consistent ensemble of source files, libraries and executables
+related to arpege/aladin.
+.br
+.B gmkpack
+is used for two operations:
+.br
++ First  : to create a "pack".
+.br
++ Second : to generate a script to compile, build object libraries and\/or make
+binaries, using the corresponding pack.
+.br
+Note that both operations can be performed at once.
+.IP "gmkpack administrator"
+A gmkpack administrator is a user who has installed
+.B gmkpack
+in his home directory for a private use or a shared use with other users.
+.br
+Anyone can be his own gmkpack manager, but usually the gmkpack manager is a
+an administrator user.
+.IP "Pack administrator"
+A pack administrator is a user who has created packs to be used by other
+users as bases for developments.
+.br
+Anyone can be his own pack administrator, but usually the pack administrator
+is the user in charge with the code management.
+.IP "Main pack"
+A pack which does not lay upon any existing pack. Such packs could be made by
+pack administrators only.
+.IP "Reference pack"
+A pack upon which one can make another pack. Main packs are obviously reference packs.
+.IP "Target pack"
+A pack laying upon an existing reference pack.
+.PP
+.SH OPTIONS
+.IP "\fB -r \fIrelease\fR"
+Reference release. This option is mandatory.
+.br
+For user packs, the already existing releases made by the pack administrator can
+be obtained by the command
+.B rlspack\fR.
+.br
+For main packs, it should be a string of digits.
+.IP "\fB -a \fR"
+To build a main pack and/or a script for a main pack. The mechanism of
+.B gmkpack
+is slightly different for main packs since it has no pack to refer to.
+.br
+Note that the options \fB-a\fR and (\fB-u\fR,\fB-v\fR) are exclusive.
+.IP "\fB -b \fIbranch\fR"
+The branch name of the reference pack. It can be a string of any characters
+except dot (".") and slash ("/"). Default is "main" (for main pack).
+.IP "\fB -u \fItarget-pack\fR"
+For a user pack, it is the name of the target pack. Since such a target pack can
+be a subdirectory of a directory of packs, the target pack name may contain a
+slash ("/").
+.br
+If not supplied the default name will be the same as the reference pack.
+.br
+For a reference pack (when the user is administrator), it is the branch name of
+the target pack. In this case this option is mandatory.
+.br
+Note that options \fB-u\fR and \fB-a\fR are exclusive.
+.IP "\fB -v \fIreference-pack-version\fR"
+Version number of the reference pack. It should be a string of exactly two
+digits. If omitted, it will be self-computed as the highest existing version
+number for the selected branch and release.
+.br
+Note that options \fB-v\fR and \fB-a\fR are exclusive.
+.IP "\fB -n \fIlocal-pack-version\fR"
+Version number of the target pack. This option works only for reference packs
+(when the user is administrator). It should be either a string of exactly two
+digits, or the string '++' ; in this case it will be self-computed as the
+highest existing version number for the selected branch and release, incremented
+with 1. If omitted, it will be self-computed as the highest existing version
+number for the selected branch and release.
+
+.IP "\fB -K \fR"
+Use this option to create a local hub. A hub is a separate directory where third-party
+packages can be built and installed with their own scripts (configure/make, cmake). Then
+the installed packages can be used to build the current source code. This option should
+be mostly used for main packs. Should a user create a pack containing a hub, then this
+subsequent pack will naturally inherit of that hub and the installed packages inside.
+.br
+This version of \fBgmkpack\fR supports cmake-built packages, but more methods can be
+implemented. 
+.IP "\fB -k \fR"
+Use this option to disable the creation of source code. This option can be used together with
+\fB-K\fR to create a hub only. From a hub-only main pack, on can derive a user pack with a
+source code.
+.IP "\fB -l \fIcompiler-label\fR"
+Reference compiler version. More exactly, it is the internal stamp of the configuration file used.
+The possible values are given by the command
+.B optionspack\fR. There is no default value unless the environment variable GMKFILE is set.
+.IP "\fB -o \fIcompiling-flag\fR"
+Compiler options family. More exactly, it is the extension of the configuration
+file used. The possible values are given by the command
+.B optionspack\fR. The default value is 'x'.
+.IP "\fB -V \fR"
+Displays the version of
+.B gmkpack\fR. This option is exclusive.
+.IP "\fB -m \fR"
+Quiet mode. Enables to make a compilation script without making a pack. This
+option as been used for debugging only.
+.IP "\fB -f \fIrootpack\fR"
+Rootpack directory (absolute path). The default value is ROOTPACK, or   
+.I $HOME/rootpack
+if ROOTPACK is not set.
+.IP "\fB -h \fIhomepack\fR"
+Homepack directory (absolute path). The default value is HOMEPACK, or
+.I $HOME/pack
+if HOMEPACK is not set.
+.IP "\fB -s \fR"
+To make a separate script for building the precompilers provided as source code.
+.br
+This option is rather used for debugging purpose, since the current compilation
+script is able to handle as well the compilation of the precompilers prior to the
+actual source code compilation.
+.br
+As the precompilers are built only inside main packs, this option can be used
+only with the option \fB -a \fR.
+.IP "\fB -p \fIprogram1[,program2]...[,programN] | listname | ?\fR"
+The list of program to be built, or the name of a list of programs, or the character "?" to build as many executables as possible.
+.br
+The list of the possible programs, and the possible lists and what programs they contain can be obtain with the command
+.I progpack\fR.
+.PP
+.SH ENVIRONNEMENT
+.IP ROOTPACK
+The directory of packs made by the packs administrator (absolute path).
+Its value should be given by the pack administrator. The default value is
+.I $HOME/rootpack
+.IP HOMEPACK
+The directory of packs made by the user (absolute path). The default value is
+.I $HOME/pack
+.IP ROOTBIN
+The root directory for executables of all reference packs. It enables to store
+executables in another file system (larger and possibly semi-permanent).
+.br
+More exactly the directory
+.I $ROOTPACK/<packname>/bin
+where the executables are stored is a symbolic link to the directory
+.I $ROOTBIN/<packname>/bin
+.IP HOMEBIN
+The root directory for executables of all user packs. It enables to store
+executables in another file system (larger and possibly semi-permanent).
+.br
+More exactly the directory
+.I $HOMEPACK/<packname>/bin
+where the executables are stored is a symbolic link to the directory
+.I $HOMEBIN/<packname>/bin
+.IP ROOTLIB
+The root directory for libraries of all reference packs. It enables to store
+libraries in another file system (larger and permanent).
+.br
+More exactly the directory
+.I $ROOTPACK/<packname>/lib
+where the libraries are stored is a symbolic link to the directory
+.I $ROOTLIB/<packname>/lib
+.IP HOMELIB
+The root directory for libraries of all user packs. It enables to store
+libraries in another file system (larger and permanent).
+.br
+More exactly the directory
+.I $HOMEPACK/<packname>/lib
+where the libraries are stored is a symbolic link to the directory
+.I $HOMELIB/<packname>/lib
+.IP GMKTMP
+.br
+A temporary directory. For optimal performance, it is recommended to use a
+local disk space.
+.IP GMKFILE
+The basename of the configuration file used to run
+.B gmkpack\fR. It contains all the variables needed to configure the usage of
+this command.
+.br
+For developers, its value should be provided by the
+.B gmkpack
+administrator. If not defined, the use of the option
+.B -l
+of
+.B gmkpack
+is mandatory. Use the command
+.I optionspack
+to get the list of existing configurations.
+.IP GMK_OPT
+The extension name of the configuration file used to run
+.B gmkpack\fR. The default value is 'x'. Use the command
+.I optionspack
+to get the list of existing options.
+.IP GMK_ALIASES
+If set to any string, whenever a user creates a new pack,
+.B gmkpack\fR
+will add the name of this new pack as an alias in the shell
+.I rc
+file
+to change directory to this new pack directory at once. Symetrically,
+.B rmpack\fR
+will remove this alias.
+.IP GMK_ENABLE_OBJ_RENAME
+If set to any string, at linking time
+.B gmkpack\fR
+will rename object files containing a unique symbol so that they will reflect
+the name of the symbol inside. In certain cases it could be worth setting this
+variable, but it will slow down the linking step. If this variable can solve a
+linking problem, you should better try and change the source code !
+.IP GMK_IMPORT_PLUGIN
+The external script (plug-in) run by
+.B gmkpack
+to import source code while creating a main pack.
+.br
+Such a script can be written by packs administrators. It works only with
+reference packs.
+.IP GMK_SUPPORT
+The directory of support files to run
+.B gmkpack\fR (wrappers, configuration files, external scripts).
+
+.IP PACK_PREFIX
+The prefix of pack names.
+.IP PACK_EXT
+The suffix of pack names.
+
+.IP GMK_IGNORE_MULTINAME
+export this variable to any non-empty string to prevent \fBgmkpack\fR from aborting
+when more than one symbol of the same name is found inside a library (main entries 
+are ignored anyway).
+
+.IP GMK_INTFBMODULE_LIB
+export this variable to any non-empty string to make \fBgmkpack\fR fill the
+"unsatisfied reference" archive library with object files resulting from
+the compilation of autogenerated interfaces encapsulated inside a module.
+This may be needed to achieve linking edition with certain compilers.
+
+.IP GMK_TIMER
+The command used to count the compile time of each file. Default is /usr/bin/time
+
+.IP GMK_USER_PACKNAME_STYLE
+Style used to construct the user pack names.
+.br
+If not set, the default is equivalent to : 
+.br
+  "GMK_USER_PACKNAME_STYLE=\\${RELATIVE_TARGET_PACK}"
+.br
+(NB : The backslashes are important !)
+.br
+The following variables can be used to build a more complex name :
+   RELEASE_NUMBER       : reference release number
+   RELEASE              : reference release, including the prefix if any
+   BRANCH               : reference branch name
+   LATEST               : reference branch version
+   RELATIVE_TARGET_PACK : user pack short name
+   LIBFRT               : compiler stamp
+   LIBOPT               : compiler options stamp
+   PACK_EXT             : suffix
+.br
+Examples :
+.br
+   - Sort packs in one directory per release :
+.br
+GMK_USER_PACKNAME_STYLE=
+.br
+  \\${RELEASE_NUMBER}/\\${RELATIVE_TARGET_PACK}
+.br
+   - Extensive information on name :
+.br
+GMK_USER_PACKNAME_STYLE=
+.br
+  \\${RELEASE}_\\${BRANCH}.\\${LATEST}%\\${RELATIVE_TARGET_PACK}.\\${LIBFRT}.\\${LIBOPT}\\${PACK_EXT}
+.br
+   - Paste the root pack name after the user pack name :
+.br
+GMK_USER_PACKNAME_STYLE=
+.br
+  \\${RELATIVE_TARGET_PACK}@\\${RELEASE}_\\${BRANCH}.\\${LATEST}.\\${LIBFRT}.\\${LIBOPT}\\${PACK_EXT}
+
+.IP GMKROOT
+The directory where
+.B gmkpack\fR
+is installed.
+
+
+.PP
+.SH EXAMPLES
+The following command builds an empty reference pack (hub and source code) from scratch, where the
+release number is 12 and with a script to compile, build archive object
+libraries, but without making executables :
+.TP 10
+.PP
+(. berootpack)
+.br
+gmkpack -a -K -r 12
+.PP
+The following command builds an empty reference pack named 'bugfix' on top of
+the main pack defined above, together with a script to compile and make the
+executables ARPEGE, ALADIN and AROME (note that this operation cannot be
+perfomed before the total achievement of the reference pack above) :
+.TP 10
+.PP
+(. berootpack)
+.br
+gmkpack -r 12 -u bugfix -p arpege,aladin,arome
+.PP
+The following command builds a user pack named 'mymods' on top of the pack 'bugfix'
+defined above, together with a script to compile and make all possible executables :
+.TP 10
+.PP
+(. behomepack)
+.br
+gmkpack -r 12 -u mymods -b bugfix -p ?
+.PP
+.SH FILES
+.IP $GMK_SUPPORT/arch/
+Directory containing the configuration files which can be used by
+.B gmkpack
+(compilers, compilers options mainly).
+.IP $HOME/.gmkpack/arch/
+The user-private directory where to add more configuration files for
+.B gmkpack
+.IP $GMK_SUPPORT/wrapper/
+Directory containing wrappers to compilers or such commands, to be developped or
+customized be the administrator.
+.IP $GMK_SUPPORT/bin/
+Directory containing miscellaneous scripts, like plugins, to be developped or
+customized be the administrator.
+.IP $GMKROOT/link/*
+The directory of configuration files specific for each possible executable.
+.IP $GMKROOT/link/*/entry
+File containing the name of the entry point. It can be a single object filename,
+or a list of object filename (which will be loaded ahead). Wild characters are 
+allowed. Non-existent object filenames are allowed.
+.IP $GMKROOT/link/*/projlist
+File containing the list of projects (and thus user libraries) needed to link
+the executable. The projects are sorted from top to bottom like the subsequent
+user libraries should be linked (from first to last), before the system
+libraries. Non-existent projects are allowed.
+.IP $GMKROOT/link/*/dummylist
+File containing the list of dummy projects (and thus dummy user libraries) needed to link
+the executable. The dummy projects are sorted from top to bottom like the subsequent
+user libraries should be linked (from first to last), before the system
+libraries. Non-existent projects are allowed.
+.IP $GMKROOT/link/*/ldflags
+File containing on the first line the name of the loader (as a configuration
+variable name), and on the second line the loading flags sequence (as a
+configuration variable name).
+.IP $GMKROOT/link/*/system_libs
+File containing the list of system libraries (as configuration variables names)
+needed to link the executable. The libraries are sorted from top to bottom like
+they should be linked (from first to last), after the user libraries.
+.IP $GMKROOT/link/*/excluded_libs/*
+For each project if present: the list of the stamps corresponding to the
+sub-libraries to be excluded while linking.
+.IP $GMKROOT/link/*/blacklist
+File containing the name of the blacklist file used at linking time. If no
+blacklist file is needed, it can be an empty file.
+.IP $HOME/.gmkpack/link/*
+The user-private directory where to add configuration files for new executables.
+.IP $GMKROOT/intfb/*
+For each project if present: the release since when the auto-generated interface blocks have been used.
+.IP $GMKROOT/libs/*/*
+For each project if present ($GMKROOT/libs/*): the sub-libraries stamps
+as files containing the list of the sub-directories serving each sub-library.
+.IP $GMKROOT/home/exenames
+The file containing the name of each executable. To be used as a starting
+point for customization.
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR admpack(1),
+.BR behomepack(1),
+.BR berootpack(1),
+.BR brushpack(1),
+.BR envpack(1),
+.BR cleanpack(1),
+.BR genpack(1),
+.BR gmkfilemaker(1),
+.BR idotpack(1),
+.BR lockpack(1),
+.BR logpack(1),
+.BR lspack(1),
+.BR mpsh(1),
+.BR optionspack(1),
+.BR progpack(1),
+.BR readpack(1),
+.BR resetpack(1),
+.BR rlspack(1),
+.BR rmpack(1),
+.BR scanpack(1),
+.BR showpack(1),
+.BR usrpack(1),
+.BR vimpack(1).

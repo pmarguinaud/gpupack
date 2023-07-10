@@ -1,0 +1,941 @@
+
+GMKPACK NEWS :
+============
+
+Changes in version 6.9.6 :
+------------------------
+- fix a regression with complex dependencies
+- fix a bug in .fypp files pre-processing when more than one project contains .fypp files
+- New variable LNK_CXX in configuration file to define the linker needed for mixed programs,
+  ie written in c++ and fortran : it can be the c++ linker or the fortran linker, depending on the compiler.
+  WARNING : previous versions were using CXXNAME (the C++ compiler). 
+  From this version, LNK_CXX should added and defined in the configuration files, and compilation scripts may
+  need to be re-generated.
+- fix the order of include/module directories for local hub on top of another hub.
+- fix a bug in the timing report script
+- add ifsobs to the list of libraries linked to BATOR, OBSCONVERT and fcqodb.
+
+Changes in version 6.9.5 :
+------------------------
+- Substential re-write of .fypp files pre-processing in order to handle .yaml  or .hypp files (and more) updates.
+  (.hypp files are fypp-like files included inside .fypp files, but unlike .fypp files they don't need to be preprocessed).
+- Fix a complementary severe bug in the order of the researched pathes for dependencies update 
+  (active when deeply intricated modules are recompiled with at least one intermediate branch on top of the local one).
+- Do not abort on "unnecessary interface" if the interface has not been generated (a side effect of cpp macro usage)
+- Add MACROS_FRT in configuration files templates for the compilation of Fiat and Ectrans fortran code.
+- Support for additional library "neural" for OOPS in hub.
+- Workaround for mpi cc wrappers not able to act like a basic C pre-processor.
+- Cleanings of configuration files templates
+- Fix entry point of the executable surfex as surfex/OFFLIN/offline.o ; 
+  not to be confused with the executable from mse/ project which is named "mse_surfex".
+- Support for executable ascii2fa.
+- Update linking rules for compatibility with cycle 49
+- New environment variables HOMELIB and ROOTLIB to store the libraries in another filesystem.
+  For expert users only ! See the INSTALL file.
+- Try to deduct 'ctest' name from 'cmake' name
+- Add forgotten library hdf5_hl
+- Experimental option to make auto-generated interfaces from partly pre-processed source code (include
+  statements are ignored). To try it, export environment variable GMK_CPP_INTFB=1 for a main pack, or 
+  export GMK_CPP_INTFB=2 to force it under any circumstances (users packs namely, for code tuning). Users packs
+  inherit from the option of the main pack by default.
+- New environment variable GMK_TIMER to be set to the equivalent of /usr/bin/time if that command is missing.
+- Configuration file template MPINFORT_IA64.in for NEC SX-Aurora
+
+Changes in version 6.9.4 :
+------------------------
+- Yet another fix for .fypp files at recompile time
+- Portability fix : use bison instead of yacc for precompilers (needed for Ubuntu 22)
+
+Changes in version 6.9.3 :
+------------------------
+- Fix a severe bug in the dependencies update at recompile time (active when deeply intricated modules are recompiled).
+- Fix two severe bugs related to the handling of .fypp files when they are not modified or just "touched" at recompile time.
+- Fix a severe bug in cleanpack which could cause the parent hub branches to be cleaned if permissions allowed it.
+- Dynamic evaluation of GMK_LAST_HUB_BRANCH, which can now have a different value for each library of each project in hub.
+- Follow symbolic links for libraries in hub at link time, in order to solve certain "transportability" issues
+  with dynamic libraries.
+- Add missing cpp macros for fiat C code in configuration file templates.
+- Add precision definition in configuration file templates for fiat and ectrans.
+- Add error message "option -n requires an argument or should be removed" if -n is specified without argument.
+
+Changes in version 6.9.2 :
+------------------------
+- fix a bug which caused the compilation in the hub to fail silently when run in the same script as the traditional source code.
+- fix a bug which could cause cpp for C/C++ files to fail silently.
+- Enable ":include" statements at recompile time in .fypp files 
+- Provide wrappers mpifort_wrapper and mpiifort_wrapper for Intel compiler when used with OpenMPI (mpifort_wrapper)
+  or IntelMPI (mpiifort_wrapper) to work around the conflict of the "show nomap" option of the compiler.
+- Provide a wrapper mpigfort_wrapper for gfortran to reduce memory usage at compile time (by reducing debug information)
+  in the case the compilation would fail because of insufficient memory.
+- Support for executable pertcma
+- New environment variable GMK_PREVAIL_CUSTOMNAME to be set to 1 in order to arbitrarily name root packs with the value
+  of the option -u. Without this variable the options -a and -u are exclusive. Note that giving an arbitrary name to root
+  packs would break the possibility to build incremental packs on top of them. Therefore this environment variable is for expert
+  users only.
+Changes in version 6.9.1 :
+------------------------
+- Fix minor regressions
+- new variable GMK_LOCAL_PROFILE in configuration file which can contain a file to source 
+  in order to setup the proper libraries environment.
+  This can reduce the cost of running compiler wrappers and simplify their maintenance.
+- Disable by default the norms checker in main source packs.  
+  These last two modifications can speedup the compilation up to 20 %.
+- Cleanings.
+
+Changes in version 6.9.0 :
+------------------------
+- bugfix : add missing view of a hub created on top of a 'main' traditional pack
+- fix the libraries research in hub if a local hub is used on top of a main one.
+  Troubleshooting : should fckit be missing at linking time in other executables than oops ones,
+  then it can be added in the configuration file in the variable LD_USR_WITH_FCKIT
+  (or LD_USR_WITH_FCKIT_SERIAL if the executable is serial). This should be valid only
+  for source code compiled with the cpp macro WITH_FCKIT, which is deprecated).
+- enable the creation of static libraries for eckit (because not supported in native eckit package)
+- add new variables to finely tune the linking rules of executables (defined in configuration file,
+  can be added in ~link/*/system_libs) :
+  - Flags for linking with whole static libraries or not
+    LNK_WHOLE_ARCHIVE (usually : -Wl,-whole-archive)
+    LNK_NO_WHOLE_ARCHIVE  (usually : -Wl,-no-whole-archive)
+  # Flags for static/dynamic linking
+    LNK_STATIC  (usually : -Wl,-Bstatic)
+    LNK_DYNAMIC (usually : -Wl,-Bdynamic)
+  More generally, LNK_* variables are used to define linker options, while LD_USR_* variables
+  are reserved for actual libraries.  
+- enable static linking of eckit/fckit in OOPS executables
+- Remove temporary working directory at the end of the build job
+- fix dependencies updates for statements like : INCLUDE "file.h"
+- remove compiler option -ftree-vectorize from gcc templates because it can cause reproductibility issues
+  on certain systems
+- prepare the splitting of the project mpa into mpa + phyex : add GMK_FCFLAGS_PHYEX in arch template
+- split bottom librairies lists into hub libraries and system libraries ; that way the missing hub libraries
+  can be ignored at link time, which makes the transition from one source code cycle to another easier
+  because the same configuration file (the one defining all possible libraries in hub) can be used for both.
+  WARNING : linking rules created or re-defined by users in their directory ~/.gmkpack/link should be adapted 
+  in such a way that the files "system_libs" should be split into a file "hub_libs" for the libraries from
+  the hub and "system_libs" for the others.
+- support for the new projects fiat and ectrans :
+  * as external libraries
+  * as projects in hub
+  * as traditional projects (not recommended anyway ; and to be double-checked for fiat)
+- Quick&dirty fix for Fortran90_stuff.pm to enable parsing of submodules
+- filter out directory bufr2odb/ from odb project
+- miscellaneous minor fixes
+- adapt linking rules to be compatible with cycle 49
+- fix a bug causing lockpack to remove all object files when used with zshell
+- remove a useless print about missing hub
+- speedup startup of gmkpack
+- fix a bug which caused the number of ODB updates to be lost if the current pack was a main source pack
+  on top of a pur hub pack.
+
+Changes in version 6.8.2 :
+------------------------
+- Support for SUBMODULES (with Stephane Martinez's help).
+- Partial support for Cuda compiler (credits : Philippe Marguinaud).
+- clean_gmkpack now removes hard-coded pathes to simplify gmkpack phasings.
+- fix a regression which caused the path to autogenerated interfaces listing to be erroneous.
+- remove a useless print about missing hub
+- enable the build of PGD and PREP if their entry points are in surfex/OFFLIN
+- prepare the splitting of the project mpa into mpa + phyex
+
+Changes in version 6.8.1 :
+------------------------
+- bugfixes (gmkpack, readpack)
+
+Changes in version 6.8.0 :
+------------------------
+- support for .fypp files (requires python). Read the file NOTE_ABOUT_FYPP_FILES
+- Support for Atlas library (needed if the cpp macro WITH_ATLAS is defined)
+- support for external libraries to be compiled in the framework of a pack ("hub" directory)
+  Read the file HOW_TO_USE_THE_HUB
+- new option "-K" to create a local branch of that "hub" (background branches are always propagated)
+- new option "-k" to disable the creation of a local branch of src/ (background branches are always propagated)
+- automatically determine and add rpath for external libraries defined in configuration file
+  if their extension is .so or .dylib
+- fix error code in return to gmkpack
+- fix : add auto-generated or preprocessed files directories in the list of dependencies research projects
+- fix a severe dependencies issue at recompile time for modules (recursivity of dependencies)
+- fix : dynamic update of include/modules path needed because of recursivity of modules dependencies
+- fix a bug in the compilation of precompilers causing an error if compilation is stopped 
+  before the term and re-submitted without cleaning the pack
+- fix spurious debugging lines, like one causing files setup_aeolus and arpifs_excluded_file to be copied on $HOME
+- fix the detection of number of core on Apple macos (recent versions)
+- fix a bug in the recognition of the configuration file from a source pack
+- fix the option "no recursive update" which was bugged for C code 
+- GMK_SUPPORT is now a true environment variable, which allows a group of user to share its content
+- Add a directory "link" to $GMK_SUPPORT in order to define executables, preempting on the executables defined in
+  $GMKROOT/link.
+- extend aladin dummy library with the directory interpol
+- Support for zsh (Apple macos)
+- support for clang compiler
+- add executable foomaster
+- add executable obsconvert. Please ask me to add a new executable before complaining it has been missed :-(
+- cpp usage : if CPP is not defined in the configuration file, then the C compiler will be used with the 
+  proper options to invoke the preprocessor only. This is preferable to using an explicit cpp because it 
+  improves the consistency with the preprocessor used within the compiler. Unfortunately certain compilers
+  (Intel namely) cannot work as a preprocessor only, therefore CPP is still needed.
+- new variable LNK_EXEC in configuration file to host linker options specific to executables and not to 
+  shared-object libraries
+- readpack now returns an error message if more than one file is found in the directory .gmkfile
+- disable source code filtering in oopsifs project
+- libs4py has extension .dylib on macos
+- remove support for .mnh/.MNH files
+- miscellaneous other minor fixes
+
+Changes in version 6.7.3 :
+------------------------
+- workaround against a failure in the dependency research for files including headers from a subdirectory : only the
+  basename of the headers are considered (credits : Stephane Martinez) 
+- fix a bug which caused C or C++ files to be lost for compilation if the preprocessing on them was missing a header.
+- add MACROS_CXX in configuration file for specific flags for C++ source code preprocessing
+- add LNK_CXX_FLAGS in configuration file as extra flags for C++ executables : eventually c++ executables
+  will be linked with CXXNAME as compiler with LNK_FLAGS together with LNK_CXX_FLAGS as linker flags.
+- OOPS binaries can support an optional project eckits to be compiled by gmkpack and used as an alternative to ECMWF eckit/fckit
+- update configuration files templates for C++ code
+- Update list of projects and system libraries for OOPS binaries
+- Fix lost abort since the version 6.7.0 on generation of interfaces (credits : Stephane Martinez)
+- add return codes (credit : Stephane Martinez)
+- current compiled file can be got from the environment variable GMK_CURRENT_FILE (credits : Stephane Martinez)
+- bugfix: add the missing options -f in the genesis file
+
+Changes in version 6.7.2 :
+------------------------
+- support for serial and distributed fckit/eckit library (needed for sequential and distributed binaries) 
+- bugfix: add the missing options -g and -e in the genesis file
+
+Changes in version 6.7.1 :
+------------------------
+- add SUBMODULE etc (f2008) keywords in Fortran90_stuff.pm (credits : Stephane Martinez)
+- fix a bug in the compilation of new sql requests in incremental packs (credits : Stephane Martinez)
+
+Changes in version 6.7.0 :
+------------------------
+- update links rules for PGD and MRGVARBC (portability fix for Cray linker)
+- new test program ootestvar
+- fix a	severe bug in the dependencies analysis of C/C++ and related headers, by using the preprocessor to determine
+  their dependencies
+- fix dependencies analysis for headers included with a relative path.
+- include C and C++ files in the recursive destruction of outdated headers.
+- fix a minor bug in the recursive destruction of outdated objects.
+- optimise and clean ODB compilation setup ; make the generation of initial odb static stubb files parallel.
+- increase parallelism and improve overall load balancing of parallel tasks
+- as default value, extract the number of updates for ODB from file cma.h for main packs. For user pack, take the value
+  used for main pack made from this version of gmkpack. For user pack build from older main packs, set the value in script
+  (default is 3).
+- allow the number of updates for ODB to be defined by a cpp macro (in GMK_CFLAGS_ODB)
+
+Changes in version 6.6.9 :
+------------------------
+- fckit is now always linked as a "system" library
+- remove default mtune option for Mac OSX
+- fix HDF5 libraries localization in gmkfilemaker
+Changes in version 6.6.8 :
+------------------------
+- Provisional support for projects oops_src and oopsifs
+- Support for eckit, eckit_mpi and fckit libraries
+- Support for boost_thread, boost_system, boost_unit_test_framework, boost_mpi and boost_serialization libraries
+- update linking rules for odbtools mrgvarbc and oops binaries
+- fix a bug in the recursive destruction of outdated objects, when a modified header is included inside
+  a non-modified header
+Changes in version 6.6.7 :
+------------------------
+- change satrad interface block generator to filter the keyword FUNCTION in comments (Credits : S. Martinez)
+- support for new projetcs crm and ifsobs
+Changes in version 6.6.6 :
+------------------------
+- link Bator with aeolus
+- link PREP with mpi
+- link festat with netcdf
+- update linking rules for mrgvarbc because of Cray linker not very clever
+- update Fortran90_stuff.pm for cycle 44 (SELECT statement) + a fix for OO Fortran (credits : Rimvydas Jasinskas)
+- Portability fix : source temporary executable files instead of executing them in a sub-shell. It enables
+  to use potentially permissions-restricted (pseudo-)file systems.
+- Portability fix and optimization : split file to eval in plEval (lib-shell.pl).
+  This modification is necessary when the version of perl used is >= 5.22 
+  (otherwise eval becomes deadly slow). Credits : Ph. Marguinaud.
+Changes in version 6.6.5 :
+------------------------
+- fix a bug which caused the creation of a compilation script to fail when the corresponding pack
+  already exists and the configuration file is set but does not exist.
+- Add missing project ecfftw for all executable needing spectral transforms
+- Support for HDF5 in Bator executable, satrad project and any executable linking satrad
+- Support for spectral transforms in festat
+- Support for radiation project
+- Remove linker option -Wl,--unresolved-symbols=ignore-in-object-files for Cray configuration file template
+- add -lrt to all configuration file templates
+- add -ldl to gnu configuration file templates
+
+Changes in version 6.6.4 :
+------------------------
+- Yet another keyword (PROCEDURE) in Fortran90_stuff.pm
+- Additive cpp macros for surfex (needed since surfex v8)
+- Add option -fast-transcendentals to configuration files with Ifort compiler
+- Wrapper "svmlfix" for Intel Ifort compiler to work around the bug of the option "-fast-transcendentals"
+- remove support for executable "master"
+- add support for executable "ctpini"
+- add linker option -Wl,--unresolved-symbols=ignore-in-object-files for Cray configuration file template
+
+Changes in version 6.6.3 :
+------------------------
+- cross-checks of the values of the options -g and -e for the target pack with respect to the source pack
+- Control that the configuration file is unique inside a pack before creating another pack on top of it
+- Allow the research of a configuration file across different locations
+- Fix a bug which caused the compilation to be ignored when a header had an unsupported extension
+- Add the fortran 2003 keywords IMPORT and ABSTRACT and support for COARRAYS syntaxto Fortran90_stuff.pm
+- move subroutine getcalls from my_check_inc_intfb.pl to Fortran90_stuff.pm
+- portability fixes for Mac OSX
+- fix a bug in the identification of the compiler options label associated with a configuration file
+- use CXXNAME preferably to VCCNAME (in configuration file) for the compiler of C++ files
+
+Changes in version 6.6.2 :
+------------------------
+- Update the fortran parser (credit : Stephane Martinez - Meteo-France and Paul Burton - ECMWF)
+- Update the check_inc_intfb.pl (credit : Stephane Martinez - Meteo-France and Paul Burton - ECMWF)
+- Fix bugs in the fortran interface generator (credit : Paul Burton - ECMWF)
+- New environment variable GMK_IGNORE_USELESS_INTFB : to be set to "YES" or 1 in order
+  to ignore the presence of useless auto-generated interface blocks at compile time.
+- Support for shared object target "libs4py" in replacement for fa_lfi_trans4py
+  (which becomes obsolete). libs4py.so supports LFA for DDHs.
+- fix a bug active in the case the configuration file is defined but does not exist.
+- workaround against a bug in Intel compiler linker in templates for shared libraries as targets (-o a.out)
+
+Changes in version 6.6.1 :
+------------------------
+- Support for fa_lfi_trans4py (shared object target) ; needs to add the
+  variable LNK_SOLIB in the configuration files and compile with 
+  -fpic (or equivalent - see the templates)
+- Change templates for Intel compiler >= 15
+- support for pearome executables pertsurf, clust and addpearp
+- yet other portability fixes for this bloody Cray linker
+- support for executable SODA (including update of cpp macros for mse/)
+- rehabilitate test on perl version (minimum is 5.10 since gmkpack.6.6.0
+- fix a bug in the detection of valid entry points (odbglue is not one of them)
+- add odb/tools/abor1fl.o in the object list for hcat
+- enable festat entry point to be stat.o or festat.o
+- update html pages with respect to the man pages
+- remove auto-generated object files in lockpack
+- add -vec-report3 to Intel compiler templates
+- fix a bug in the construction of the pack name if the option -u is not provided and
+  HOMEPACK is not ROOTPACK
+
+Changes in version 6.6.0 :
+------------------------
+- New fortran90_stuff.pm
+- Merge of surfex_fortran90_stuff.pm with the new fortran90_stuff.pm
+- Support for the enhanced norms checker "2011" beside the traditional one ("2003")
+ (see the INSTALL file to learn how to select each of them)
+- Fix a bug in the detection of lex/yacc files at compile time
+- Fix a bug in the selection of compiler options for sql files
+- add option "-fno-var-tracking-assignments" intemplates for gcc used to compile ODB C code,
+  in order to save compile time
+- support for the project oops. It requires boost and libxml. Supported entries :
+    oohofx     <=> oops/ifs/mains/ifsHofX.o
+    oomakeobs  <=> oops/ifs/mains/ifsMakeObs.o
+    oomaster   <=> oops/ifs/mains/ifsForecast.o
+    ootest     <=> oops/ifs/mains/ifsTest.o
+    oovar      <=> oops/ifs/mains/ifs4dvar.o
+- provisional support for the project cope. It requires odb_api, and more. No supported entries yet.
+- Enhance flexibility to make sub-libraries of object files
+- fix a portability issue with locale (LC_ALL=C)
+- fix compilation of C++ code with "cc" extension
+- enable the use of a relative path in headers inclusions
+- Do not abort while making an objects archive library if object files of the same name 
+  are detected but strictly identical (depends of the compiler, too)
+- README file split in README + INSTALL
+- New file HOW_TO_MAKE_A_NEW_EXECUTABLE (self explanatory)
+- partial support for pearome softwares
+- remove vipack and instead implement vimpack, by Ph. Marguinaud.
+- Optional report of the most time consumming files at compile time (see ICS_TIMING_REPORT in the compilation script)
+- update man pages
+- use -qrealsize=8 in IBM XLF template instead of -qautodbl=dbl4 -qdpc=e to harmonize the
+  compilation options.
+- explicit use of the option "unsigned zero" for gfortran (-fno-sign-zero), IBM (-qxlf90=nosignedzero),
+  Intel (-assume nominus0 though it is the default) and NEC (-Ph). For other compilers the default is used,
+  without specification (yet).
+
+Changes in version 6.5.18 :
+--------------------------
+- Customization of the user pack name withe the environment variable GMK_USER_PACKNAME_STYLE
+  (see the README file)
+- Support for sfxtools binary
+- ASSOCIATE statement added in fortran stuff
+- fix a bug in the update of recursive dependencies of headers
+- Update IBM XLF template to support openmp/mpi in the recent versions of Surfex.
+- Support for Cray compiler ("ftn") and linker. With this compiler the new environment
+  variable GMK_INTFBMODULE_LIB should be exported to any non-empty string (see the README file for more)
+- add odb/tools/abor1fl.o in the object list for dcagen and odbmd5sum
+
+Changes in version 6.5.17 :
+--------------------------
+- Fix a bug in the detection of missing inclusion of autogenerated interfaces
+- add odb/tools/abor1fl.o in the object list for ioassign
+- add lapack/blas for linking master911
+
+Changes in version 6.5.16 :
+--------------------------
+- Add cpp macro GRIB_API_1 in all templates
+- use xlf95 instead of xlf90 in IBM xlf template
+- change option "-Wf,-A,dbl4" into "-Wf,-A,idbl4" for Surfex in NEC SX template
+- Remove support for executables adbias adscan biascv cabias cascan cybias
+  cyprep cyscan cysele facat rttov_ascii2bin_coef lamflag_odb
+- Update miscellaneous linking rules
+- Add openmp compiler option for C code in templates
+- Fix a bug in the generation of Surfex module interfaces
+- PACK_EXT (option -e) and PACK_PREFIX (option -g) become environment variables
+  (overwriting the corresponding variables in the configuration file)
+Changes in version 6.5.15 :
+--------------------------
+- support for project renaming with git
+- miscellaneous cleanings
+Changes in version 6.5.14 :
+-------------------------
+- genpack can now have a packname as argument
+- link BATOR with xla/ library, RGRID with lapack, PGD, PREP, *SURFEX with mpi.
+- up to 10 system libraries at bottom link
+- new environment variable GMK_NO_RESET to disable a pack reset before full (re)compilation.
+  By default, a 'resetpack' command is now run (not a 'cleanpack') before compilation, after
+  several troubleshootings have been observed.
+- improve compatibility for catching the xlf compiler version on IBM
+Changes in version 6.5.13 :
+-------------------------
+- Update linking rules for miscellaneous executables
+- Support for new project 'coupling'
+- Preliminary support for cope/odb_api projects
+Changes in version 6.5.12 :
+-------------------------
+- fix a bug in the control of autogenerated interfaces
+- Full support for obstat_calc,obstat_merge,obstat_plot including use of Magics
+- Support for executable liftools, removal of testfa
+Changes in version 6.5.11 :
+-------------------------
+- fix a bug in the detection of projects with autogenerated interfaces
+- add cpp macros for Surfex : -DARO -DOL -DASC -DTXT -DFA -DLFI
+- test the returned code from the linker even if an executable has been created
+Changes in version 6.5.10 :
+-------------------------
+- fix a bug which was causing gmkpack compilation to crash in a main pack with 
+  no source code with autogenerated interfaces.
+- gfortran wrapper against compiler bugs
+- Bugfixes in the management of surfex autogenerated interfaces
+- Modified configuration file templates for Intel
+- Faster detection of autogenerated interfaces in some cases
+- In case duplicated symbols are detected inside a library, the abort is not
+  postponed.
+- Support for separated Netcdf Fortran and C libraries
+- Remove norms violations reports for PRES-07.
+- Remove norms report on "Unusual kind value used"
+- Move up to 50 the exeeded maximum number of arguments reported by the norms checker. 
+Changes in version 6.5.9 :
+------------------------
+- More robust detection of autogenerated interfaces
+- Updates in various executables linking rules
+- Fix compilation of sat:satrad with autogenerated interfaces
+Changes in version 6.5.8 :
+------------------------
+- Bugfix in the detection of autogenerated interfaces
+Changes in version 6.5.7 :
+------------------------
+- bugfix and support for Mac OS X on the test of unicity of the symbols in the
+  text section of the users libraries.
+- fix eoj wrapper script used on IBM
+- all executables linking gribex now link grib_api as well
+- support for mse/surfex new executable convert_ecoclimap
+- support for mse/surfex new executable mse_surfex
+- support for aladin new executable holo and unholo
+Changes in version 6.5.6 :
+------------------------
+- add xla library to build combi executable
+- Support for module-encapsulated auto-generated interface blocks in surfex project
+- Test the unicity of the symbols in the text section of the users libraries except for
+  fortran main entries (MAIN__)
+Changes in version 6.5.5 :
+------------------------
+- Support for auto-generated interface blocks in sat/satrad project
+- Improvements in Fortran_stuff.pm
+- Enable empty interface blocks (will make pre-phasings easier)
+- Test the unicity of the symbols in the text section of the users libraries
+- Link with gfortran with option -ffast-math (Credits : Sami Saarinen)
+Changes in version 6.5.4 :
+------------------------
+- Change synthax "-openmp-threadprivate:compat" into "-openmp-threadprivate compat"
+  in Ifort templates
+- 'bench' list for executables, containing (ioassign,odbtools,masterodb,io_serv)
+Changes in version 6.5.3 :
+------------------------
+- Support for ioserv executable
+- New raps list with (ioassign,odbtools,masterodb,io_serv)
+- Fix a bug in SQL_cplpack.sh which caused the flag CANARI to be mandatory in
+  MACROS_CC rather than just in GMK_CFLAGS_ODB 
+- Bugfix for line too long in noupdpack.sh
+- Fix location of cpp macro BLAS in templates
+- Bugfix in the management of multiple compilers
+- Update Ifort templates
+- Support for Odbdiff executable
+Changes in version 6.5.2 :
+------------------------
+- Put back the support for OASIS in arch templates.
+- Remove Open-mp filter from xlf wrapper for IBM
+- Add option -qnoescape for surfex (version 6) in arch template for IBM.
+- Add option -Mbackslash for surfex (version 6) in arch template for PGF90.
+- Add line option GMK_CFLAGS_XRD = -DPOINTER_64 in arch template for all 64bits addressing machines
+Changes in version 6.5.1 :
+------------------------
+- Bugfixes
+- Auto-generated interfaces blocks update more robust.
+- DrHook selective instrumentation and scripts support by Philippe Marguinaud
+- configuration file template for mpiifort_ia64
+- Fix location of ADDRESS64 cpp macro in configuration file templates
+- let 64 Gb of stack limit in NEC SX configuration file template
+- bugfix on the treatement of .F by drHook.
+Changes in version 6.5.0 :
+------------------------
+- Test yacc and the availability of libncurses in gmkfilemaker.
+- For conservative reasons, the cpp macro MATHKEISAN has been removed from the NECSX template
+- Add compilation option "-Wf,-Nesc" in NEC SX template to fit with Surfex version 6
+- DrHook_all instrumentation by Philippe Marguinaud (see documentation
+  doc/DrHook-instrumentation.pdf)
+- README file split in README and NEWS.
+- New compilation list for raps
+- Add -Wf,-O,nomove in the sxf90 for the compilation of sat/satrad project.
+- Bugfix for using gget.
+- Remove mcmodel=medium from pathf95 template ; add openmp in sxf90 template.
+- GMK_THREADS becomes a environment variable.
+- enhanced and optimized parallel algorithm (credits : Philippe Marguinaud) :
+  * re-written in perl for better efficiency
+  * explore dependency to the maximum depth, not being stopped by alphabetic order
+  * parallel list sorted per size to optimise the load balance after circular distribution
+- interface blocks generator wrapper re-written in perl for better efficiency 
+ (credits : Philippe Marguinaud)
+- Bugfix to recover the source code descriptors after the program has been interrupted. 
+- New options "-g" for release prefix and "-e" for pack suffix, to enable
+  building of packs upon existing one when GMKFILE is not set and release prefix
+  and packs extension are not emty strings (ouf !). Should rarely be used.
+- Support for executable Surfex offline (name : surfex) - just for fun ?? ;-) 
+- Support for executables odbmd5sum, facat, oi_main and mysort
+- Support for new ODB bases : ddl.COUNTRYRSTRHBIAS, ddl.RSTBIAS and ddl.SONDETYPERSTRHBIAS
+  to be linked with the executables masterodb and ifs only (if present).
+- Bugfix in ODB sql management (credits : Oldrich Spaniel)
+- cleanups, optimisation of updating mechanism.
+- Add use of GMK_CFLAGS_ODB for preprocessing of ODB (previously in MACROS_CC)
+- Update mrgvarbc linking rules since cycle 36t1_bf
+- Support for Openmp in architecture templates (except NEC for now)
+- Cleaning of macros in architecture templates
+- Promote optimisation level to -O2 for C files wherever gcc is used (Darwin, Linux)
+- For operating system with a linker not having a libraries cycling research mechanism
+  (namely : Mac OSX), use the biggest library + a mix of the others, rather than a mix
+  of all libraries. This is because a single huge library may break the limits
+  of the os/kernel.
+- Bugfix in the support for self-made executables
+- Optimise the building of executables : libraries are linked rather than copied
+  when they don't need to be pruned.
+- Systematic execution of ranlib on Darwin system prevents the loader to fail.
+Changes in version 6.4.1 :
+------------------------
+- Bugfixes
+- Remove Dummies_netcdf.c from compilation of ODB, as it can conflict with the true Netcdf library.
+  (if necessary, an external dummy netcdf library would need to be used)
+- Support for C++ files (expension .cpp) ; for now the same options as fort C files are used.
+- Remove '-show include' option in ifort configuration files templates for
+  compatibility with mpich wrapper
+- Support for new executable master911 (former conf. 911)
+Changes in version 6.4.0 :
+------------------------
+- Systematic abort on compilation error, regardless of the variable ICS_RECURSIVE_UPDATE.
+  To ignore a compilation error, the corresponding source file should be ignored.
+  However, compilation errors can be ignored up to the end of the compilation step
+  if the variable ICS_POSTPONE_ABORT is set to 'yes' (needs to re-generate the
+  compilation script)
+- Support for ODB-related executables adjust_seqnos.x, revert_seqnos.x, create_odb.x,
+  fscheduler.x, split_bufr_data.x, split_timeslot_bufr_data.x, bufr2odb.x,
+  odb2bufr.x, simulobs2odb.x, obstat_merge.x, obstat_plot.x, obstat_calc.x,
+  dcagen.x, odbsql.x and hcat.
+- Support for IFS executable (executable name : ifs.x).
+- Support for an external blacklist file generator
+- trap interrution signals to clean the working directory before leaving
+- Support for compilation options with NaN preinitialisation in fortran code
+  in the compilation script (needs to re-generate the compilation script and
+  fill the variable NAN_FRTFLAGS in the configuration file). 
+- Authorise duplicated modules if they are used by themselves only.
+- partial optimisation of compilation procedures
+- Support for the split of mse projects into mse + surfex projects
+- Enable specific compilation options per project : this options should be set
+  as the following variables in the configuration file : 
+  - Fortran code : GMK_FCFLAGS_$(NAME) ; C code : GMK_CFLAGS_$(NAME)
+  where $(NAME) is the project name as capitalized letters.
+  Update configuration file templates consequently :
+  - for Aeolus on NEC/SX (use xint option) 
+  - for Sat/Satrad on IBM (define the cpp macro RTTOV_ECMWF to use essl subroutines)
+  - for Sat/Satrad in general : move specific macros from MACROS_FRT
+  - for mpa, mse and Surfex : promote reals to 64 bits.
+- Reduce the list of include/module directories : the include files (excepting
+  auto-generated interfaces) and modules are now linked to a permanent directories
+  after the first time they are compiled. There is one directory per project and
+  per kind of file (headers, modules) below ~/src/local/.include
+- Executables can now be requested as predefined lists of executables.
+  The lists should be files in $HOME/.gmkpack/list/ or in $GMK_SUPPORT/list/ and
+  should contain a list of existing executables. A few default lists are provided
+  (see $GMK_SUPPORT/list after installation).
+- Each executable name is now defined in the file ~/link/$(executable)/name
+- Enable blacklist file CPP-preprocessing.
+- Remove LNK_MULDEFS and GMK_NQS_SMALL that are now useless
+- Improve the flexibility of projects management (less constraints with project names)
+  A few modifications break the possibility to build cycles older than cycle 27. 
+- Enable exit on error in the script 'do_aeolus_setup_for_gmkpack' driving
+  aeolus package
+- Make ccp macro CANARI optional while building the configuration file with
+  gmkfilemaker
+- gmkfilemaker now ask where to find fortint.h (optional, needed in some aeolus
+  test programs)
+- Support for Magics library (needed for obstat_plot)
+- Support for a dummmy mpi library (for serial executions)
+- Support for a dummmy Meteo-France library (needed for Ifs)
+- Support for EECFI library (possibly needed for aeolus)
+- Support for Netcdf library (needed for Surfex)
+- Support for grib_api libraries (including jpeg)
+- Library essl linked prior to lapack in IBM configuration file template
+  (should improve the performance)
+- Support for Intel Fortran compiler + either icc or gcc
+- Support for Portland Group Fortran compiler + either pgcc or gcc
+- Template for Pathscale compiler
+- Add -lm when linking ioassign (needed since cycle 36)
+- Add system libraries when linking cabias (missed)
+- Specify -qnohot in IBM aix template (needed since compiler version 11 or 12 ?)
+- new version of gmak.pl to fix dependency research failures (credit : S. Martinez)
+- Support for pre-processable .mnh files : extension should be .MNH
+Changes in version 6.3.2 :
+------------------------
+- Support for a 3rd MPI library 
+- Remove blas library from IBM aix template (essl is used instead)
+Changes in version 6.3.2 :
+------------------------
+- fix a bug concerning the handling of mpi in 'gmkfilemaker'
+- support for executables arpege, alaldin, arome, arpodb, aldodb and aromodb removed
+  and replaced by master and masterodb.
+- miscellaneous fixes
+- remove compilation option -Wf,pvctrl,chgpwr from NEC SX configuration file template
+- Add missing project arp/ to link PGD
+- Optimisation for linking on MacIntosh
+- Clean Ifort configuration files templates
+- Fix flexfix.sh, thanks to Toon Moene.
+- Add missing cpp macro "-DRTTOV_ARCH_VECTOR" in NEC SX configuration file template
+  (usefull since cycle 35)
+- Various fixes in the IBM AIX configuration file template.
+- Use -O2 in configuration files for pgi compiler.
+Changes in version 6.3.1 :
+------------------------
+- Support for RTTOV9 : new cpp macro "_RTTOV_DO_DISTRIBCOEF" in architecture templates
+- fix bugs in the gmkfilemaker to build configuration files with mpif90
+- remove support for executable CTRODB.
+- Support for executables PGD, PREP and SXPOST from Surfex.
+- Support for aeolus software (not before cycle 34). Needs two supplementary
+  variables in configuration file : GMK_AEOLUS_F90 and 
+  GMK_AEOLUS_LATLON_HANDLING (See the templates)
+- Wrapper "ifortld" for Intel Fortran compiler 10.x when used as a pure loader :
+  The ifort version 10.x compilers have a problem with not placing the
+  --start_group and --end_group flags correctly when calling ld.
+  This happens when ifort is called with only .o and .a files (for pure
+  linking), but not when there is also a .F file on the command line.
+- Exclude directory old2new fron bla/ main library because it contains a main C
+  program)
+- flushpack command removed and replaced by 'cleanpack' : to remove from pack
+  the object files and any other objects-related files. This command is the 
+  counterpart of "make clean". Don't ask me why I didn't write this command earlier ...
+- clearpack command removed : getting to dangerous since aeolus support, where it
+  could remove crucial files.
+- Auto-generation of html man-pages at installation time (needs man2html).
+- Improved scripts "import_from_webdav" and "cc_export" in support/bin
+- Support for cycle 35 source code reorganisation 
+
+Changes in version 6.3.0 :
+------------------------
+  This new version should improve the flexibility of gmkpack, and should make 
+  its maintenance easier. The installation should be easier as well. Note that 
+  building gmkpack is now partly interactive.
+- ROOTPACK, HOMEPACK, ROOTBIN, HOMEBIN and GMKTMP don't need to be specified
+  before installing or running gmkpack : defaults values are proposed.
+- GMKROOT is now useless : only what is in PATH is relevent.
+- Wrappers are now moved out of gmkpack and provided as a separate support 
+  package with gmkpack
+- Customized configuration files are now moved out of gmkpack and should be 
+  stored in a specific directory named $GMK_SUPPORT/arch. For continuity with 
+  the previous versions of gmkpack, these files (when relevent with respect to 
+  the operating system) will be stored automatically in this target directory 
+  at the installation time of gmkpack. This should not be the case in the next 
+  versions of gmkpack.
+  The previous directory (~/gmkpack/arch/) now contains only skeletons of 
+  architecture files for different operating systems ; these files should not be 
+  customized, as they used by the configuration file maker assistant 'gmkfilemaker'
+- New script 'gmkfilemaker' to assist the user in the creation of a configuration file.
+- Consequently a new environment variable GMK_SUPPORT can be set as the path
+  of gmkpack support files. The default is "gmkpack_support" in the parent 
+  directory of gmkpack.  Below this directory, wrappers should be stored in
+  a directory named 'wrapper/', and configuration files should be stored in
+  a directory named 'arch/' ; a third directory named bin/ can be filled with 
+  miscellaneous scripts. The next versions of gmkpack should only provided new 
+  wrappers or new miscellaneous scripts.
+- Enable option -l to select a compiler and a compiler version. Note that from now,
+  configuration files with different compilers or architecture must set different
+  values for LIBFRT. 
+- New command % optionspack to list the potential compilers and compiler options 
+  available for the current installation, using the configuration files stored	in
+  $GMK_SUPPORT/arch.
+- From now, configuration files should always have an extension (new environment 
+  variable GMK_OPT). If GMK_OPT is not initialised, the extension "x" will be assumed. 
+  Files without extension will be ignored.
+- It is no more necessary to set GMKFILE as an environment variable ; but if
+  GMKFILE is not set, then the option -l is mandatory while invoking gmkpack to create a pack.
+- Update support for Linux PC 32 or 64 bits with pgi, gfortran and g95
+- Support for distributed compilation has been removed ; the support for 
+  multi-threaded should fit all the machines of today. Configuration variable LNK_MPCCNATIVE
+  recycled in all configuration files to represent the linking options for the 
+  native C linker (this change may cause a problem only while recompiling 
+  completely a main pack).
+- Configuration variables INC_MPI and DUMMY_INCPATH merged into a unique one : INCLUDEPATH
+- Support for an alternative perl installation with the environment variable 
+  GMK_ALT_PERL (needs a re-installation of gmkpack) ; the test procedure is now run at
+  installation time
+- New configuration file for the cluster HPCE at ECMWF, suitable for power5 processors.
+- clearpack, flushpack, lockpack, rmpack resetpack, berootpack, behome pack : revisited.
+- rmpack, lockpack and resetpack can work outside of a pack, specifying a list of packnames.
+- Support for new executables addsurf and mrgvarbc ; remove support for 
+  executables sptogp and gptosp
+- New environment variable : export GMK_ENABLE_OBJ_RENAME=YES to enable renaming
+  of object as the symbol name inside if the symbol is unique in the object. 
+  This was the previous behaviour which is now changed. The new behaviour 
+  (ie : no renaming) is less hazardous and faster, providing the source code 
+  release of arpege/ifs is at least cycle 30.
+- Synchronisation of compilation for IBM flags with ECMWF experience
+- New environment variable GMK_IMPORT_PLUGIN to support source code
+  importation at the time of the pack creation. GMK_IMPORT_PLUGIN
+  should be the absolute path of an external script, working without
+  argument. Anybody is free (en encorouraged) to write a personal plug-in.
+- Make the libraries update more flexible from the user interface : 
+  from now the possible modes are :
+    "full" (or "yes") : update all the libraries
+    "user"            : udate only the actual user libraries
+    "dummy"           : update only the dummy (user-mirror) libraries
+    "unsx"            : update only the unsatisfied external libraries
+    "off" (or "no")   : no updates.
+- Fix a bug to remove a meaningless warning message while making dummy libraries
+- Update support for MacIntosh	computers with g95 or gfortran compilers and 
+  'Tiger' or 'Leopard' OS.
+- Fix a bug in odbstuffpack.sh to invoke odb98.x with -o on any platform 
+- Plugin ODB 'flexfix' patch for compatibility between lex.l and any flex version.
+  Note that however lex.l from cycle 33 or lower cannot be compiled with 
+  flex-2.5.33 or higher ; in that case one should install an older version of flex. 
+- New arch file GFORTRAN.LINUX
+- Fix a bug in the versionning calculation of reference packs.
+- SX8R.MF* architecture files now links libgen.a for compatibility with ODB cycle 33.
+- Default behaviour is from now to make output listings even in main packs. 
+- Support for new project "bip" (externalized biperiodicisation)
+- Miscellabeous cleanings
+
+Changes in version 6.2.4 :
+------------------------
+- Support for the ASCII2BIN rtcoef converter
+- Use a wrapper for mpisxc++ so that compilation directives can be interpreted
+  even if not on top of the source code (by courtesy of Sami Saarinen)
+- Replace debug option "-Cdebug" by "-gv" in SX8R.MF architecture files
+- fix a bug in lnkpack.sh to enable new executables to use a blacklist file
+- configuration stuff for making the generic executable PINUTS (for cycle 32T3 and next)
+- invoke odb98.x in odbstuffpack.sh with -o to ensure compatibility with ODB_cy32r2
+- fix a bug which caused the user pack name incorrect when -u is not specified
+  and -v is specified to a version which is not the last existing one
+- new architecture file SX8R.MF.xompft for Open-MP and flowtrace
+- SX8R.MF architecture files now links MathKeisan FFT library and define 
+  MATHKEISAN as a supplementary cpp macro
+- new environment variable GMK_ALIASES : to be set to anything in order to
+  have aliases of the packs inside the file $(SHELL)rc. The default is from now
+  NOT to set any aliases.
+- new environment variable ROOTBIN for an easy switch toward ROOTPACK and 
+  backward to HOMEPACK. If ROOTBIN is not set it will be assumed as $ROOTPACK. 
+- cleanings
+- miscellaneous fixes in configuration files
+
+Changes in version 6.2.3 :
+------------------------
+- enable option -o of gmkpack. The argument could be any alphanumeric string
+- enable the following arguments for -o :
+  -o g : debug (for SX8R.MF)
+  -o NaN : preinitialization to Not a Number (for SX8R.MF)
+  -o xQuad : quadruple precision effective (for SX8R.MF)
+  -o bC : debug + bound checking (for SX8R.MF and PGI.LXGMAP)
+- new arch file for Intel, including ODB, thanks to Ulf Andrea
+- new executable RGRID for making gaussian reduced grids (needs cycle 32T2 or 
+  later, and compilation in quadruple precision)
+- now gmkpack creates a script file for compiling and archiving libraries when
+  option -p is not specified
+- new command "idotpack" to recursively list the files prefixed with "i." and 
+  not suffixed with ".L" (for NEC deboggers !)
+- new command "showpack" to recursively find the last two files given in
+  arguments of the command (extension of source file included or not in the
+  arguments). If the argument(s) is (are) not in the local pack, thenonly one
+  file is shown (the last one from the reference pack).
+  Example : %showpack cnt0
+  local/arp/control/cnt0.F90
+  inter.2/arp/control/cnt0.F90
+- minor bugfix since odbglue in lnkpack.sh
+
+Changes in version 6.2.2 :
+------------------------
+- change the linker for pregpssol
+- fix a bug in rmpack
+- fix a bug in the linking step of IOASSIGN since the ODB-glue solution
+- executables are now linked in the temorary directory, then moved to the
+  destination directory : this should prevent at least from making truncated
+  executables if time limit is reached at linking time.
+
+Changes in version 6.2.1 :
+------------------------
+- Adapt linking step with the ODB-glue solution (quick & dirty)
+- fix a bug which could make gmkpack fail with a large liste of sql files
+- fix the list of low-level libraries to load for executable pregpssol (IBM problem)
+- fix the list of libraries to load for ioassign (IBM problem)
+- provide configuration for NEC SX8R at Meteo-France
+- remove obsolete option -O
+
+Changes in version 6.2 :
+----------------------
+- Support for NEC SX (cross-compiler used)
+- Support for multi-threading, thanks to Eric Sevault's "mpsh". This tool has 
+  been modified here however, in order to get the ouput of parallel threads
+  immediately.
+- split library "uti" in many part to avoid potential conflicts at linking time
+- if the variables LNK_STARTG and LNK_ENDG are not set, then the user libraries
+  will be fused into a unique big library.
+- force a default option (-breorder) in IBM configuration files in order to let
+- the loader do itself a cycling research in libraries (default behavior) 
+- loadind odb main library prior to the other libs can changes misfortune by luck
+- Fix a bug which caused all executables to be removed instead of only thoses
+  which are related (directly or undirectly) to a change/removal of a library
+- Full support for blacklisting
+- optimisation : use xargs whenever possible instead of -exec in find command
+- portability to NEC TX and SX platforms
+- Force the computation of auto-generated interfaces when the compilation mode
+  is "full"
+- Fix a bug in the usage of odb98.x which caused the incremental mode of
+  compilation to fail
+- Fix 2 tiny bugs which could caused errors in the .genesis/.logfile files
+- More robust interpretation of bottom libraries filenames, enabling the use
+- of environment variables
+- Research of the odb98 flags file more robust
+- Recover the standard error file on the dayfile even if no listing requested
+- Support for shared object library if bottom libraries are "so".
+- Maximum number of updates supported at compilation time for ODB is tunable.
+  Default is 3
+- architecture file "GMKFILE" can be stored in $HOME/.gmkpack
+  gmkpack will search this file first in $HOME/.gmkfile, then in $GMKROOT/arch
+- Gmkpack now uses $GMKTMP/gmktmp.$$ as its own working directory
+- Better management of environment variables from the configuration file
+  "GMKFILE" ; it should not be necessary, for the next upgrades, to re-make
+  the compilation scripts (unless there is a change in the user-interface part
+  of the script).
+- new configuration variable DUMMY_INCPATH to define pathes for dummy include 
+  files (like mpif.h for single processor machine, or ODB include files for 
+  those not using ODB)
+- new directory containing wrappers for compilers (1 for xlf90, 1 for pgf90)
+- update the configuration files. Note that for IBM machines, the variable
+  LNK_MULDEFS has been set to "-bobjreorder", though such option does not
+  exist, according to the man page of ld. This is just to force ld to behave
+  its fancy non-standard way ! However this variable could be filled with a
+  neutral option, or even be left unset (then gmkpack would do the job itself).
+- new scripts : "berootpack" and "behomepack", respectively to change in the
+  local shell the environment variable HOMEPACK to ROOTPACK, and to reset
+  HOMEPACK to its original value. Usage : 
+  % . berootpack
+  % . behomepack
+- flushpack now flushes also the user's libraries and binaries
+- Support for a cross-compiler, including change of the parallel process to
+  Eric Sevault's "mpsh". This tool has been modified here however, in order to
+  get the ouput of parallel task immediately.
+- VPP's environment variable "LD_EXCLUSION" is set by gmkpack itself (should
+  improve a bit the performance of the loader)
+- fix a bug which made gmkpack load more than one time the same "GCO"'s
+  libraries under special conditions (complex stack of packs).
+- fix a bug with gget which made gmkpack not find the libraries when fetched from the 
+  archive machine
+- Low-level libraries are now selected individually for each binary
+  New libraries can be rather easily added, providing the variable name starts with
+  "LD_" in the configuration file
+- compilation step has now 3 modes :
+  	"full" to do the full normal compilation step
+	"incr" to compile from a starting "level" to an ending "level"
+	"off" to switch off the compilation step.
+- user libraries purged from multiple defined symbols if the loader does not do it ; the first symbol
+  definition is taken. New architecture variable to support multiple definitions of symbols if the
+  loader has such option.
+- semi-automatic generation of users dummies libraries (via configuration files)
+- Fix a severe bug when ICS_NC_SEVERITY=0
+- Upgrade of Fortan stuff Perl module (from ECMWF)
+- support for precompiler odb98 revisited ; support for precompiler bla95 added
+- option -f to desable prompting the user in rmpack
+- desactivate default user setup of the norms checker
+- cosmetic cleanings
+- Bugfix on resetpack
+- remove useless environment variables MPIF and FRT_CTL_VERSION
+- environment and file configuration for Linux pc at GMAP (PGI)
+- better compliance with Linux
+- support for *serial* vs. *distributed* machine :
+  from now the variable "INC_MPI" MUST be set for distributed machine
+  and MUST be left UNSET for serial machine.
+- some hard-coded VPP-specificies makes life easier
+- Default intfb projects list more robust
+- *.ddl files now kept safe after cpp
+- flushpack flushes as well odb compiler stuff if main pack
+- files in "reduced list" don't need anymore to be prefixed with "local@"
+
+Changes in version 6.1 :
+----------------------
+- cosmetic cleanings
+- forget externalization of odb98.x
+- architecture file for VPP5000 Kami ; draft for HPPA andante
+- new architecture file for SMHIs Linux-clusters
+- bugfix : correct compilation statements for Psize/Psystem at installation time
+- new binary "aromodb" for arome+odb
+- bugfix : do not report on a listing if it does not exist
+- support for debugging odb-related problems
+
+Changes in version 6.0.2 :
+------------------------
+- Norms checker informative message when macros "DOC" or "doc" are defined (CTRL(35))
+- enable new vobs created in intermediate branches
+
+Changes in version 6.0.1 :
+------------------------
+- User-control of Norms checker verbosity :
+  ICS_NC_SEVERITY = 0 (No report) or 1 (Severe,Warning) or 2 (+Informative)
+  ICS_NC_SUPPRESS = "MESS-n:MESS-m" : suppressed messages
+- Norms checker report written in the compilation dayfile
+- Lines longer than 132 characters are now considered as a warning (W) norms violation
+- new VOBs "mse" and "mpa" for AROME
+- handle files with extension .mnh as .f90 files to be compiled in double precision
+- separate variables for various compilation flags and Cpp flags in architecture files
+- Specific variable in architecture file for odb98 Cpp macros
+- update architecture files
+- New executables : qscat_25to50, qscat_bufr, qscat_dconeqc, qscat_filter,
+  blend, blendsur, check_limits, lamflag_odb, arome
+- Abort at once if an error occurs while building archive libraries
+- fix a bug in rmpack which caused that aliases where not removed from the file .kshrc
+- This time, ioassign generation is really fixed (I hope).
+- Miscellaneous minor bugfixes
+
+Changes in version 6.0 :
+----------------------
+- new architecture file for Portland compiler on LINUX, made by A. Bogatchev
+ for gmap (stille bugged, actually)
+- fix a bug in the interfaces generator when two consecutive comment lines are
+  present in the subroutine calling sequence
+- correct generation of ioassign
+
+Changes in version 5.7 :
+----------------------
+- various bugs fixed.
+- remove parameter LD_DYN from architecture file
+- new architecture file for Intel compiler on LINUX, made by A. Bogatchev for
+  Bulgaria
+- new environment variable needed .profile : "GMKTMP" instead of
+  "TMPDIR" (GMKTMP should be still set to $TMPDIR if TMPDIR is suitable)
+- Unsatisfied external subroutines (those inside src/unsxref/quiet and
+   mostly src/unsxref/verboose) should be suffixed with an underscore.
+- enable multi programs "a la carte" while generating the compilation script
+  (-p program1/program2/.../programN)
+

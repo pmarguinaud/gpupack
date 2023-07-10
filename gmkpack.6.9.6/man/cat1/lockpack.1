@@ -1,0 +1,41 @@
+lockpack(1)		    General Commands Manual		   lockpack(1)
+
+
+
+1mNAME0m
+       lockpack - lock packs
+
+1mSYNOPSIS0m
+       1mlockpack 22m[ 1m-f 22m] [ 4mpack124m ] [ 4mpack224m ]	...
+
+1mDESCRIPTION0m
+       For  a  single pack or a set of packs, 1mlockpack 22mrecursively removes all
+       the "object" files (ie with extension "o" or "ok"), except those	 which
+       are  used  individually	at linking time. The remaining files will have
+       permissions changed to readonly.
+       This command should be run once a pack has been finalized, so  that  it
+       will  take  less	 disk  space. "Locked" packs can be considered as com‐
+       pletely safe by end users, since they could not be changed later.
+       Arguments are optional and can be a list	 of  packs  names  (directory)
+       visible from the current directory.
+       When  invoked without argument, the working directory can be any direc‐
+       tory inside a pack.
+
+1mOPTIONS0m
+       1m-f	22mBy default, 1mlockpack 22masks for confirmation before  running.  Use
+	      this option to force the action without confirmation.
+
+1mDIAGNOSTICS0m
+       This  command  will not work for an argument which does not look like a
+       pack. Then the following message would be displayed :
+       "The directory 4mtarget24m does not look like a pack. No lock."
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1mgmkpack(1).0m
+
+
+
+								   lockpack(1)

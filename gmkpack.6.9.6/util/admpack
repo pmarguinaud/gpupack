@@ -1,0 +1,54 @@
+#!/bin/bash
+########################################################################
+#
+#    Script admpack
+#    --------------
+#
+#    Purpose : to list administrator's existing packs
+#    -------   
+#
+#    Usage :  admpack [ -f rootpack_directory ]
+#    -----           
+#
+#    Environment variable : 
+#    --------------------
+#                ROOTPACK : default rootpack directory
+#
+########################################################################
+#
+# Either use -f or have ROOTPACK exported :
+
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+ROOTPACK=${ROOTPACK:=$HOME/rootpack}
+FROM=$ROOTPACK
+errflg=0
+while getopts f: option
+do
+  case $option in
+  f)  FROM=$OPTARG;;
+  \?) errflg=1;;
+  esac
+done
+if [ $errflg -eq 0 ] ; then
+  if [ ! "$FROM" ] ; then
+    errflg=2
+  fi
+fi
+if [ $errflg -eq 1 ] ; then
+  USAGE1="Usage : admpack [-f rootpack-directory ]"
+  echo $USAGE1 >&2
+  \exit 1
+elif [ $errflg -eq 2 ] ; then
+  USAGE2="ROOTPACK is not set."
+  USAGE1="Set it, or usage : admpack [-f rootpack-directory ]"
+  echo $USAGE2 >&2
+  echo $USAGE1 >&2
+  \exit 1
+fi
+echo Available packs in directory $FROM :
+cd $FROM
+\ls -1d * 2>/dev/null

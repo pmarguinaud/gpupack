@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# A plug-in for gmkpack to import the source code at the time of the 
+# creation of the pack.
+# The format of the source code file(s) is supposed to be pre-determined
+# by the plug-in.
+
+# from the $HOME/src directory
+#
+# Only 'administrative pack' are concerned so far
+
+if [ "$ROOTPACK" = "$HOMEPACK" ] ; then
+# Get source directory
+  DIRNAME=$HOME/src
+  if [ ! -d $DIRNAME ] ; then
+    if [ ! -d $DIRNAME ] ; then
+      echo "$HOME/src could not be found"
+      exit 1
+    fi
+  fi
+# Make basename of the source code
+  if [ "$MAINPACK" ] ; then
+    BASENAME=${RELEASE_NUMBER}_${BRANCH}.${VERSUS}
+  else
+    BASENAME=${RELATIVE_TARGET_PACK}.${LATEST}@${RELEASE_NUMBER}_${BRANCH}.${VERSUS}
+  fi
+# Import
+  NAME=$DIRNAME/${BASENAME}.tgz
+  if [ -f $NAME ] ; then
+    cd $TARGET_PACK/$GMKSRC/$GMKLOCAL
+    tar xvfz $NAME
+  else
+    echo "The source code to import is missing."
+    exit 1
+  fi
+fi

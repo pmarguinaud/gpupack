@@ -1,0 +1,132 @@
+#!/bin/bash
+########################################################################
+#
+#    Script rmpack
+#    -------------
+#
+#    Purpose : In the framework of a pack : to remove the named pack
+#    -------
+# remove a pack dir structure created by gmkpack
+# (copyleft) 2001 Eric.Sevault@meteo.fr ... ready to leave GCO !
+# Modified 2001-11 Ryad el Khatib : sub-directory packs, HOMEBIN & alias
+# Modified 2005-10 Ryad El Khatib : option -f
+# 
+#
+#    Usage : rmpack [-f] pack1 pack2 ...
+#    -----
+#    Parameters :  -f : remove without prompting the user
+#    ----------
+#    Environment variable :
+#    --------------------
+#
+########################################################################
+#
+
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+DIR=$PWD
+
+FLAG=""
+set -- `getopt f $*`
+if [ $? != 0 ] ; then
+ echo "usage: rmpack [-f] pack1 [pack2]..." >&2
+ exit 2
+fi
+for i in $*
+do
+     case $i in
+     -f)  FLAG=force; shift;;
+     --)  shift; break;;
+     esac
+done
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+for target in $*; do
+
+  IERR=0
+  if [ -d $target ] ; then
+    cd $target
+#   Find whether we are inside a pack or not : test the presence of directory .gmkfile:
+    if [ -d .gmkfile ] ; then
+      export TARGET_PACK=$PWD
+      GMKSRC=$($GMKROOT/util/readpack GMKSRC | cut -d '"' -f2)
+      if [ "$GMK_ALIASES" ] ; then
+        GMKUSERFILE=$($GMKROOT/util/readpack GMKUSERFILE | cut -d '"' -f2)
+        if [ ! -f $HOME/.${GMKUSERFILE}$(basename $SHELL)rc.old ] ; then
+          \cp $HOME/.${GMKUSERFILE}$(basename $SHELL)rc $HOME/.$(basename $SHELL)rc.old
+        fi
+      fi
+    elif [ -s .genesis ] && [ -s .gmkview ] && [ -s .logfile ] && [ -d src/local ] && [ -d sys ] && [ -d lib ] ; then
+      GMKSRC=src
+#     another chance for oldest packs:
+#     No chance to find safely GMKUSERFILE
+    else
+      IERR=1
+    fi
+#   Confirm with the presence of directory .gmak :
+    if [ $IERR -eq 0 ] ; then
+      if [ ! -d $GMKSRC/.gmak ] ; then
+        IERR=1
+      fi
+    fi
+    if [ $IERR -eq 1 ] ; then
+      echo "The directory $target does not look like a pack. No remove."
+    fi
+    cd $DIR
+  else
+    echo Skip non-existent $target directory
+    IERR=1
+  fi
+
+# Confirm:
+  if [ ! "$FLAG" ] && [ $IERR -eq 0 ] ; then
+    echo -n "rmpack: pack ${target}. Remove(y/n)? "
+    read answer
+    if [ "$answer" != "y" ] ; then
+      echo "pack $target not removed."
+      IERR=1
+    fi
+  fi
+
+# Remove :
+  if [ $IERR -eq 0 ] ; then
+    \echo "removing pack $target"
+#   pack itself:
+    chmod -R 755 $target 2>/dev/null
+    \rm -rf $target
+#   pack lib directory as a link (if possible):
+    if [ "$HOMELIB" ] ; then
+      if [ -d $HOMELIB ] && [ "$HOMELIB" != "$HOMEPACK" ] ; then
+        \cd $HOMELIB
+        chmod -R 755 $target
+        \rm -rf $target
+      fi
+    fi
+#   pack bin directory as a link (if possible):
+    if [ "$HOMEBIN" ] ; then
+      if [ -d $HOMEBIN ] && [ "$HOMEBIN" != "$HOMEPACK" ] ; then
+        \cd $HOMEBIN
+        chmod -R 755 $target
+        \rm -rf $target
+      fi
+    fi
+#   remove alias if possible ...
+    if [ "$GMK_ALIASES" ] ; then
+      if [ $(echo $target | grep -c "/") -eq 0 ] ; then
+        \cp $HOME/.${GMKUSERFILE}$(basename $SHELL)rc $HOME/.gmkpack/$(basename $SHELL)rc
+        grep -v "alias $1='cd \$HOMEPACK/$1" $HOME/.gmkpack/$(basename $SHELL)rc > $HOME/.${GMKUSERFILE}$(basename $SHELL)rc
+      fi
+    fi
+  fi
+
+done

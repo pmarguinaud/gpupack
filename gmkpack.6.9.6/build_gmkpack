@@ -1,0 +1,560 @@
+#
+###########################
+#                         #
+# Installation of gmkpack #
+#                         #
+###########################
+#
+# Position myself in this bottom directory :
+cd $(dirname $0)
+
+
+echo Environment variables :
+#    ---------------------
+#
+# Shell :
+#
+if [ ! "$SHELL" ] ; then
+  echo SHELL not defined.
+  exit 1
+else
+  echo Shell is $SHELL
+fi
+#
+# Perl :
+#
+which perl > /dev/null 2>&1
+if [ $? -eq 1 ] ; then
+  if [ "$GMK_ALT_PERL" ] ; then
+#   Use a specific perl installation
+    PERL=$GMK_ALT_PERL
+    echo Specific perl used : $PERL
+  else
+    echo perl not found.
+    You can set an specific perl with the environment variable GMK_ALT_PERL
+    exit 1
+  fi
+else
+  PERL=$(which perl | awk '{print $NF}')
+  if [ "$GMK_ALT_PERL" ] && [ "$PERL" != "$GMK_ALT_PERL" ] ; then
+#   Use an alternative perl installation
+    PERL=$GMK_ALT_PERL
+    echo Alternative perl used : $PERL
+  else
+    echo Perl is $PERL
+  fi
+fi
+$PERL -e 'die "perl version - $] should be greater or equal to v5.10" unless($] >= 5.010)'
+if [ $? -ne 0 ] ; then
+  exit 1
+fi
+#
+# time :
+#
+if [ "$GMK_TIMER" ] ; then
+  if [ -f $GMK_TIMER ] ; then
+    if [ -f /usr/bin/time ] ; then
+      echo "NOTICE : $GMK_TIMER is superseeding /usr/bin/time."
+    else
+      echo "NOTICE : $GMK_TIMER is used instead of /usr/bin/time which is missing."
+    fi
+  else
+    if [ -f /usr/bin/time ] ; then
+      echo
+      echo "*******"
+      echo "WARNING : GMK_TIMER is set to $GMK_TIMER but this file is missing. Remove it or the timer will not work."
+      echo "*******"
+      echo
+    else
+      echo
+      echo "*******"
+      echo "WARNING : GMK_TIMER is set to $GMK_TIMER but this file is missing. Set it to the equivalent of /usr/bin/time or the timer will not work."
+      echo "*******"
+      echo
+    fi
+  fi
+else
+  if [ -f /usr/bin/time ] ; then
+    echo "Timer is /usr/bin/time"
+  else
+    echo
+    echo "*******"
+    echo "WARNING : /usr/bin/time is missing. Set $GMK_TIMER to the equivalent command or the timer will not work."
+    echo "*******"
+    echo
+  fi
+fi  
+#
+# Gmkpack application :
+#
+export GMKROOT=$PWD
+#
+# Gmkpack support :
+#
+if [ ! "$GMK_SUPPORT" ] ; then
+  GMK_SUPPORT=$(dirname $PWD)/gmkpack_support
+  echo Default directory for support files \(absolute path\) : GMK_SUPPORT=$GMK_SUPPORT
+else
+  echo Directory for support files \(absolute path\) : GMK_SUPPORT=$GMK_SUPPORT
+fi
+OLDPWD=$PWD
+cd /
+GMKSUPPORT_EXISTED=0
+if [ -d $GMK_SUPPORT ] ; then
+  GMKSUPPORT_EXISTED=1
+else
+  mkdir -p $GMK_SUPPORT
+  if [ $? -ne 0 ] ; then
+    echo make sure you have the permission to make the directory GMK_SUPPORT
+    cd $OLDPWD
+    exit 1
+  fi
+fi
+cd $OLDPWD
+#
+# Tmpdir :
+#
+GMKTMP=${GMKTMP:=/tmp}
+export GMKWRKDIR=$GMKTMP/gmktmp.$$
+mkdir -p $GMKWRKDIR 2> /dev/null
+if [ ! -d $GMKWRKDIR ] ; then
+  echo Working directory $GMKWRKDIR could not be created
+  exit 1
+else
+  echo Working directory : $GMKWRKDIR
+fi
+#
+# Linking facility :
+#
+if [ "$GMK_NO_LINK" ] ; then
+  echo Linking facility disabled.
+else
+  echo Linking facility enabled.
+fi
+
+echo Directories/files permissions :
+#    -----------------------------
+DIRS="arch aux doc dummy intfb libs licensed link man mpsh norms support util vimpack*"
+find $DIRS -type f -name "*" -print | xargs chmod 644
+chmod 644 README
+#
+#
+echo Install codes configuration files :
+#    ---------------------------------
+#
+if [ ! -d $HOME/.gmkpack/link ] ; then
+  mkdir -p $HOME/.gmkpack/link
+fi
+#
+echo Install scripts :
+#    ---------------
+#
+mkdir -p $GMKWRKDIR 2> /dev/null
+cd aux
+for file in *.sh ; do
+  echo aux/$file ...
+  \echo "#!"$SHELL > $GMKWRKDIR/tmpfile
+  sed "1,1 d" $file >> $GMKWRKDIR/tmpfile
+  \cp $GMKWRKDIR/tmpfile $GMKROOT/aux/$file
+  \rm $GMKWRKDIR/tmpfile
+done
+for file in $(\grep -l "GMK_SUPPORT:" *.sh) ; do
+  sed "s|GMK_SUPPORT=\${GMK_SUPPORT:=.*}|GMK_SUPPORT=\${GMK_SUPPORT:=${GMK_SUPPORT}}|" $file > $GMKWRKDIR/tmpfile
+  \mv $GMKWRKDIR/tmpfile $file
+done
+for file in *.pl ; do
+  echo aux/$file ...
+  if [ "$file" = "lib-file.pl" ] || [ "$file" = "lib-shell.pl" ] ; then
+    \echo "#!$PERL" > $GMKWRKDIR/tmpfile
+  else
+    \echo "#!$PERL  -I$GMKROOT/aux" > $GMKWRKDIR/tmpfile
+  fi
+  sed "1,1 d" $file >> $GMKWRKDIR/tmpfile
+  \cp $GMKWRKDIR/tmpfile $GMKROOT/aux/$file
+  \rm $GMKWRKDIR/tmpfile
+done
+
+\rm -f $GMKWRKDIR/tmpfile
+cd ..
+#
+cd util
+for file in $(\ls -1 | egrep -v "(berootpack|behomepack|\.pl$)") ; do
+  echo util/$file ...
+  echo "#!"$SHELL > $GMKWRKDIR/tmpfile
+  sed "1,1 d" $file >> $GMKWRKDIR/tmpfile
+  \cp $GMKWRKDIR/tmpfile $GMKROOT/util/$file
+  \rm $GMKWRKDIR/tmpfile
+done
+for file in $(\ls -1 | grep "\.pl$") ; do
+  echo util/$file ...
+  echo "#!$PERL  -w" > $GMKWRKDIR/tmpfile
+  sed "1,1 d" $file >> $GMKWRKDIR/tmpfile
+  \cp $GMKWRKDIR/tmpfile $GMKROOT/util/$file
+  \rm $GMKWRKDIR/tmpfile
+done
+sed "/THIS_GMKPACK/,$ d" gmkpack > $GMKWRKDIR/tmpfile
+echo "THIS_GMKPACK=$PWD/gmkpack" >> $GMKWRKDIR/tmpfile
+sed "1,/THIS_GMKPACK/ d" gmkpack >> $GMKWRKDIR/tmpfile
+\cp $GMKWRKDIR/tmpfile $GMKROOT/util/gmkpack
+\rm $GMKWRKDIR/tmpfile
+for file in $(\grep -l "GMK_SUPPORT:" *) ; do
+  sed "s|GMK_SUPPORT=\${GMK_SUPPORT:=.*}|GMK_SUPPORT=\${GMK_SUPPORT:=${GMK_SUPPORT}}|" $file > $GMKWRKDIR/tmpfile
+  \mv $GMKWRKDIR/tmpfile $file
+done
+\rm -f $GMKWRKDIR/tmpfile
+cd ..
+
+cd mpsh/spl
+for file in *.pl ; do
+  echo spl/$file ...
+  \echo "#!$PERL  -w" > $GMKWRKDIR/tmpfile
+  sed "1,1 d" $file >> $GMKWRKDIR/tmpfile
+  \cp $GMKWRKDIR/tmpfile $GMKROOT/mpsh/spl/$file
+  \rm $GMKWRKDIR/tmpfile
+done
+\rm -f $GMKWRKDIR/tmpfile
+cd ../..
+
+echo vimpack ...
+for VERSION in 0 1 ; do
+  cd vimpack.${VERSION}
+  echo "#!$PERL -w" > $GMKWRKDIR/tmpfile
+  sed "1,1 d" vimpack >> $GMKWRKDIR/tmpfile
+  \cp $GMKWRKDIR/tmpfile vimpack
+  \rm $GMKWRKDIR/tmpfile
+  chmod 755 vimpack
+  cd ..
+done
+
+find aux util mpsh/spl -name "*" -print | xargs chmod 755
+
+
+echo Initialise multi-threaded support for compilation :
+# -------------------------------------------------
+# Count the maximum number of threads:
+if [ -f /proc/cpuinfo ] ; then
+# Linux-based system should have this file:
+  MAX_THREADS=$(cat /proc/cpuinfo | grep processor | wc -l)
+elif [ "$(uname)" = "AIX" ] ; then
+# IBM can take advantage of sar :
+  MAX_THREADS=$(sar | grep lcpu | cut -d" " -f3 | cut -d"=" -f2)
+elif [ -f /usr/sbin/system_profiler ] ; then
+# MacIntosh computers have this other one :
+  if [ "$(arch)" = "ppc" ] ; then
+    MAX_THREADS=$(system_profiler -detailLevel -2 | grep "Number Of CPUs:" | awk '{print $4}')
+  else
+    MAX_THREADS=$(system_profiler -detailLevel -2 | grep -i "Total Number Of Cores:" | awk '{print $5}')
+  fi
+else
+  MAX_THREADS="unknown"
+fi
+\cp $GMKROOT/mpsh/spl/mpsh.pl  $GMKROOT/mpsh/bin/mpsh
+chmod 755 $GMKROOT/mpsh/bin/mpsh
+#
+export GMK_THREADS=2
+echo Test multi-threading on $GMK_THREADS threads :
+# -------------------------------------------------
+ierr=0
+echo Test of Psystem :
+n=1
+while [ $n -le $GMK_THREADS ] ; do
+  \rm -f threaded_argument.$n threaded_file.$n
+    n=$((n+1))
+done
+SAVEDIR=$PWD
+cd $GMKWRKDIR
+$GMKROOT/aux/Psystem.sh touch threaded_argument threaded_file
+if [ $? -eq 0 ] ; then
+  \ls threaded_argument.[1-$GMK_THREADS] threaded_file.[1-$GMK_THREADS]
+  n=1
+  while [ $n -le $GMK_THREADS ] ; do
+    if [ ! -f threaded_argument.$n ] ; then
+      ierr=1
+    fi
+    if [ ! -f threaded_file.$n ] ; then
+      ierr=1
+    fi
+    n=$((n+1))
+  done
+else
+  ierr=1
+fi
+cd $SAVEDIR
+if [ $ierr -eq 0 ] ; then
+  echo Test of Psystem sucessful.
+else
+  echo Test of Psystem failed.
+fi
+unset GMK_THREADS
+THREAD_TEST=$ierr
+#
+#
+echo Install support files in $GMK_SUPPORT :
+#    -------------------------------------
+# We don't overwrite the existing files, except for the lists. In case of conflict
+# the imported files are stamped with .imported (if different from the old one)
+cd support
+# list:
+mkdir -p $GMK_SUPPORT/list 2>/dev/null
+for file in $(find list -type f -name "*" -print) ; do
+  if [ -f $GMK_SUPPORT/$file ] ; then
+    cmp -s $file $GMK_SUPPORT/$file
+    if [ $? -ne 0 ] ; then
+      echo warning : $file has been updated. Previous version will be saved as ${file}.old
+      \mv -i $GMK_SUPPORT/$file $GMK_SUPPORT/${file}.old
+      \cp -i $file $GMK_SUPPORT/${file}
+    fi
+  else
+    echo $file
+    \cp $file $GMK_SUPPORT/${file}
+  fi
+done
+# bin:
+mkdir -p $GMK_SUPPORT/bin 2>/dev/null
+for file in $(find bin -type f -name "*" -print) ; do
+  if [ -f $GMK_SUPPORT/$file ] ; then
+    cmp -s $file $GMK_SUPPORT/$file
+    if [ $? -ne 0 ] ; then
+      echo warning : another version of $file has been imported. It is copied to ${file}.imported
+      \cp -i $file $GMK_SUPPORT/${file}.imported
+    fi
+  else
+    echo $file
+    \cp $file $GMK_SUPPORT/${file}
+  fi
+done
+# wrappers:
+mkdir -p $GMK_SUPPORT/wrapper 2>/dev/null
+for file in $(\ls wrapper) ; do
+#  If the file already exists, we consider it
+  if [ -f $GMK_SUPPORT/wrapper/$file ] ; then
+    cmp -s wrapper/$file $GMK_SUPPORT/wrapper/$file
+    if [ $? -ne 0 ] ; then
+      echo warning : another version of $file has been imported. It is copied to ${file}.imported
+      \cp -i wrapper/$file $GMK_SUPPORT/wrapper/${file}.imported
+    fi
+  else
+    echo wrapper/$file
+    \cp wrapper/$file $GMK_SUPPORT/wrapper/${file}
+  fi
+done
+find $GMK_SUPPORT/bin $GMK_SUPPORT/wrapper -name "*" -print | xargs chmod 755
+# For continuity with the previous versions only :
+cd ..
+\rm -rf wrapper
+\ln -s $GMK_SUPPORT/wrapper wrapper
+cd support
+# End For continuity with the previous versions only :
+# arch:
+mkdir -p $GMK_SUPPORT/arch 2>/dev/null
+cd ..
+#
+# binaries linking rules : they will preempt those from gmkpack installation
+# but they will be preempted by those installed by the user in $HOME/.gmkfile/link
+if [ ! -d $GMK_SUPPORT/link ] ; then
+  mkdir -p $GMK_SUPPORT/link
+fi
+
+echo Install man pages :
+#    -----------------
+
+for file in man/man1/*.1 ; do
+  tbl $file | nroff -man | col > man/cat1/$(basename $file)
+done
+
+echo Convert man pages into html :
+#    ---------------------------
+
+if [ "$(uname)" = "Darwin" ] ; then
+  type man2html >/dev/null 2>&1
+  ii=$?
+else
+  which man2html >/dev/null 2>&1
+  ii=$?
+fi
+if [ $ii -eq 0 ] ; then
+  mkdir -p doc/man1
+  cd man/man1
+  for file in * ; do
+    man2html < $file > ../../doc/man1/${file}.html
+  done
+  cd ../..
+  cd doc
+  cat <<EOF>corps.html
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>marge_manual_gmkpack</title>
+</head>
+<body>
+<p style="text-align: center;"><br>
+</p>
+<p style="text-align: center;"><b><i><font size="+4"><br>
+</font></i></b></p>
+<p style="text-align: center;"><b><i><font size="+4"><br>
+GMKPACK<br>
+EOF
+VERSION=$(echo $(basename $(dirname $(pwd))) | sed "s/gmkpack.//")
+echo "</font></i></b><font size=\"+1\">Version ${VERSION}</font><br>" >> corps.html
+  cat <<EOF >>corps.html
+</p>
+<p style="text-align: center;"><font size="+1">M&eacute;t&eacute;o-France
+- CNRM/GMAP/ALGO</font>
+</p>
+EOF
+DATE=$(date +%d-%m-%Y)
+echo "<p style=\"text-align: center;\">${DATE}<br>" >> corps.html
+  cat <<EOF >>corps.html
+</p>
+<p style="text-align: center;"><br>
+</p>
+<p style="text-align: center;"><a href="man1/gmkpack.1.html">manual
+pages</a>
+</p>
+<p style="text-align: center;"><a href="tutorial/tutorial.html">tutorial
+(draft)</a></p>
+<p style="text-align: center;"><a href="old_gmkpack.html">older
+documentation</a><br>
+</p>
+</body>
+</html>
+EOF
+  cd ..
+else
+  echo No man2html convertor in PATH.
+fi
+
+if [ $THREAD_TEST -eq 0 ] ; then
+  echo Multi-threaded installation enabled \(Maximum number of processors/cores on this machine : ${MAX_THREADS}\).
+else
+  echo Notice : multi-threaded installation NOT enabled.
+  echo You can export GMK_ALT_PERL to an alternative perl supporting multi-threading and re-install gmkpack.
+fi
+echo Installation finished.
+
+cd $GMKROOT
+echo
+type gmkpack > /dev/null 2>&1
+if [ $? -eq 1 ] ; then
+# No gmkpack so far : this must be the very first installation without anticipation :
+# We may link the current directory to 'gmkpack' to help for a shared installation of gmkpack
+# and for its next updates :
+  if [ "$GMK_NO_LINK" ] ; then
+#   Update the pathes :
+    DIRNAME=$GMKROOT
+  else
+#   Create the link :
+    cd ..
+    NAME=gmkpack
+    DIRNAME=$PWD/$NAME
+#   test in case of a re-run of the command :
+    if [ -L $NAME ] ; then
+      LINK=$(\ls -l $NAME | awk '{print $NF}')
+      if [ "$LINK" = "$(basename $GMKROOT)" ] ; then
+        echo Existing link to gmkpack is up to date :
+      else
+        \rm $NAME
+        \ln -s $(basename $GMKROOT) $NAME
+        echo Link to gmkpack updated :
+      fi
+    else
+      \ln -s $(basename $GMKROOT) $NAME
+      echo Link to gmkpack created :
+    fi
+    \ls -l $DIRNAME
+  fi
+  echo Warning : environment variables PATH and MANPATH should now be set as follows in your profile :
+  echo GMKROOT=$DIRNAME
+  echo export PATH=\$GMKROOT/util:\$PATH
+  echo export MANPATH=\$GMKROOT/man:\$MANPATH
+elif [ "$(which gmkpack | awk '{print $NF}')" != "$GMKROOT/util/gmkpack" ] ;then
+# A version of gmkpack already exists : it could be either another version,
+# or a link to the current version, or a link to another version to be updated or not.
+  NAME=$(basename $(dirname $(dirname $(which gmkpack | awk '{print $NF}'))))
+  DIR=$(dirname $(dirname $(dirname $(which gmkpack | awk '{print $NF}'))))
+  cd $DIR
+  if [ -L $NAME ] ; then
+    SYMLINK=1
+    LINK=$(\ls -l $NAME | awk '{print $NF}')
+  else
+    SYMLIK=
+    LINK=$NAME
+  fi
+  if [ ! "$SYMLINK" ] ; then
+    if [ "$GMK_NO_LINK" ] ; then
+#     Update the pathes :
+      DIRNAME=$GMKROOT
+    else
+#     Create the link if it does not exist :
+      NAME=gmkpack
+      DIRNAME=$PWD/$NAME
+      if [ ! -L $NAME ] ; then
+        \ln -s $(basename $GMKROOT) $NAME
+        echo Link to gmkpack added :
+        \ls -l $DIRNAME
+      fi
+    fi
+    echo Warning : environment variables PATH and MANPATH should now be updated as follows in your profile :
+    echo GMKROOT=$DIRNAME
+    echo export PATH=\$GMKROOT/util:\$PATH
+    echo export MANPATH=\$GMKROOT/man:\$MANPATH
+  elif [ "$LINK" = "$(basename $GMKROOT)" ] ; then
+    echo Existing link to gmkpack is up to date :
+    \ls -l $DIR/$NAME
+  elif [ "$GMK_NO_LINK" ] ; then
+#   Do not update the link :
+    echo Warning : environment variables PATH and MANPATH should now be updated as follows in your profile :
+    echo GMKROOT=$GMKROOT
+    echo export PATH=\$GMKROOT/util:\$PATH
+    echo export MANPATH=\$GMKROOT/man:\$MANPATH
+  else
+#   Update the link :
+    \rm $NAME
+    \ln -s $(basename $GMKROOT) $NAME
+    echo Link to gmkpack is updated
+    \ls -l $DIR/$NAME
+  fi
+else
+  echo Environment variables PATH and MANPATH are up to date.
+fi
+
+cd $GMKROOT
+
+echo
+N_OPTIONS=$(\ls -1 $GMK_SUPPORT/arch | wc -l)
+if [ $N_OPTIONS -ge 0 ] ; then
+# Control the number of valid configuration files & flavours:
+  N_OPTIONS=$($GMKROOT/util/optionspack | wc -l)
+  if [ $N_OPTIONS -gt 0 ] ; then
+    echo "Possible configuration files & flavours :"
+    $GMKROOT/util/optionspack
+  else
+    echo "To create new packs with gmkpack you will need to setup a configuration file,"
+    echo "defining compilers, options, etc."
+    echo "You can setup this file manually or use a an automatic assitant."
+    echo "Do you want to run the configuration file maker assistant now (y) or later [n] ?"
+    read answer
+    if [ "$answer" = "y" ] ; then
+      export PATH=$GMKROOT/util:$PATH
+      $GMKROOT/util/gmkfilemaker
+      echo Notice : for next sessions, make sure the environment variables PATH and MANPATH are set as follows in your profile :
+      echo GMKROOT=$DIRNAME
+      echo export PATH=\$GMKROOT/util:\$PATH
+      echo export MANPATH=\$GMKROOT/man:\$MANPATH
+    fi
+  fi
+fi
+
+cd $GMKROOT/link
+
+for d in *; do
+  excluded=$d/excluded_libs
+  if [ ! -d $excluded ]; then
+    mkdir $excluded
+  fi
+done
+
+\rm -rf $GMKWRKDIR
+exit 0

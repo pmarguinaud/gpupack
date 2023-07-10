@@ -1,0 +1,918 @@
+#!/bin/ksh
+########################################################################
+#
+#    Script cc_export
+#    --------------
+#
+#    Purpose : to export files from ClearCase to a pack on any machine
+#    -------   by default, the pack name is the current branch name
+#              by default the whole branch is exported
+#
+#    Usage :  cc_export [-b |-a ] -n label | -f source-file | -l list-of-files | -v | -s ]
+#    -----              [-P remote-pack ] [-c [-p program]] [ -i ] [ -t ] [ -o ] [ -L compiler ]
+#
+#    Parameters :  -b = export the current branch
+#                  -v = export the current view
+#                  -s = export the current sub-branch
+#                  -f = export the file source-file
+#                  -l = export the source files listed in the file list-of-files
+#                  -a = export all branches in rules from main to the specified label of the current view
+#                  -P = remote pack name
+#                  -h = remote host
+#                  -c = create distant pack
+#                  -p = program name for distant pack
+#                  -d = list of vobs-directories to export if -v selected
+#                  -n = label of the current branch where the export should stop
+#                  -i = ignore vobs listed in the environment variable IGNORED_VOBS
+#                  -t = change the target directory of pack : to HOMEPACK if
+#                       the default is ROOTPACK (ie : if the user's view is CCHOME) and vice-versa 
+#                  -o = architecture file flavour for gmkpack
+#                  -L = architecture file label for gmkpack
+#                  -F = explicit ROOTPACK
+#
+#    Externals : cleartool
+#    ---------
+#
+#    History   : 01/02/02 Modified by R. El Khatib : FILENAME can be relative
+#    -------     13/08/04 Modified by R. El Khatib : -h -c -p
+#                25/01/05 Modified by R. El Khatib : -v rehabilitated
+#                                                    HOMEPACK automatic when -c selected
+#                11/05/05  Modified by R. El Khatib : -d
+#                16/09/05  Modified by R. El Khatib : support for -hlxgmap**
+#                17/11/05  Modified by R. El Khatib : fix version number for
+#                                                    view exports + cleanings
+#                23/11/05  Modified by R. El Khatib : full view saved on cougar
+#                28/11/05  Modified by R. El Khatib : -a -n
+#                26/04/06  Modified by R. El Khatib : -i
+#                15/06/06  Modified by R. El Khatib : -t
+#                30/01/08  Modified by R. El Khatib : -o + clarify the setup of -p
+#                29/04/08  Modified by R. El Khatib : Recover a default value for HOMEPACK if not set
+#                04/05/08  Modified by R. El Khatib : support for the webdav (cc_exort -h webdav ...)
+#                                                     support for exporting aeolus (when ready)
+#                17/06/08  Modified by R. El Khatib : -L 
+#                21/07/09  Modified by R. El Khatib : -F
+#                11/09/09  Modified by R. El Khatib : Default target = yuki
+#                                                     Enable -c without modifications to export.
+#
+########################################################################
+#
+# 0. Environment :
+#    -----------
+#
+cc_view > /dev/null
+if [ $? -ne 0 ] ; then
+  echo "No valid view."
+  exit
+fi
+mydir=$PWD
+ccdir=$CCHOME/dev
+#
+#-----------------------------------------------------------------------
+#
+#
+#     1. Set defaults for parameters
+#        ---------------------------
+#
+FILELIST=
+FILENAME=
+CPVIEW=
+ALLBR=
+CPBR=no
+LABEL=last
+CPSB=no
+VIEW=$(cleartool pwv -short)
+VIEWNAME=$(echo $VIEW | cut -d"_" -f2-)
+ACCOUNT=$(echo $VIEWNAME | cut -d"_" -f1)
+RELEASE_AND_PACK=$(echo $VIEW | cut -d"_" -f3-)
+RELEASE=$(echo $RELEASE_AND_PACK | cut -d"_" -f1 | tr [A-Z] [a-z] )
+PACKNAME=$(echo $RELEASE_AND_PACK | cut -d"_" -f2-)
+if [ "$RELEASE_AND_PACK" = "$PACKNAME" ] ; then
+  MAINPACK=yes
+  PACKNAME=main
+fi
+HOST=yuki
+CREATE=
+VOBS=
+IGNORE=
+TARGET=
+OPTION=
+GMK_F_OPTION=
+USAGE1="Usage: cc_export -f filename | -l list | -v [-d \"vob1 vob2 ... vobn\"] -b | -s [-P packname] [-c [-p program]] [-a [-n label]] [-i] [-h host] [-t] [-o] [-L compiler] [ -F alternative-rootpack]"
+cc_log $0 $* || \exit 1
+#
+errflg=0
+#
+#-----------------------------------------------------------------------
+#
+#     2. Crack parameters
+#        ----------------
+#
+while getopts h:P:L:F:o:l:f:p:d:n:bvscait option
+do
+   case $option in
+   b)  CPBR=yes;;
+   v)  CPVIEW=yes;;
+   s)  CPSB=yes;;
+   c)  CREATE=yes;;
+   a)  ALLBR=yes;;
+   h)  HOST=$OPTARG;;
+   P)  PACKNAME=$OPTARG;;
+   l)  FILELIST=$OPTARG;;
+   f)  FILENAME=$OPTARG;;
+   p)  PROGRAM=$OPTARG;;
+   d)  VOBS=$OPTARG;;
+   n)  LABEL=$OPTARG;;
+   o)  OPTION=$OPTARG;;
+   L)  COMPILER=$OPTARG;;
+   F)  GMK_F_OPTION=$OPTARG;;
+   i)  IGNORE=yes;;
+   t)  TARGET=yes;;
+   \?) errflg=1;;
+   esac
+done
+#
+#-----------------------------------------------------------------------
+#
+#     3. Check parameters, issue error messages
+#        --------------------------------------
+#
+if [ $errflg -ne 0 ] ; then
+  echo $USAGE1 >&2
+  \exit 1
+fi
+#
+if [ "$PACKNAME" = "" ] ; then
+  echo $USAGE1 >&2
+  echo " -P packname must be supplied"
+  \exit 1
+fi
+#
+ii=0
+if [ "$FILELIST" != "" ] ; then
+  ii=$(($ii+1))
+fi
+if [ "$FILENAME" != "" ] ; then
+  ii=$(($ii+1))
+fi
+if [ "$CPVIEW" ] ; then
+  ii=$(($ii+1))
+fi
+if [ "$CPBR" = "yes" ] ; then
+  ii=$(($ii+1))
+fi
+if [ "$CPSB" = "yes" ] ; then
+  ii=$(($ii+1))
+fi
+if [ "$ALLBR" ] ; then
+  ii=$(($ii+1))
+fi
+if [ $ii -gt 1 ] ; then
+  echo $USAGE1 >&2
+  echo " -f filename, -l listfile, -v, -s, -b and -a are exclusive"
+  \exit 1
+fi
+
+if [ "$ACCOUNT" = "public" ] ; then
+  echo "Account \"public\" not allowed for cc_export !!"
+  echo "Originating account must be used, together with privileged permissions."
+  exit 1
+fi
+
+if [ "$ACCOUNT" = "$(basename $CCHOME)" ] && [ "$LABEL" != "last" ] ; then
+  if [ $(echo $LABEL | egrep "^[0-9]$" | wc -l) -ne 0 ] ; then
+    LABEL=0${LABEL}
+  elif [ $(echo $LABEL | egrep "^[0-9][0-9]$" | wc -l) -eq 0 ] ; then
+    echo
+    echo label should be a string of 1 or 2 numbers !
+    exit 1
+  fi
+fi
+
+if [ "$LABEL" = "last" ] ; then
+  LAST_VERSION=yes
+fi
+
+if [ "$CREATE" ] ; then
+  if [ "$PROGRAM" ] ; then
+    PROGRAM_USR=$PROGRAM
+    PROGRAM_ADM=$PROGRAM
+  elif [ "$GMK_USR_DFLTPROG" ] ; then
+    PROGRAM_USR=$GMK_USR_DFLTPROG
+  elif [ "$GMK_ADM_DFLTPROG" ] ; then
+    PROGRAM_ADM=$GMK_ADM_DFLTPROG
+  fi
+fi
+
+if [ "$IGNORE" ] ; then
+  echo
+  if [ ! "$IGNORED_VOBS" ] ; then
+    echo environment variable IGNORED_VOBS is not set.
+    IGNORED_VOBS="nam:sct:ssm:cli:man:obs:scr:ssa:test:tov:wam"
+    echo "The default is to ignore the following vobs : $(echo $IGNORED_VOBS | sed 's/:/ /g')"
+  else
+  echo "The following vobs will be ignored : $(echo $IGNORED_VOBS | sed 's/:/ /g')"
+  fi
+  EGREPLIST="^$(echo $IGNORED_VOBS | sed 's/:/\/|^/g')/"
+else
+  unset EGREPLIST
+fi
+
+#-----------------------------------------------------------------------
+#
+#
+#     4. Hosts specificities
+
+#        -------------------
+echo "host specificities ..."
+if [ $(echo $HOST | grep -c "^lxgmap[0-9][0-9]$") -eq 1 ] ; then
+  SHORT_HOST=$HOST
+  HOST=${SHORT_HOST}.cnrm.meteo.fr
+  MYHOSTNAME=$HOST
+  USERNAME=$LDAPLOGNAME
+  if [ ! "$USERNAME" ] ; then
+    echo LDAPLOGNAME not set. Exit.
+    exit
+  fi
+  HOSTSHELL="bash_"
+  USRBIN=/usr/bin
+  LIBFRT=PGI$(rsh $HOST -l $USERNAME -n "pgf90 -V | grep pgf90 | cut -d ' ' -f2 | sed 's/\.//g' | sed 's/-//g'")
+  SUFFIX=""
+  PREFIX=""
+  ENVIRO="BATCH"
+elif [ $(echo $HOST | grep -c "^lxgmap[0-9]$") -eq 1 ] ; then
+  SHORT_HOST=$HOST
+  HOST=${SHORT_HOST}.cnrm.meteo.fr
+  USERNAME=$LDAPLOGNAME
+  if [ ! "$USERNAME" ] ; then
+    echo LDAPLOGNAME not set. Exit.
+    exit
+  fi
+  HOSTSHELL="bash_"
+  MYHOSTNAME=$HOST
+  USRBIN=/usr/bin
+  LIBFRT=PGI$(rsh $HOST -l $USERNAME -n "pgf90 -V | grep pgf90 | cut -d ' ' -f2 | sed 's/\.//g' | sed 's/-//g'")
+  SUFFIX=""
+  PREFIX=""
+  ENVIRO="BATCH"
+elif [ "$HOST" = "hpce" ] ; then
+  USERNAME=
+  HOSTSHELL=
+  MYHOSTNAME=$HOST
+  USRBIN=
+  LIBFRT=XLF91
+  SUFFIX=
+  PREFIX=""
+  ENVIRO="BATCH"
+elif [ "$HOST" = "ash" ] ; then
+  USERNAME=$LOGNAME
+  HOSTSHELL="bash_"
+  MYHOSTNAME=ash
+  USRBIN=/usr/bin
+  LIBFRT=PGI612
+  SUFFIX=".pack"
+  PREFIX="cy"
+  ENVIRO="BATCH"
+elif [ "$HOST" = "tori" ] || [ "$HOST" = "Otori" ] ; then
+  USERNAME=$LOGNAME
+  HOSTSHELL=""
+  MYHOSTNAME=tori
+  USRBIN=/usr/bin
+  LIBFRT=$(echo SX8RV$(rsh $MYHOSTNAME -l $USERNAME -n "/SX/opt/sxf90/inst/bin/sxf90 -V 2>&1 | fgrep Version | cut -d ' ' -f3 | sed 's/\.//'"))
+  SUFFIX=".pack"
+  PREFIX="cy"
+  ENVIRO="BATCH"
+elif [ "$HOST" = "yuki" ] || [ "$HOST" = "Oyuki" ] ; then
+  USERNAME=$LOGNAME
+  HOSTSHELL=""
+  MYHOSTNAME=yuki
+  USRBIN=/usr/bin
+  LIBFRT=$(echo SX$(rsh $MYHOSTNAME -l $USERNAME -n "/SX/opt/sxf90/inst/bin/sxf90 -V 2>&1 | tr -cs '[A-Z][a-z][0-9]'\/\.\*-_ '[\012*]' | grep '\.'  | sed 's/Rev/r/' | sed 's/\.//' | head -2") | sed 's/ //')
+  SUFFIX=".pack"
+  PREFIX="cy"
+  ENVIRO="BATCH"
+elif [ "$HOST" = "webdav" ] ; then
+  MYHOSTNAME=$(echo $DISPLAY | cut -d':' -f1)
+  USERNAME=$LDAPLOGNAME
+  if [ ! "$USERNAME" ] ; then
+    echo LDAPLOGNAME not set. Exit.
+    exit
+  fi
+  HTTP=http://
+  DOMAIN=webdav.cnrm.meteo.fr
+  WEBDAV_PUBLIC_DIR=public/algo/$USERNAME/src
+else
+  MYHOSTNAME=$HOST
+fi
+OPT="x"
+PROFILE=./.${HOSTSHELL}profile
+if [ ! "$COMPILER" ] ; then
+  COMPILER=$LIBFRT
+fi
+
+#-----------------------------------------------------------------------
+#
+#     5. Define & create distant pack, or control existence
+#        --------------------------------------------------
+
+echo "distant pack identification ..."
+
+# Remove prefix of RELEASE and use small letters
+RELEASE_NUMBER_SMALL=$(echo $RELEASE | tr [A-Z] [a-z])
+RELEASE_NUMBER=$RELEASE_NUMBER_SMALL
+while [ "$(echo $RELEASE_NUMBER | cut -c1 | sed "s/^[0-9]/ /")" != " " ] ; do
+  XX_NUMBER=$(echo $RELEASE_NUMBER | sed "s/^[a-z]//")
+  RELEASE_NUMBER=$XX_NUMBER
+done
+RELEASE=$RELEASE_NUMBER
+
+REFERENCE=$(cleartool catcs -tag $VIEW | grep "\-mkbranch" | head -1 | cut -d" " -f3)
+OTHER=$(echo $REFERENCE | awk -F "." '{print $1}')
+NFIELDS=$(echo $OTHER | tr "_" "[\012*]" | wc -l)
+if [ $NFIELDS -eq 1 ] || [ "$ALLBR" ] ; then
+  BRANCH=main
+  VERSION=01
+else
+  if [ $NFIELDS -eq 2 ] ; then
+    BRANCH=$(echo $OTHER | cut -d"_" -f2)
+  elif [ $NFIELDS -eq 3 ] ; then
+    BRANCH=$(echo $OTHER | cut -d"_" -f3)
+  fi
+# VERSION is the reference version of the view the current branch lays upon:
+  VERSION=$(echo $REFERENCE | awk -F "." '{print $2}')
+  if [ ! "$MAINPACK" ] && [ ! "$VERSION" ] ; then
+    echo Version not found. Assumed to be 01.
+    VERSION=01
+  fi
+fi
+
+if [ "$ACCOUNT" = "$(basename $CCHOME)" ] ; then
+  LAST_LABEL=$(grep "${RELEASE_AND_PACK}\." $CCHOME/ccase/tables/all_label | tail -1 | cut -d " " -f1 | cut -d "." -f2)
+  if [ "$LABEL" = "last" ] ; then
+    LABEL=$LAST_LABEL
+  elif [ $LABEL -gt $LAST_LABEL ] ; then
+    echo $LABEL too high ! Last label is $LAST_LABEL
+    exit 1
+  fi
+  if [ ! "$LABEL" ] ; then
+    echo Label not found. Assumed to be 01.
+    LABEL=01
+  fi
+  FULLNAME=${RELEASE_AND_PACK}.${LABEL}
+else
+  FULLNAME=${RELEASE_AND_PACK}
+# user label is expected to be always 01
+  LABEL=01
+fi
+
+if [ "$ACCOUNT" = "$(basename $CCHOME)" ] ; then
+  if [ ! "$TARGET" ] ; then
+    if [ "$HOST" = "yuki" ] ; then
+      sethomepack=""
+    else
+      sethomepack="; . berootpack 1>/dev/null 2>&1"
+    fi
+    FINALNAME=${PREFIX}${RELEASE}_${PACKNAME}.${LABEL}.${COMPILER}.${OPT}${SUFFIX}
+  else
+    if [ "$HOST" = "yuki" ] ; then
+      sethomepack=""
+      FINALNAME=${PACKNAME}
+    else
+      sethomepack="; . behomepack 1>/dev/null 2>&1"
+      FINALNAME=${PREFIX}${RELEASE}_${PACKNAME}.${VERSION}.${COMPILER}.${OPT}${SUFFIX}
+    fi
+  fi
+else
+  if [ ! "$TARGET" ] ; then
+    if [ "$HOST" = "yuki" ] ; then
+      sethomepack=""
+    else
+      sethomepack="; . behomepack 1>/dev/null 2>&1"
+    fi
+    FINALNAME=${PACKNAME}
+  else
+    if [ "$HOST" = "yuki" ] ; then
+      sethomepack=""
+      FINALNAME=${PACKNAME}
+    else
+      sethomepack="; . berootpack 1>/dev/null 2>&1"
+      if [ $(echo ${PACKNAME} | grep -c "\.") -eq 0 ] ; then 
+        FINALNAME=${PREFIX}${RELEASE}_${PACKNAME}.${VERSION}.${COMPILER}.${OPT}${SUFFIX}
+      else
+        FINALNAME=${PREFIX}${RELEASE}_${PACKNAME}.${COMPILER}.${OPT}${SUFFIX}
+      fi
+    fi
+  fi
+fi
+LOCALDIR=$FINALNAME/src/local
+if [ "$MAINPACK" ] || [ "$CPVIEW" ] ; then
+  if [ "$HOST" = "ecgate" ] || [ "$HOST" = "webdav" ] ; then
+    THISTMPDIR=/tmp/$LOGNAME/${RELEASE}_${PACKNAME}.${LABEL}
+  else
+    THISTMPDIR=/tmp/$LOGNAME/${RELEASE}_${PACKNAME}.${LABEL}.${COMPILER}.${OPT}
+  fi
+elif [ "$ACCOUNT" = "$(basename $CCHOME)" ] ; then
+  if [ "$HOST" = "ecgate" ] || [ "$HOST" = "webdav" ] ; then
+    THISTMPDIR=/tmp/$LOGNAME/${PACKNAME}.${LABEL}@${RELEASE}_${BRANCH}.${VERSION}
+  else
+    THISTMPDIR=/tmp/$LOGNAME/${PACKNAME}.${LABEL}@${RELEASE}_${BRANCH}.${VERSION}.${COMPILER}.${OPT}
+  fi
+else
+  if [ "$HOST" = "ecgate" ] || [ "$HOST" = "webdav" ] ; then
+    THISTMPDIR=/tmp/$LOGNAME/${PACKNAME}@${RELEASE}_${BRANCH}.${VERSION}
+  else
+    THISTMPDIR=/tmp/$LOGNAME/${PACKNAME}@${RELEASE}_${BRANCH}.${VERSION}.${COMPILER}.${OPT}
+  fi
+fi
+
+if [ "$HOST" = "webdav" ] ; then
+  ihost=2
+elif [ "$(nslookup $MYHOSTNAME 2>/dev/null  | grep Address | head -1 | awk '{print $NF}')" ] ; then
+  ADDRESS=$(nslookup $MYHOSTNAME 2>/dev/null  | grep Address | head -1 | awk '{print $NF}')
+  echo Address: $ADDRESS
+  ihost=1
+  HOMEPACK="$(rsh $MYHOSTNAME -l $USERNAME -n " ENVIRONMENT=$ENVIRO ; . $PROFILE 1>/dev/null 2>&1 $sethomepack ; env | grep HOMEPACK | cut -d'=' -f2")"
+  if [ ! "$HOMEPACK" ] ; then
+    HOMEPACK="$(rsh $MYHOSTNAME -l $USERNAME -n "echo \$HOME")"/pack
+  fi
+  REMOTEDIR="$(rsh $MYHOSTNAME -l $USERNAME -n "cd $HOMEPACK ; ls -dp $LOCALDIR 2>/dev/null" | tail -1)"
+  if [ "$REMOTEDIR" = "${LOCALDIR}/" ] ; then
+    if [ "$CREATE" ] ; then
+      echo "Pack $HOMEPACK/$FINALNAME already exists. Not changed."
+    fi
+  else
+    if [ ! "$CREATE" ] ; then
+      echo "Pack $HOMEPACK/$FINALNAME does not exist."
+      echo "To create it, re-run this command with option -c"
+      \exit 1
+    fi
+    if [ "$MAINPACK" ] || [ "$CPVIEW" ] ; then
+      GMKPACK="gmkpack -a -r $RELEASE -b $PACKNAME -n $LABEL -l $COMPILER"
+      if [ ! "$PROGRAM" ] ; then
+        PROGRAM=$GMK_ADM_DFLTPROG
+      fi
+    else
+      GMKPACK="gmkpack -u $PACKNAME -r $RELEASE -b $BRANCH -v $VERSION -l $COMPILER"
+      if [ "$ACCOUNT" = "$(basename $CCHOME)" ] ; then
+        GMKPACK="$GMKPACK -n$LABEL"
+      fi
+      if [ ! "$PROGRAM" ] ; then
+        PROGRAM=$GMK_USR_DFLTPROG
+      fi
+    fi
+    if [ "$OPTION" ] ; then
+      GMKPACK="$GMKPACK -o $OPTION"
+    fi
+    if [ "$GMK_F_OPTION" ] ; then
+      GMKPACK="$GMKPACK -f $GMK_F_OPTION"
+    fi
+    if [ "$PROGRAM" ] ; then
+      GMKPACK="$GMKPACK -p $PROGRAM"
+    fi
+    echo start remote creation  : $GMKPACK
+    rsh $MYHOSTNAME -l $USERNAME -n ". /etc/profile ; export ENVIRONMENT=$ENVIRO ; . $PROFILE 1>/dev/null 2>&1 $sethomepack ; $GMKPACK"
+#   Test wether the creation is sucessful
+    EXIST=$(rsh $MYHOSTNAME -l $USERNAME -n "\ls -1 $HOMEPACK/$LOCALDIR 2>/dev/null")
+    if [ ! "$EXIST" ] ; then
+      echo "gmkpack failed ! cc_export aborted"
+      \exit 1
+    fi
+  fi
+else
+  ihost=0
+fi
+
+#-----------------------------------------------------------------------
+
+#
+# 4. Copy tree :
+#    ---------
+#
+if [ $ihost = 1 ] ; then
+  echo "Start export work to pack \"$FINALNAME\""
+elif [ $ihost = 2 ] ; then
+  echo "Start export work to the webdav directory ${HTTP}${DOMAIN}/$WEBDAV_PUBLIC_DIR"
+elif [ "$HOST" = "ecgate" ] ; then
+  echo "Start export work to temporary directory $THISTMPDIR"
+else
+  echo
+  echo "Warning : No host \"$MYHOSTNAME\" found. Start export work to temporary directory $THISTMPDIR"
+  echo "-------"
+fi
+
+/bin/rm -rf $THISTMPDIR
+mkdir -p $THISTMPDIR
+#
+ii=0
+if [ "$CPVIEW" ] ; then
+  if [ "$VOBS" ] ; then
+    LIST_OF_VOBS="$VOBS"
+  else
+    if [ $ihost = 1 ] ; then
+      TMPHOST=$HOST
+      GMKROOT="$(rsh $MYHOSTNAME -l $USERNAME -n "ENVIRONMENT=$ENVIRO ; . $PROFILE 1>/dev/null 2>&1 $sethomepack ; env | grep GMKROOT | cut -d'=' -f2")"
+      LIST_OF_VOBS="$(echo $(rsh $MYHOSTNAME -l $USERNAME -n "cat $GMKROOT/link/*/projlist | sort -u"))"
+    else
+      LIST_OF_VOBS="$(echo $(cat /home/mrpm602/bin/gmkpack/link/*/projlist | sort -u))"
+    fi
+    \rm -rf $THISTMPDIR/actual_vobslist
+    for vob in $LIST_OF_VOBS ; do
+      if [ -d $vob ] ; then
+        echo $vob >> $THISTMPDIR/actual_vobslist
+      fi
+    done
+    LIST_OF_VOBS=$(echo $(cat $THISTMPDIR/actual_vobslist))
+    if [ $ihost != 1 ] ; then
+      echo Assumed list of vobs to export : $LIST_OF_VOBS
+    fi
+  fi
+  cd $ccdir
+  if [ $ihost = 2 ] ; then
+#   Create an archive of the whole vobs :
+    for vob in $LIST_OF_VOBS ; do
+      echo copy $vob ...
+      \cp -R $vob $THISTMPDIR
+    done
+    echo filter lost+found ...
+    find $THISTMPDIR -name "*lost+found*" | xargs \rm -rf 
+    OLDPWD=$PWD
+    for vob in $LIST_OF_VOBS ; do
+      if [ $(\ls -1 $THISTMPDIR/$vob 2>/dev/null | wc -l) -eq 0 ] ; then
+        echo remove empty vob $vob ...
+        \rm -rf $THISTMPDIR/$vob
+      fi
+    done
+    echo tar all vobs ...
+    cd $THISTMPDIR
+    tar cfz .allvobs.tgz *
+    \mv .allvobs.tgz allvobs.tgz
+    \rm -rf $LIST_OF_VOBS
+    cd $OLDPWD
+    echo "done."
+  else
+    for vob in $LIST_OF_VOBS ; do
+      if [ ! -d $vob ] ; then
+        echo no vob \"$vob\"
+      elif [ $(echo $EGREPLIST | grep -c $vob) -ne 0 ] ; then
+        echo vob \"$vob\" ignored
+      else
+#       Create an archive of the directory $vob itself :
+        echo "vob \"$vob\" : copy and filter ... \c"
+        \cp -R $vob $THISTMPDIR
+        find $THISTMPDIR/$vob -name "*lost+found*" | xargs \rm -rf 
+        OLDPWD=$PWD
+        if [ $(\ls -1 $THISTMPDIR/$vob 2>/dev/null | wc -l) -eq 0 ] ; then
+          echo "remove empty vob $vob ... \c"
+          \rm -rf $THISTMPDIR/$vob
+        else
+          echo "tar-gzip ... \c"
+          cd $THISTMPDIR
+          tar cf $vob.tar $vob
+          gzip $vob.tar
+          \rm -rf $vob
+          cd $OLDPWD
+        fi
+        echo "done."
+      fi
+    done
+  fi
+elif [ "$CPBR" = "yes" ] && [ "$LAST_VERSION" ] ; then
+  cd $ccdir
+  for file in $($CCHOME/ccase/bin/users/cc_list 2>/dev/null) ; do
+    if [ -f $file ] ; then
+      unset SKIPPED
+      if [ "$IGNORE" ] ; then
+        vob=$(echo $file | cut -d"/" -f1)
+        if [ $(echo $EGREPLIST | grep -c $vob) -ne 0 ] ; then
+          echo "skipping $file"
+          SKIPPED=yes
+        fi
+      fi
+      if [ ! "$SKIPPED" ] ; then
+        locdir=$(dirname $file)
+        dir=$THISTMPDIR/$locdir
+        if [ ! -d $dir ] ; then
+          \mkdir -p  $dir
+        fi
+        base=$(basename $file)
+        \cp $file $dir/$base
+        echo " >  $file copied"
+        chmod 644 $dir/$base
+# CASE for sql requests in odb/ddl:
+        if [ "$locdir" = "odb/ddl" ] ; then
+          for ddlfile in $(\ls -1 ${locdir}.*/$base) ; do
+            dir=$THISTMPDIR/$(dirname $ddlfile)
+            if [ ! -d $dir ] ; then
+              \mkdir -p  $dir
+            fi
+            cd $dir
+            \ln -s ../ddl/$base $base
+            echo " >  $ddlfile linked to ../ddl/$base"
+            cd $ccdir
+          done
+        fi
+# END CASE
+      fi
+    fi
+  done
+elif [ "$CPSB" = "yes" ] ; then
+  unset DIRNAME
+  NEWPWD=$PWD
+  locdir=$(basename $NEWPWD)
+  while [ "$(dirname $ccdir)/$locdir" != "$ccdir" ] ; do
+    if [ "$DIRNAME" ] ; then
+      DIRNAME=$locdir/$DIRNAME
+    else
+      DIRNAME=$locdir
+    fi
+    NEWPWD=$(dirname $NEWPWD)
+    locdir=$(basename $NEWPWD)
+  done
+  for file in $($CCHOME/ccase/bin/users/cc_list 2>/dev/null | cut -c3-) ; do
+    if [ -f $file ] ; then
+      lllocdir=$DIRNAME/$(dirname $file)
+      dir=$THISTMPDIR/$lllocdir
+      base=$(basename $file)
+      unset SKIPPED
+      if [ "$IGNORE" ] ; then
+        vob=$(echo $lllocdir | cut -d"/" -f1)
+        if [ $(echo $EGREPLIST | grep -c $vob) -ne 0 ] ; then
+          echo "skipping $file"
+          SKIPPED=yes
+        fi
+      fi
+      if [ ! "$SKIPPED" ] ; then
+        if [ ! -d $dir ] ; then
+          \mkdir -p  $dir
+        fi
+        \cp $file $dir/$base
+        echo " >  $DIRNAME/$file copied"
+        chmod 644 $dir/$base
+# CASE for sql requests in odb/ddl:
+        if [ "$lllocdir" = "odb/ddl" ] ; then
+          for ddlfile in $(\ls -1 $(echo $lllocdir | cut -d"/" -f2).*/$base) ; do
+            dir=$THISTMPDIR/$(dirname $ddlfile)
+            if [ ! -d $dir ] ; then
+              \mkdir -p  $dir
+            fi
+            cd $dir
+            \ln -s ../ddl/$base $base
+            echo " >  $ddlfile linked to ../ddl/$base"
+            cd $NEWPWD/$DIRNAME
+          done
+        fi
+# END CASE
+      fi
+    fi
+  done
+elif [ "$FILELIST" != "" ] ; then
+  cd $ccdir
+  for file in $(cat $FILELIST) ; do
+    locdir=$(dirname $file)
+    if [ -f $file ] ; then
+      unset SKIPPED
+      if [ "$IGNORE" ] ; then
+        vob=$(echo $file | cut -d"/" -f1)
+        if [ $(echo $EGREPLIST | grep -c $vob) -ne 0 ] ; then
+          echo "skipping $file"
+          SKIPPED=yes
+        fi
+      fi
+      if [ ! "$SKIPPED" ] ; then
+        dir=$THISTMPDIR/$(dirname $file)
+        if [ ! -d $dir ] ; then
+          \mkdir -p  $dir
+        fi
+        base=$(basename $file)
+        \cp $file $dir/$base
+        echo " >  $file copied"
+        chmod 644 $dir/$base
+# CASE for sql requests in odb/ddl:
+        if [ "$locdir" = "odb/ddl" ] ; then
+          for ddlfile in $(\ls -1 ${locdir}.*/$base) ; do
+            dir=$THISTMPDIR/$(dirname $ddlfile)
+            if [ ! -d $dir ] ; then
+              \mkdir -p  $dir
+            fi
+            cd $dir
+            \ln -s ../ddl/$base $base
+            echo " >  $ddlfile linked to ../ddl/$base"
+            cd $ccdir
+          done
+        fi
+      fi
+# END CASE
+    else
+      echo " Warning ! No file $ccdir/$file" 
+      ii=1
+    fi
+  done
+elif [ "$FILENAME" != "" ] ; then
+  if [ -d $(dirname $FILENAME) ] ; then
+    cd $(dirname $FILENAME)
+  else
+    echo No existing directory $(dirname $FILENAME)
+    echo " cc_export aborted"
+    \exit 1
+  fi
+  NEWFILENAME=$(basename $FILENAME)
+  NEWPWD=$PWD
+  locdir=$(basename $NEWPWD)
+  while [ "$(dirname $ccdir)/$locdir" != "$ccdir" ] ; do
+    NEWFILENAME=$locdir/$NEWFILENAME
+    NEWPWD=$(dirname $NEWPWD)
+    locdir=$(basename $NEWPWD)
+  done
+  cd $ccdir
+  for file in $(echo $NEWFILENAME) ; do
+    if [ -f $file ] ; then
+      unset SKIPPED
+      if [ "$IGNORE" ] ; then
+        vob=$(echo $file | cut -d"/" -f1)
+        if [ $(echo $EGREPLIST | grep -c $vob) -ne 0 ] ; then
+          echo "skipping $file"
+          SKIPPED=yes
+        fi
+      fi
+      if [ ! "$SKIPPED" ] ; then
+        locdir=$(dirname $file)
+        dir=$THISTMPDIR/$(dirname $file)
+        if [ ! -d $dir ] ; then
+          \mkdir -p  $dir
+        fi
+        base=$(basename $file)
+        \cp $file $dir/$base
+        echo " >  $file copied"
+        chmod 644 $dir/$base
+# CASE for sql requests in odb/ddl:
+        if [ "$locdir" = "odb/ddl" ] ; then
+          for ddlfile in $(\ls -1 ${locdir}.*/$base) ; do
+            dir=$THISTMPDIR/$(dirname $ddlfile)
+            if [ ! -d $dir ] ; then
+              \mkdir -p  $dir
+            fi
+            cd $dir
+            \ln -s ../ddl/$base $base
+            echo " >  $ddlfile linked to ../ddl/$base"
+            cd $ccdir
+          done
+        fi
+      fi
+# END CASE
+    else
+      echo " Warning ! No file $ccdir/$file"
+      ii=1
+    fi
+  done
+else
+  cd $ccdir
+  if [ "$ALLBR" ] ; then
+    LIST_OF_BRANCHES="$(echo $(cleartool catcs -tag $VIEW | sed "1,2 d" | sed '1!G;h;$!d' | sed "1,2 d" | cut -d " " -f3)) $FULLNAME"
+  elif [ "$CPBR" ] ; then
+    LIST_OF_BRANCHES=$FULLNAME
+  else
+    echo internal error !
+  fi
+  for iteration in $LIST_OF_BRANCHES ; do
+    echo Branch $iteration :
+    if [ $(echo $iteration | grep -c "\.") -ne 0 ] ; then
+#     No label
+      CCLISTARG="-l $iteration"
+    fi 
+    for file in $($CCHOME/ccase/bin/users/cc_list $CCLISTARG 2>/dev/null) ; do
+      if [ -f $file ] ; then
+        unset SKIPPED
+        if [ "$IGNORE" ] ; then
+          vob=$(echo $file | cut -d"/" -f1)
+          if [ $(echo $EGREPLIST | grep -c $vob) -ne 0 ] ; then
+            echo "skipping $file"
+            SKIPPED=yes
+          fi
+        fi
+        if [ ! "$SKIPPED" ] ; then
+          locdir=$(dirname $file)
+          dir=$THISTMPDIR/$(dirname $file)
+          if [ ! -d $dir ] ; then
+            \mkdir -p  $dir
+          fi
+          base=$(basename $file)
+          if [ "$CCLISTARG" ] ; then
+            \cp $(find ${file}@@/main -name "$iteration" -print | tail -1) $dir/$base
+          else
+            \cp $(find ${file}@@/main -name "LATEST" -print | tail -1) $dir/$base
+          fi 
+          echo " >  $file copied"
+          chmod 644 $dir/$base
+# CASE for sql requests in odb/ddl:
+          if [ "$locdir" = "odb/ddl" ] ; then
+            for ddlfile in $(\ls -1 ${locdir}.*/$base) ; do
+              dir=$THISTMPDIR/$(dirname $ddlfile)
+              if [ ! -d $dir ] ; then
+                \mkdir -p  $dir
+              fi
+              cd $dir
+              if [ -f $base ] ; then
+                \rm $base
+              else
+                \ln -s ../ddl/$base $base
+              fi 
+              echo " >  $ddlfile linked to ../ddl/$base"
+              cd $ccdir
+            done
+          fi
+        fi
+# END CASE
+      fi
+    done
+  done
+fi
+if [ $ii -eq 1 ] ; then
+  echo " cc_export aborted"
+  \exit 1
+fi
+
+cd $THISTMPDIR
+
+# 3. Tar & Zip :
+#    ---------
+#
+
+if [ ! "$CPVIEW" ] ; then
+  if [ $ihost -eq 2 ] ; then
+    tar cvfz allvobs.tgz * 2>/dev/null
+    if [ $? -ne 0 ] ; then
+      echo Nothing to export.
+      echo End cc_export.
+      exit 2
+    fi
+  else
+    tar cvf allvobs.tar * 2>/dev/null
+    if [ $? -ne 0 ] ; then
+      echo Nothing to export.
+      echo End cc_export.
+      exit 2
+    else
+      gzip allvobs.tar
+    fi
+  fi
+fi
+#
+#-----------------------------------------------------------------------
+#
+# 5. Remote work :
+#    -----------
+#
+if [ $ihost -eq 1 ] ; then
+  echo "Start remote work to pack \"$FINALNAME\""
+  DISTANTDIR=$HOMEPACK/$LOCALDIR
+  if [ ! "$CPVIEW" ] ; then
+    rcp allvobs.tar.gz $USERNAME@$MYHOSTNAME:$DISTANTDIR/allvobs.tar.gz
+    rsh $MYHOSTNAME -l $USERNAME -n "cd $DISTANTDIR ; $USRBIN/gunzip allvobs.tar.gz ; tar xvf allvobs.tar 2>/dev/null ; \rm allvobs.tar"
+  else
+    for archive in *.tar.gz ; do
+      tarfile=$(basename $archive .gz)
+      vob=$(basename $tarfile .tar)
+      echo Install vob \"$vob\" ...
+      rcp $archive $USERNAME@$MYHOSTNAME:$DISTANTDIR/$archive
+      rsh $MYHOSTNAME -l $USERNAME -n "cd $DISTANTDIR ; $USRBIN/gunzip $archive ; tar xf $tarfile 2>/dev/null ; \rm $tarfile"
+    done
+  fi
+  echo "End remote work"
+  cd /tmp
+  /bin/rm -rf $THISTMPDIR
+elif [ $ihost -eq 2 ] ; then
+  echo "proceeding remote copy to webdav directory :"
+  DISTANTDIR=.${WEBDAV_PUBLIC_DIR}
+  set -x
+  rcp allvobs.tgz $USERNAME@$MYHOSTNAME:$DISTANTDIR/$(basename $THISTMPDIR).tgz
+  set +x
+  \rm -rf $THISTMPDIR
+else
+  if [ ! "$CPVIEW" ] ; then
+    \mv allvobs.tar.gz .local.tar.gz
+    \rm -rf $THISTMPDIR/*
+    \mv .local.tar.gz local.tar.gz
+    echo "tar gzipped local directory saved as $THISTMPDIR/local.tar.gz"
+  else
+    echo "tar gzipped vobs saved individually in directory $THISTMPDIR"
+    echo "proceeding backup on cougar in directory $(basename $THISTMPDIR)"
+    echo
+    cat <<EOF>$THISTMPDIR/dirftp
+    open cougar.meteo.fr
+    mkdir $(basename $THISTMPDIR)
+    cd $(basename $THISTMPDIR)
+    lcd $THISTMPDIR
+    prompt
+    mput *.tar.gz
+    quit
+EOF
+    ftp <$THISTMPDIR/dirftp
+    \rm $THISTMPDIR/dirftp
+  fi
+fi
+#
+#-----------------------------------------------------------------------
+#
+# 5. Finish :
+#    ------
+#
+echo End cc_export.

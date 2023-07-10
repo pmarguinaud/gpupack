@@ -1,0 +1,35 @@
+#
+##############################
+#                            #
+#    Cleaning of gmkpack     #
+#                            #
+##############################
+
+# This procedure does some cleaning of the installation of gmkpack.
+# It does NOT un-install gmkpack.
+# Actually it is usefull mostly to make a clean tar file of the installation package.
+# and also simplify merges.
+
+# Position myself in this top directory :
+cd $(dirname $0)
+
+# Remove generated files
+\rm -f mpsh/bin/*
+\rm -f man/cat1/*
+\rm -f doc/man1/*
+\rm -f doc/corps.html
+\rm -f wrapper
+
+# Remove hard-coded include path used by perl scripts
+cd aux
+for file in *.pl ; do
+  sed "1,1 s/perl.*/perl/" $file > .${file}
+  \mv .${file} $file
+done
+cd ..
+
+# Remove hard-coded version in gmkpack
+sed "s/THIS_GMKPACK=.*/THIS_GMKPACK=/" util/gmkpack > util/.gmkpack
+\mv util/.gmkpack util/gmkpack
+
+echo cleaning finished.

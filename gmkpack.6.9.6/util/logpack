@@ -1,0 +1,45 @@
+#!/bin/bash
+########################################################################
+#
+#    Script logpack
+#    --------------
+#
+#    Purpose : to get the logfile of the current pack
+#    -------   
+#
+#    Usage :  logpack
+#    -----           
+#
+#    Environment variables :
+#    ---------------------
+#
+########################################################################
+#
+export LC_ALL=C
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+# Find whether we are inside a pack or not : test the presence of directory .gmkfile:
+if [ -d .gmkfile ] ; then
+  export TARGET_PACK=$PWD
+  LOGFILE=$($GMKROOT/util/readpack GMK_LOG | cut -d '"' -f2)
+elif [ -f .logfile ] ; then
+# another chance for older packs:
+  LOGFILE=.logfile
+else
+  echo "This directory is not the main directory of a pack."
+  exit 1
+fi
+
+if [ -s $LOGFILE ] ; then
+  cat $LOGFILE
+else
+  echo "Broken pack."
+  exit 1
+fi

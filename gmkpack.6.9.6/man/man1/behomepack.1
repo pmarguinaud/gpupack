@@ -1,0 +1,46 @@
+.TH behomepack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+behomepack \- setup the environment to be packs developer
+.PP
+.SH SYNOPSIS
+.B . behomepack
+.SH DESCRIPTION
+.B behomepack
+changes the user environment to be packs developer, then displays the
+summary of environment variables used by 
+.B gmkpack\fR.
+.br
+Though this status is the default one, this command is helpful if the
+environment has been switched previously to packs administrator with the command
+.B berootpack\fR.
+.br
+Note that the dot character (".") ahead from the command is mandatory : this is
+because the command will export environment variables to the current shell, so this command has to be sourced.
+.PP
+.SH ENVIRONNEMENT
+.IP ROOTPACK
+The default directory of reference packs as an alternative to
+.I $HOME/rootpack
+.IP HOMEPACK
+The default directory of user packs as an alternative to
+.I $HOME/pack
+.IP ROOTBIN
+The root directory for executables of all reference packs. It enables to store
+executables in another file system (larger and possibly semi-permanent).
+.IP HOMEBIN
+The root directory for executables of all user packs. It enables to store
+executables in another file system (larger and possibly semi-permanent).
+.IP ROOTLIB
+The root directory for libraries of all reference packs. It enables to store
+libraries in another file system (larger and permanent).
+.IP HOMELIB
+The root directory for libraries of all user packs. It enables to store
+libraries in another file system (larger and permanent).
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR berootpack(1),
+.BR envpack(1).

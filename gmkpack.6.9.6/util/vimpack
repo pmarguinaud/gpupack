@@ -1,0 +1,11 @@
+#!/bin/bash
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+GMK_VIMPACK_VERSION=${GMK_VIMPACK_VERSION:=1}
+$GMKROOT/vimpack.${GMK_VIMPACK_VERSION}/vimpack $*

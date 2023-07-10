@@ -1,0 +1,28 @@
+#!/bin/bash
+########################################################################
+#
+#    Script lspack
+#    -------------
+#
+#    Purpose : In the framework of a pack : to recursively list all the files 
+#    -------
+#
+#    Usage :  lspack $*
+#    -----
+#            $* : if any, directories to list ; else list all of them
+#
+#    Environment variables :
+#    ---------------------
+#
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+if [ ! "$*" ] ; then
+  find . -name "*" \( ! -type d \) -follow -depth -print 2> /dev/null | cut -c3-
+else
+  find $* -name "*" \( ! -type d \) -follow -depth -print 2> /dev/null
+fi

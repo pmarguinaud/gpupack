@@ -1,0 +1,43 @@
+#!/bin/bash
+########################################################################
+#
+#    Script oops_srcstuffpack
+#    --------------------
+#
+#    Purpose : In the framework of a pack : to remove what is not used from
+#    -------   ec externalised surface
+#
+#    Usage : oops_srcstuffpack $1
+#    -----
+#               $1 : pack content to update (in/out)
+#
+#    Environment variables :
+#    ---------------------
+#
+########################################################################
+#
+export LC_ALL=C
+
+packlist=$1
+
+VOB=oops_src
+
+MyTmp=$GMKWRKDIR/${VOB}stuffpack
+mkdir -p $MyTmp
+cd $MyTmp
+#
+# Shrink packlist by removing what is not used
+# --------------------------------------------
+#
+\cp $packlist packlist.bak
+echo Check $VOB content ...
+grep -v "${VOB}\/" packlist.bak > $packlist
+dirlist="src"
+echo "WARNING : Content of directory ${VOB} is restricted to non-\"test\" directories\
+ and to the following directories : $dirlist"
+for dir in $(eval echo $dirlist) ; do
+    grep "^${VOB}\/${dir}\/" packlist.bak | grep -v "\/test\/" >> $packlist
+done
+#
+cd $GMKWRKDIR
+\rm -rf ${VOB}stuffpack

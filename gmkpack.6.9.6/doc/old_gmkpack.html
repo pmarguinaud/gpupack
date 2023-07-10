@@ -1,0 +1,1544 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Ryad El Khatib">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; HP-UX B.11.00 9000/785) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#0000EE" alink="#FE0000">
+&nbsp;
+<center>
+<p><i><font size=+4>Getting started with</font></i>
+<p><b><i><font size=+4>GMKPACK</font></i></b>
+<p><i><font size=+1><a href="mailto:ryad.elkhatib@meteo.fr">By</a></font></i>
+<br><i><font size=+1><a href="mailto:ryad.elkhatib@meteo.fr">Ryad El Khatib</a></font></i>
+<p><font size=+1>CNRM / GMAP / ALGO</font>
+<p><font size=+1>Version 6.1</font>
+<p>2005-04-04</center>
+
+<ul>
+<li>
+<a href="#Prefactory note">Prefactory note</a></li>
+
+<li>
+<a href="#What is a pack">What is a <i>pack</i></a></li>
+
+<li>
+<a href="#Which mkpack">Why g<i>mkpack</i></a></li>
+
+<li>
+<a href="#Prepare your environment">Prepare your environment</a></li>
+
+<li>
+<a href="#Getting started">Getting started</a></li>
+
+<li>
+<a href="#Visiting a created pack">Visiting a created pack</a></li>
+
+<li>
+<a href="#Visiting the script for compilation and load">Visiting the script
+for compilation and load</a></li>
+
+<li>
+<a href="#Making a comprehensive pack">Making a comprehensive pack</a></li>
+
+<li>
+<a href="#Tools">Tools</a></li>
+
+<li>
+<a href="#Miscellaneous">Miscellaneous</a></li>
+
+<li>
+<a href="#Frequently Asked Questions">Frequently Asked Question (...or
+something like that)</a></li>
+
+<li>
+<a href="#manuals">Manuals</a></li>
+</ul>
+
+<ul>
+<li>
+<a href="#Comment">Comment &ccedil;a marche</a></li>
+
+<ol>
+<li>
+<a href="#Compilation">Compilation</a></li>
+
+<li>
+<a href="#Confection des librairies de code-objet">Confection des librairies
+de code-objet</a></li>
+
+<li>
+<a href="#Edition de liens">Edition de liens</a></li>
+
+<li>
+<a href="#Traitement des interfaces explicites">Traitement des interfaces
+explicites auto-g&eacute;n&eacute;r&eacute;es et "norms checker"</a></li>
+
+<li>
+<a href="#Traitement des r f rences insatisfaites">Traitement des r&eacute;f&eacute;rences
+insatisfaites</a></li>
+
+<li>
+<a href="#Gestion des packs">Gestion des packs</a></li>
+
+<li>
+<a href="#Fabrication de programmes-syst">Fabrication de programmes-syst&egrave;me
+et autres pr&eacute;compilateurs</a></li>
+
+<li>
+<a href="#Les m ta-fichiers d'ODB">Les "m&eacute;ta-fichiers" d'ODB</a></li>
+</ol>
+</ul>
+
+<center>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Prefactory note"></a><font size=+2>Prefactory note</font></center>
+
+<p><font size=+1>This document has been written in order to help people
+to use the procedure <i>gmkpack.</i></font>
+<p><font size=+1><i>gmkpack </i>is a procedure that has been written by
+<a href="http://mout.meteo.fr/~marp001/cgi-bin/login.pl">GCO</a>&nbsp;
+and <a href="mailto:ryad.elkhatib@meteo.fr">myself</a> in order to create
+an environment to compile and make binaries from Arpege, Aladin, ODB, ...
+or others libraries.</font>
+<p><font size=+1>The previous version of this precedure, named <i>mkpack</i>,
+was based on the use of <i>makefiles</i>.</font>
+<br><font size=+1>It solved the problem of the dependencies research between
+source files. But unfortunately it was not properly adapted to handle the
+so-called "duplicated" subroutines of Aladin. Furthermore the research
+of dependencies was very slow.</font>
+<p><font size=+1>The present procedure is an improvement of the previous
+system ; it is composed of "home-made" scripts, written in Perl or Shell.
+Though one can find it less user-friendly, it solves the problem of duplicated
+subroutines. It is also faster than the previous one as far as dependencies
+compilation is concerned.</font>
+<p><font size=+1>Like the previous system using makefiles, this one will
+find for you what should be compiled (or re-compiled), by checking the
+dependencies (due to the use of fortran <i>modules</i>), and by checking
+whether or not a source file is more recent than its corresponding object
+file. It will also provide for you all the necessary links to reach the
+source codes, object libraries, etc.</font>
+<p><font size=+1>Nevertheless, there are several differences between the
+two systems in the way it works as in the way it should be used.</font>
+<br><font size=+1>For instance, packs from <i>mkpack</i> and packs from
+<i>gmkpack</i>
+are not compatible.</font>
+<center>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="What is a pack"></a><font size=+2>What is a <i>pack</i> ?</font></center>
+
+<p><font size=+1>When you want to compile source codes, you have to copy
+your modified source codes "somewhere" (usually : a directory).</font>
+<br><font size=+1>This "somewhere" is somehow a "pack".</font>
+<p><font size=+1>A pack is a directory, containing specific subdirectories
+and files, that will be all created by running <i>gmkpack</i>.</font>
+<br><font size=+1>Below this directory, you will compile your modifications
+and make your libraries and executables.</font>
+<p><font size=+1>The use of Arpege/Aladin is made complicated by the need
+of various "include" files, modules and libraries to achieve an executable.</font>
+<br><font size=+1><i>Gmkpack</i> will provide for you all this environment
+that you will need.</font>
+<br><font size=+1>Therefore, the pack that you will create in your user
+must depend on a pre-defined "environment", described by an existing <b>Arpege
+reference cycle</b>.</font>
+<p><font size=+1>More generally, we can try to define a pack as follows
+:</font>
+<br>&nbsp;
+<br>&nbsp;
+<br>
+<center>
+<p><i><font size=+1>A pack is a consistent ensemble of scripts, source
+files, libraries and executables</font></i>
+<br><i><font size=+1>of all ClearCase projects related to Arpege/Aladin
+(ie : arp, ald, tfl, tal, odb, uti, ...)</font></i>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Which mkpack"></a><font size=+2>Why g<i>mkpack</i> ?</font></center>
+
+<p><font size=+1>Preliminary tests showed that while <i>mkpack.pl</i> looked
+well designed for GCO purpose, it is actually not properly designed for
+developers. G<font color="#000000"><i>mkpack</i> is a procedure which fits
+developers' work, and which is supposed to fit as well GCO's work later
+on.</font></font>
+<br>&nbsp;
+<br>&nbsp;
+<br>
+<center>
+<p><i><font color="#000000"><font size=+1>gmkpack is a procedure to create
+a pack and&nbsp; generate script files</font></font></i>
+<br><i><font color="#000000"><font size=+1>to compile your modified source
+codes and to make libraries or executables.</font></font></i>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Prepare your environment"></a><font size=+2>Prepare your environment</font></center>
+
+<p><font size=+1>Before starting to create a pack, you should add the following
+lines in your file </font><font face="Arial,Helvetica">.profile</font><font size=+1>
+on the machine where you will operate on your packs ("tora" at this time
+for M&eacute;t&eacute;o-France) :</font>
+<br>&nbsp;
+<ul>
+<li>
+<font size=+1>The following variables <font face="Times New Roman,Times">are
+necessary to define the procedure </font>:</font></li>
+</ul>
+export GMKROOT=/u/gp/mrpm/mrpm602/gmkpack
+<br>export ROOTPACK=/u/dp/marp/marp001/pub
+<br>export GMKFILE=VPP5000.TORA
+<br>&nbsp;
+<ul><font size=+1>You need to define a temporary directory named GMKTMP
+:</font></ul>
+export GMKTMP=$TMPDIR
+<br>(or export GMKTMP=/tmp/$(id -u).$$ for instance, if you do not have
+any $TMPDIR defined yet)
+<br>&nbsp;
+<ul>
+<li>
+<font size=+1><font face="Times New Roman,Times">You should define
+</font>the
+directory where you will create your own packs :</font></li>
+</ul>
+<font face="Arial,Helvetica">export HOMEPACK= <i>(fill it yourself)</i></font>
+<ul>
+<li>
+<font size=+1><font face="Times New Roman,Times">You should define </font>the
+directory where you will create your binaries :</font></li>
+</ul>
+<font size=+1>The current custom is to create the binaries in the </font><font face="Arial,Helvetica">$workdir</font><font size=+1>
+directory, because these files are huge.</font>
+<br><font size=+1>The drawback is that the files in this directory are
+volatile, so your binaries may be removed out of your control.</font>
+<br><font size=+1>But usually it is easy to re-create them, and meanwhile
+you can still save them on the archive machine, too.</font>
+<br><font face="Arial,Helvetica">export HOMEBIN= <i>(fill it yourself)</i></font>
+<ul>
+<li>
+<font face="Times New Roman,Times"><font size=+1>You should define the
+path for the procedure <i>gmkpack</i> and its relatives (note that the
+variable for man pages depends on the system ; usually it is MANPATH but
+on Fujitsu machines the name is CATMAN) :</font></font></li>
+</ul>
+export PATH=$PATH:$GMKROOT/util
+<br>export CATMAN=$CATMAN:$GMKROOT/man
+<p><font face="Times New Roman,Times"><font size=+1>Example :</font></font>
+<br>export GMKROOT=/u/gp/mrpm/mrpm602/gmkpack
+<br>export ROOTPACK=/u/dp/marp/marp001/pub
+<br>export GMKFILE=VPP5000.TORA
+<br><font face="Arial,Helvetica">export HOMEPACK=$HOME/pack</font>
+<br><font face="Arial,Helvetica">export HOMEBIN=$WORKDIR/binpack</font>
+<br>export PATH=$PATH:$GMKROOT/util
+<br>export CATMAN=$CATMAN:$GMKROOT/man
+<br>export GMKTMP=$TMPDIR
+<center>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Getting started"></a><font face="Times New Roman,Times"><font size=+2>Getting
+started</font></font></center>
+
+<p><font face="Times New Roman,Times"><font size=+1>Before starting, one
+should have in mind that making a <a href="#What is a pack">pack</a> with
+<i>gmkpack</i>
+is very similar to getting a <a href="http://www.cnrm.meteo.fr/aladin/MODELES/CLEARCASE/CC-manual.html">ClearCase</a>
+view with </font></font><font face="Arial,Helvetica"><a href="http://www.cnrm.meteo.fr/aladin/MODELES/CLEARCASE/CC-manual.html#Lesson4">cc_getview</a></font>
+<br>&nbsp;
+<br>&nbsp;
+<br>
+<center>
+<p><i><font color="#000000"><font size=+1>As when you create a ClearCase
+branch upon an existing GCO release,</font></font></i>
+<br><i><font color="#000000"><font size=+1>you will always create a pack
+upon an existing GCO pack.</font></font></i></center>
+
+<p><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<p><font color="#000000"><font size=+1>Therefore you will have to define
+the characteristics of the GCO pack (called : "reference pack" or "source
+pack") upon which your own pack will be built.</font></font>
+<p><font face="Times New Roman,Times"><font size=+1>To get the usage of
+<i>gmkpack</i>,&nbsp;
+type :</font></font>
+<br><font face="Arial,Helvetica">gmkpack</font>
+<p><font face="Times New Roman,Times"><font size=+1>The system will answer
+:</font></font>
+<br><font face="Arial,Helvetica">Usage: gmkpack -r release [-b branch ]
+[-n local-pack-version ] [-a -s | -u target-pack [-v reference-pack-version
+]] [-l compiler-label ] [-o compiling-flag ] [-f rootpack-directory ] [-p
+project|program ] [-O] [-m]</font>
+<p><a NAME="Parameters"></a><font face="Arial,Helvetica">Parameters :</font>
+<br><font face="Arial,Helvetica">--------</font>
+<br><font face="Arial,Helvetica">&nbsp;-r = reference release label</font>
+<br><font face="Arial,Helvetica">&nbsp;-u = target pack name</font>
+<br><font face="Arial,Helvetica">&nbsp;-b = reference branch name (optional,
+default is "main")</font>
+<br><font face="Arial,Helvetica">&nbsp;-v = reference pack version number
+(optional, default is the latest)</font>
+<br><font face="Arial,Helvetica">&nbsp;-l = reference compiler version
+(optional, default is "L0209")</font>
+<br><font face="Arial,Helvetica">&nbsp;-o = compiler options family, (optional,
+"x" : optimal [default], "g" : debug, "b" : bound checking)</font>
+<br><font face="Arial,Helvetica">&nbsp;-f = alternative rootpack directory
+(optional)</font>
+<br><font face="Arial,Helvetica">&nbsp;-p = project|program name for the
+compilation script</font>
+<br><font face="Arial,Helvetica">&nbsp;-m = quiet mode (optional ; to make
+the compilation script only)</font>
+<br><font face="Arial,Helvetica">&nbsp;-O = Observations handling libraries
+(optional)</font>
+<br><font face="Arial,Helvetica">&nbsp;-a = To create a main pack (optional)</font>
+<br><font face="Arial,Helvetica">&nbsp;-n = local pack version number (optional,
+default is the latest existing one)</font>
+<br><font face="Arial,Helvetica">&nbsp;-s = To create the scripts to compile
+the system programs</font>
+<p><font face="Times New Roman,Times"><font size=+1>To start with, let's
+consider only the mandatory parameter :</font></font>
+<p><font face="Times New Roman,Times"><font size=+1>&nbsp;&nbsp;&nbsp;
+-r : <a href="http://www.cnrm.meteo.fr/aladin/MODELES/CLEARCASE/CC-manual.html#Notion of Release"><b>ARPEGE</b>
+reference release label under Clearcase</a> ; in other words : the main
+Arpege cycle to be considered.</font></font>
+<br><font face="Times New Roman,Times"><font size=+1>You can get the list
+of existing releases by typing : </font></font><font face="Arial,Helvetica">rlspack</font>
+<p><font size=+1>Two more arguments are very important, however :</font>
+<p><font face="Times New Roman,Times"><font size=+1>&nbsp;&nbsp;&nbsp;
+-u : User's target pack : you can set the name of your choice (it is recommended
+to choose a name which refers to your corresponding ClearCase branch).
+If you do not provide this argument the system will build one anyhow.</font></font>
+<br><font face="Times New Roman,Times"><font size=+1>&nbsp;&nbsp;&nbsp;
+-p : <a href="http://www.cnrm.meteo.fr/aladin/MODELES/CLEARCASE/CC-manual.html#Notion of Project">Program
+name</a> to make an executable ; the possible values are listed below.
+If you do not provide this argument, <i>gmkpack</i> will create a pack
+without any script to compile or load. Anyhow it will be still possible
+to generate such scripts later.</font></font>
+<p><u><font size=+1>Possible program names :</font></u>
+<blockquote>adbias
+<br>adscan
+<br>aladin
+<br>aldodb
+<br>arome
+<br>arpege
+<br>arpodb
+<br>atstprog
+<br>bator
+<br>biascv
+<br>blend
+<br>blendsur
+<br>cabias
+<br>cascan
+<br>check_limits
+<br>ctrodb
+<br>ctroulan
+<br>cybias
+<br>cyprep
+<br>cyscan
+<br>cysele
+<br>ddhc
+<br>ddhr
+<br>ddht
+<br>eatstpro
+<br>etestadj
+<br>fcqodb
+<br>gobptout
+<br>gptosp
+<br>ioassign
+<br>lamflag_odb
+<br>lecbdap
+<br>mandalay
+<br>odbtools
+<br>progrid
+<br>qscat_25to50
+<br>qscat_bufr
+<br>qscat_dconeqc
+<br>qscat_filter
+<br>sptogp
+<br>testadj
+<br>testfa</blockquote>
+<font face="Times New Roman,Times"><font size=+1>For example, let's make
+a pack named </font></font><font face="Arial,Helvetica">test0</font><font face="Times New Roman,Times"><font size=+1>
+upon the Arpege release </font></font><font face="Arial,Helvetica">CY24T1</font><font face="Times New Roman,Times"><font size=+1>,
+with a script for compiling and loading aladin :</font></font>
+<br><font face="Arial,Helvetica">%gmkpack -utest0 -r26t1 -paladin</font>
+<p><font face="Arial,Helvetica"><font size=+1>Displayed lines :</font></font>
+<br>/u/gp/mrpm/mrpm602/gmkpack.6.1/util/gmkpack starts.
+<br>Creating pack /u/gp/mrpm/mrpm602/pack/test0 upon /u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack
+...
+<br>Basic directories :
+<br>src
+<br>src/local
+<br>lib
+<br>bin -> /work08/mrpm602/binpack/test0/bin
+<br>Unsatisfied external references directories :
+<br>src/unsxref/quiet
+<br>src/unsxref/verboose
+<br>Sources control directory :
+<br>src/.gmak
+<br>Sources view :
+<br>local
+<br>main
+<br>Links :
+<br>src/main -> /u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main
+<br>Background source descriptors files :
+<br>main.sds
+<br>"main" tree for ald ...
+<br>"main" tree for arp ...
+<br>"main" tree for coh ...
+<br>"main" tree for odb ...
+<br>"main" tree for ost ...
+<br>"main" tree for sat ...
+<br>"main" tree for tal ...
+<br>"main" tree for tfl ...
+<br>"main" tree for uti ...
+<br>"main" tree for xrd ...
+<br>libald.a -> /u/dp/marp/marp001/tampon/lib/ald/al26/al26t1_main.01.L0209.x.a
+<br>libarp.a -> /u/dp/marp/marp001/tampon/lib/arp/cy26/cy26t1_main.01.L0209.x.a
+<br>libcoh.a -> /u/dp/marp/marp001/tampon/lib/coh/co26/co26t1_main.01.L0209.x.a
+<br>libobs.a -> /u/dp/marp/marp001/tampon/lib/obs/ob26/ob26t1_main.01.L0209.x.a
+<br>libodb.a -> /u/dp/marp/marp001/tampon/lib/odb/od26/od26t1_main.01.L0209.x.a
+<br>libodb.cma-main.a -> /u/dp/marp/marp001/tampon/lib/odb/od26/od26t1_cma-main.01.L0209.x.a
+<br>libodb.scr-main.a -> /u/dp/marp/marp001/tampon/lib/odb/od26/od26t1_scr-main.01.L0209.x.a
+<br>libost.a -> /u/dp/marp/marp001/tampon/lib/ost/os26/os26t1_main.01.L0209.x.a
+<br>libsat.a -> /u/dp/marp/marp001/tampon/lib/sat/sa26/sa26t1_main.01.L0209.x.a
+<br>libsct.a -> /u/dp/marp/marp001/tampon/lib/sct/st26/st26t1_main.01.L0209.x.a
+<br>libssa.a -> /u/dp/marp/marp001/tampon/lib/ssa/ss26/ss26t1_main.01.L0209.x.a
+<br>libssm.a -> /u/dp/marp/marp001/tampon/lib/ssm/sm26/sm26t1_main.01.L0209.x.a
+<br>libtal.a -> /u/dp/marp/marp001/tampon/lib/tal/ta26/ta26t1_main.01.L0209.x.a
+<br>libtfl.a -> /u/dp/marp/marp001/tampon/lib/tfl/tf26/tf26t1_main.01.L0209.x.a
+<br>libuti.a -> /u/dp/marp/marp001/tampon/lib/uti/ut26/ut26t1_main.01.L0209.x.a
+<br>libuti.ddl-main.a -> /u/dp/marp/marp001/tampon/lib/uti/ut26/ut26t1_ddl-main.01.L0209.x.a
+<br>libxrd.a -> /u/dp/marp/marp001/tampon/lib/xrd/xr26/xr26t1_main.01.L0209.x.a
+<br>Background include/module paths ...
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/ald/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/coh/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/misc
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/ost/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/sat/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/tal/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/tfl/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/uti/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/module
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/ald_inc/function
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/ald_inc/interface
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/ald_inc/namelist
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/common
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/function
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/interface
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/arp/namelist
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/coh/common
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/coh/namelist
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/CCMA
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/ECMA
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/ECMASCR
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/include
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/odb/interface
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/ost/common
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/ost/interface
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/ost/namelist
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/tal/interface
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/tfl/interface
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/uti/include
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/uti/namelist
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/ddh
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/fa
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/grib_io/include
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/include
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/lfi
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/svipc/include
+<br>-I/u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main/xrd/utilities/include
+<br>done.
+<br>Genesis :
+<br>/u/gp/mrpm/mrpm602/gmkpack.5.4/util/gmkpack -r cy26t1 -b main -v 01
+-u test0 -l L0209 -o x -p aladin
+<br>&nbsp;The following line has been appended to your file ~/.kshrc :
+<br>alias test0='cd $HOMEPACK/test0;ls -l'
+<p>Prepare script(s) ...
+<p>>&nbsp; copy compilation and load script on /u/gp/mrpm/mrpm602/pack/test0/ics_aladin
+...
+<br>/u/gp/mrpm/mrpm602/gmkpack.5.4/util/gmkpack ends.
+<p><u><font size=+1>Comments :</font></u>
+<ul>
+<li>
+<font face="Times New Roman,Times"><font size=+1>You have now a pack </font></font><font face="Arial,Helvetica">test0</font><font face="Times New Roman,Times"><font size=+1>
+ready for use ; the echo of the command has shown you several steps of
+the constitution of the pack.</font></font></li>
+
+<li>
+<font face="Times New Roman,Times"><font size=+1>You have a script file
+for compilation and load (local name : </font></font><font face="Arial,Helvetica">ics_aladin</font><font face="Times New Roman,Times"><font size=+1>
+in </font></font><font face="Arial,Helvetica">$HOMEPACK/test0</font><font face="Times New Roman,Times"><font size=+1>)</font></font></li>
+
+<li>
+<font face="Times New Roman,Times"><font size=+1>Note that <i>gmkpack</i>
+has appended to your file .kshrc the following command :</font></font></li>
+
+<br><font face="Arial,Helvetica">alias -x test0='cd $HOMEPACK/test0;ls
+-l'</font>
+<br><font size=+1>Thus typing<font face="Times New Roman,Times"> the name
+of your pack, you will go to its directory at once in the next sessions
+(to get this facility in the current session as well, you should re-type
+it right now : </font></font><font face="Arial,Helvetica">%alias -x mypack='cd
+$HOMEPACK/mypack;ls -l'</font><font face="Times New Roman,Times"><font size=+1>)</font></font></ul>
+
+<center>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Visiting a created pack"></a><font size=+2>Visiting a created
+pack</font></center>
+
+<p><font size=+1>Now let's visit the pack </font><font face="Arial,Helvetica">test0</font><font size=+1>
+you have just created :</font>
+<br><font face="Arial,Helvetica">%test0</font>
+<br><font face="Arial,Helvetica">total 64</font>
+<table BORDER=0 CELLSPACING=0 CELLPADDING=0 COLS=4 WIDTH="70%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="2%" NOSAVE><font face="Arial,Helvetica">lrwxrwxrwx&nbsp;</font></td>
+
+<td WIDTH="20%" NOSAVE>1&nbsp; <font face="Arial,Helvetica">logname&nbsp;&nbsp;
+group</font></td>
+
+<td>
+<div align=right>30</div>
+</td>
+
+<td WIDTH="50%" NOSAVE><font face="Arial,Helvetica">&nbsp; MM dd hh:mm
+<a href="#bin">bin</a>
+-> $HOMEBIN/test0/bin</font></td>
+</tr>
+
+<tr NOSAVE>
+<td><font face="Arial,Helvetica">-rw-r--r--</font></td>
+
+<td WIDTH="10%" NOSAVE>1&nbsp; <font face="Arial,Helvetica">logname&nbsp;&nbsp;
+group</font></td>
+
+<td>
+<div align=right>6958</div>
+</td>
+
+<td WIDTH="1%" NOSAVE><font face="Arial,Helvetica">&nbsp; MM dd hh:mm <a href="#frtsld">ics_aladin</a></font></td>
+</tr>
+
+<tr NOSAVE>
+<td><font face="Arial,Helvetica">drwxr-xr-x</font></td>
+
+<td WIDTH="10%" NOSAVE>2&nbsp; <font face="Arial,Helvetica">logname&nbsp;&nbsp;
+group</font></td>
+
+<td WIDTH="1%" NOSAVE>
+<div align=right>512</div>
+</td>
+
+<td NOSAVE><font face="Arial,Helvetica">&nbsp; MM dd hh:mm <a href="#lib">lib</a></font></td>
+</tr>
+
+<tr NOSAVE>
+<td><font face="Arial,Helvetica">drwxr-xr-x</font></td>
+
+<td>3&nbsp; <font face="Arial,Helvetica">logname&nbsp;&nbsp; group</font></td>
+
+<td>
+<div align=right>512</div>
+</td>
+
+<td NOSAVE><font face="Arial,Helvetica">&nbsp; MM dd hh:mm <a href="#src">src</a></font></td>
+</tr>
+</table>
+
+<p><u><font size=+1>Comments :</font></u>
+<ul>
+<li>
+<a NAME="bin"></a><font face="Arial,Helvetica">bin</font><font size=+1>
+is the directory where you executables will be written ; you can see that
+actually this directory is a symbolic link toward another one : </font><font face="Arial,Helvetica">$HOMEBIN/test0/bin</font><font face="Times New Roman,Times"><font size=+1>.
+But since now you do not have to care about this link : do as if your executables
+were on </font></font><font face="Arial,Helvetica">$HOMEPACK/test0/bin</font></li>
+</ul>
+
+<ul>
+<li>
+<a NAME="frtsld"></a><font face="Arial,Helvetica">ics_aladin </font><font size=+1>is
+your <font face="Times New Roman,Times">script file for compilation and
+load. We shall detail it <a href="#Visiting the script for compilation and load">later</a>.</font></font></li>
+</ul>
+
+<ul>
+<li>
+<a NAME="lib"></a><font face="Arial,Helvetica">lib</font><font face="Times New Roman,Times"><font size=+1>
+is the directory where you will find or write all the needed object libraries
+for you work.</font></font></li>
+
+<br><font face="Times New Roman,Times"><font size=+1>Note that this directory
+is not empty ; it already contains a lot of object libraries from GCO,
+as symbolic links.</font></font></ul>
+
+<ul>
+<li>
+<a NAME="src"></a><font face="Arial,Helvetica">src</font><font size=+1>
+is the directory where you will find or write all the needed source files
+for your work, but WAIT ! This needs to be detailed right now : Type :
+</font><font face="Arial,Helvetica">ls
+-l src</font></li>
+</ul>
+<font face="Arial,Helvetica">total 32</font>
+<br><font face="Arial,Helvetica">drwxr-xr-x&nbsp; 12 logname&nbsp; group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+512 MM dd hh:mm local</font>
+<br><font face="Arial,Helvetica">lrwxrwxrwx&nbsp;&nbsp;&nbsp; 1 logname&nbsp;
+group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 MM
+dd hh:mm main ->&nbsp; /u/dp/marp/marp001/pub/cy26t1_main.01.L0209.x.pack/src/main</font>
+<ul>
+<ul>
+<li>
+<font color="#CC0000"><font face="Arial,Helvetica">local/<i>ppp</i></font><font size=+1>
+is the actual directory where you will put your modified source files ACCORDING
+TO THE CLEARCASE TREE once you have defined the working project <i>ppp</i></font></font></li>
+
+<li>
+<font face="Arial,Helvetica">main</font><font size=+1> is a symbolic link
+to a GCO's directory containing all the background source codes, object
+files and modules from your reference Arpege release (remember <a href="/users/algo/gmod/doc_html/modeles/ClearCase/CC-manual.html#Lesson2">cc_view</a>
+in ClearCase ?).</font></li>
+</ul>
+</ul>
+<font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Below each of
+this directories, you will find again the ClearCase-style of sub-directories.
+Again :</font>
+<center>
+<p><u><font color="#CC0000"><font size=+1><b>You will have to put your
+modified source files below </b><font face="Arial,Helvetica">local/<i>ppp</i></font><b>
+at the proper place,</b></font></font></u>
+<br><b><u><font color="#CC0000"><font size=+1>as you would do in a ClearCase
+session below the project <i>ppp</i> !</font></font></u></b>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Visiting the script for compilation and load"></a><font size=+2>Visiting
+the script for compilation and load</font></center>
+
+<p><font size=+1>Let's comment the script </font><font face="Arial,Helvetica">ics_aladin</font><font size=+1>
+for compilation and load (<a href="gfrtsld.html" TARGET="FRTSLD">click
+here</a>) :</font>
+<ul>
+<li>
+<a NAME="These are special control command to submit the job efficiently"></a><font size=+1><b>Control
+command</b> : to submit the job efficiently</font></li>
+
+<li>
+<a NAME="Compilation options"></a><font size=+1><b>Compiler options</b>
+: you are given the choice between various combination of options, but
+you can also set your own options. Note that default is "Optimal" for fast
+computation with a robust code.</font></li>
+
+<li>
+<a NAME="Files in pack to ignore (obsolete/useless)"></a><font size=+1><b>Files
+in pack to ignore (obsolete/useless)</b> : you can list them in the form
+: "project/subdirectory/filename"</font></li>
+
+<li>
+<a NAME="bypass"></a><font size=+1><b>Compilation bypass</b> : to bypass
+the compilation on some project. For expert users only, because this option
+is risky !</font></li>
+
+<li>
+<a NAME="Dependencies"></a><font size=+1><b>Dependencies</b> : if you have
+modified a module, you are supposed to recompile all the subroutines that
+are using this module. This feature is replacing the ClearCase command
+<a href="http://www.cnrm.meteo.fr/aladin/MODELES/CLEARCASE/CC-manual.html#Lesson7">cc_depend</a>.</font></li>
+
+<br><font size=+1>The variable MKPROJECT is listing all the projects that
+are concerned by the research of dependencies. You might reduce this list
+yourself if you know exactly which dependencies you will really need.</font>
+<li>
+<a NAME="Supplementary projects to be handled with explicit interface bl"></a><font size=+1><b>Supplementary
+projects to be handled with explicit interface blocks</b> : only if you
+wish to have more projects treated with explicit interfaces blocks</font></li>
+
+<li>
+<a NAME="Recursive update control"></a><font size=+1><b>Recursive update
+control</b> : it could be switched of when you compile a main pack for
+the first time, to save time. Otherwise it is better to let gmkpack do
+its update control : more secure and informative.</font></li>
+
+<li>
+<a NAME="Incremental compilation facility"></a><font size=+1><b>Incremental
+compilation facility</b> : to be used with much care ! If enabled, you
+can select the starting and ending level of work, or let gmkpack find where
+it can start from without damages. Level 0 stands for the setup. Level
+1 and above stand for the compilation level. You can for instance go from
+0 to 0 to study the setup. If you do not specify the starting level, gmkpack
+will run through level 0 anyhow, for safety controls. If you want to restart
+from a specific level and recompile at that stage only specific elements,
+you can list them in the form "branch@project/subdirectory/filename".</font></li>
+
+<li>
+<a NAME="Listing"></a><font size=+1><b>Listing</b> : if switched off the
+errors report could be written out in the output job listing.</font></li>
+
+<li>
+<a NAME="Norms checker"></a><font size=+1><b>Norms checker severity</b>
+: enables to tune the verbosity of the Norms checker in the compilation
+dayfile</font></li>
+
+<li>
+<a NAME="Map"></a><font size=+1><b>Load map</b> : to control the actual
+links.</font></li>
+
+<li>
+<a NAME="Users libraries update"></a><font size=+1><b>Users libraries update</b>
+: you can possibly switch off this step, but this is quite unsafe ! for
+expert usage only.</font></li>
+
+<li>
+<a NAME="Executables"></a><font size=+1><b>Executables</b> : to activate
+any proceeding executable.</font></li>
+
+<li>
+<a NAME="Executable name"></a><font size=+1><b>Executable name</b> : for
+your own purpose, the name of your binary that will be written below </font><font face="Arial,Helvetica">$HOMEBIN/bin</font><font face="Times New Roman,Times"><font size=+1>.</font></font></li>
+
+<li>
+<a NAME="Entry point"></a><font size=+1><b>Entry point</b> : it depends
+on which
+<i>program</i> you intend to run.</font></li>
+
+<li>
+<a NAME="Libraries to load"></a><font size=+1><b>Libraries to load</b>
+: as a developper, you should really keep the control over the libraries
+to load, and in which order to load them. The procedure is supposed to
+guess the libraries you need, and to list them in the proper ordering (from
+the highest to the lowest priority). Anyhow, it is good to control that
+you agree with the generated list.</font></li>
+
+<li>
+<a NAME="Message passing libraries"></a><font size=+1><b>System libraries</b>
+: you might need to change them ... when you are an expert user ;-)</font></li>
+
+<li>
+<a NAME="Loading options"></a><font size=+1><b>Loader and options</b> :
+in case you need to change them ...</font></li>
+
+<li>
+<a NAME="Verboose level"></a><font size=+1><b>Verboose level</b> : for
+debugging purpose</font></li>
+</ul>
+
+<p><br><font size=+1>Submitting the job of compilation and load, if the
+job is sucessfull, you will get libraries of your modifications and possibly
+a binary to execute as well. The procedure will usually generate one library
+per project involved in your modification, with the name : </font><font face="Arial,Helvetica">lib$project.local.a</font>
+<br><font size=+1>If not, the tail of the output will tell you why the
+job failed.
+<i>Note that meanwhile, if you had already existing libraries
+or binaries, they will be removed for security reasons</i>.</font>
+<center>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Making a comprehensive pack"></a><font size=+2>Making a comprehensive
+pack</font></center>
+
+<p><font size=+1>We shall now explain the optional <a href="#Parameters">parameters
+of <i>gmkpack</i></a> :</font>
+<p><b><font size=+1><font color="#CC0000">&nbsp;</font><font color="#000000">-b
+: reference branch name</font></font></b>
+<br><font size=+1>Like a branch in ClearCase, you may have to work upon
+a reference pack that is a modification of a main release : this is typically
+the case for a <i>bugfix</i>.</font>
+<br><font size=+1>Therefore you will have to invoke <i>gmkpack</i> giving
+with : </font><font face="Arial,Helvetica">-b</font><font size=+1> </font><font face="Arial,Helvetica">branch_name</font>
+<br><font face="Times New Roman,Times"><font size=+1>The default is "main",
+which correspond to the main release (like in ClearCase).</font></font>
+<p><font size=+1><font color="#CC0000">&nbsp;</font><b><font color="#000000">-v
+: reference pack version number</font></b></font>
+<br><font size=+1>The version number of the pack related to the branch
+name and release (even if the branch name is "main"). In that case, you
+will have also to invoke <i>gmkpack</i> with : </font><font face="Arial,Helvetica">-v
+: version_number</font>
+<br><font face="Times New Roman,Times"><font size=+1>By default, the procedure
+selects the highest existing version number for the selected branch and
+release.</font></font>
+<p><font face="Times New Roman,Times"><font size=+1><font color="#CC0000">&nbsp;</font><b><font color="#000000">-l
+: reference compiler version</font></b></font></font>
+<br><font face="Times New Roman,Times"><font color="#000000"><font size=+1>This
+is a label for the machine compiler version used while building the reference
+pack. This parameter should not be used so often.</font></font></font>
+<p><b><font face="Times New Roman,Times"><font color="#000000"><font size=+1>&nbsp;-o
+: reference compiler option</font></font></font></b>
+<br><font face="Times New Roman,Times"><font color="#000000"><font size=+1>This
+is a character to symbolize the compiling options used for building the
+reference pack. This parameter should not be used so often. The option
+"g" stands for a debugging pack, to be used when we really are in a big
+mess.</font></font></font>
+<p><font size=+1><font color="#CC0000">&nbsp;</font><b><font color="#000000">-O
+: Observations handling libraries</font></b></font>
+<br><font size=+1>Those who work on data assimilation will need to link
+more libraries : to force the use of observation libraries one should invoke
+<i>gmkpack</i>
+with the option </font><font face="Arial,Helvetica">-O <font size=+1>;
+anyhow this option should no more be used since it is possible to get these
+libraries linked if the program name has been properly chosen (example
+:
+</font>arpodb<font size=+1> or </font>aldodb<font size=+1> instead of
+</font>arpege<font size=+1>
+or </font>aladin<font size=+1>).</font></font>
+<p><b><font size=+1>- a : to create a reference pack</font></b>
+<br><font size=+1>This option is used to create a reference pack which
+should contain everything needed. Usually this option is used by administrators
+only, though anybody can make his own "main" packs.</font>
+<p><b><font size=+1>-n : to select the version of a pack to create.</font></b>
+<br><font size=+1>By default you start with 1. To increment the version
+you can set the number of your choice, but it is recomended to set "-n
++" : that way the system will consider the highest exiting version number
+and will increment it.</font>
+<p><b><font size=+1>-f : alternative rootpack directory</font></b>
+<br><font size=+1>This is to be used if you create your packs over a reference
+pack which does not belong the the official administrator (ROOTPACK)</font>
+<p><b><font size=+1>-s : system program script</font></b>
+<br><font size=+1>For those who makes reference pack : this option creates
+the script to build some system programs (precompilers) like odb98.x</font>
+<p><b><font size=+1>&nbsp;-m : Quiet mode</font></b>
+<br><font size=+1>One may be interested in simulating the creation of a
+pack without making the pack itself. For that you should invoke</font>
+<br><font size=+1>gmkpack with the option -m&nbsp; ; this option will disable
+the creation of the pack but it will generate the name of the reference</font>
+<br><font size=+1>pack and a local script file for compilation and load,
+that you can check. This option is mainly used to develop the procedure.</font>
+<p><font size=+1><u>Example</u> : Create a pack named </font>mydevs<font size=+1>,
+based on the branch </font>op4<font size=+1> of cycle </font>26t1<font size=+1>,
+and with a script to compile </font>odbtools<font size=+1> program :</font>
+<br><font face="Arial,Helvetica">%gmkpack -r26t1 -bop4 -umydevs -podbtools</font>
+<p><font face="Arial,Helvetica"><font size=+1>More details are given in
+the man page of gmkpack.</font></font>
+<center>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Tools"></a><font size=+2>Tools</font></center>
+
+<ul>
+<li>
+<font size=+1><u>Various procedures has been written to simplify the developer's
+life while handling packs</u> :</font></li>
+</ul>
+
+<table BORDER COLS=2 WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="1%" NOSAVE><font face="Arial,Helvetica">rmpack</font></td>
+
+<td><font size=+1>to remove a pack</font></td>
+</tr>
+
+<tr NOSAVE>
+<td WIDTH="100%" NOSAVE><font face="Arial,Helvetica">flushpack</font></td>
+
+<td><font size=+1>from the current directory : to recursively remove all
+files except the source files</font></td>
+</tr>
+
+<tr>
+<td><font face="Arial,Helvetica">clearpack</font></td>
+
+<td><font size=+1>from the current directory : to recursively remove all
+the files except source files and object files</font></td>
+</tr>
+
+<tr>
+<td><font face="Arial,Helvetica">lspack</font></td>
+
+<td><font size=+1>from the current directory : to recursively list all
+the files</font></td>
+</tr>
+
+<tr>
+<td><font face="Arial,Helvetica">scanpack</font></td>
+
+<td><font size=+1>from the current directory : to recursively list all
+the source files</font></td>
+</tr>
+
+<tr>
+<td><font face="Arial,Helvetica">vipack</font></td>
+
+<td><font size=+1>to find and edit files</font></td>
+</tr>
+
+<tr NOSAVE>
+<td><font face="Arial,Helvetica">usrpack</font></td>
+
+<td NOSAVE><font size=+1>to list the user's existing packs</font></td>
+</tr>
+
+<tr>
+<td><font face="Arial,Helvetica">admpack</font></td>
+
+<td><font size=+1>to list administrator's existing packs</font></td>
+</tr>
+
+<tr>
+<td><font face="Arial,Helvetica">rlspack</font></td>
+
+<td><font size=+1>to list administrator's existing releases</font></td>
+</tr>
+
+<tr>
+<td>envpack</td>
+
+<td><font size=+1>to display current environment variables for gmkpack</font></td>
+</tr>
+
+<tr>
+<td>genpack</td>
+
+<td><font size=+1>to display the genesis of a pack</font></td>
+</tr>
+
+<tr>
+<td>logpack</td>
+
+<td><font size=+1>to print the logfile of a pack</font></td>
+</tr>
+
+<tr>
+<td>progpack</td>
+
+<td><font size=+1>to list all possible program names handled by gmkpack</font></td>
+</tr>
+
+<tr>
+<td>resetpack</td>
+
+<td><font size=+1>to remove some control files in case of strange behavior
+of the system.</font></td>
+</tr>
+</table>
+
+<ul>
+<li>
+<font size=+1><u>Notice</u> :</font></li>
+</ul>
+
+<ul>
+<ul>
+<li>
+<font size=+1>Preliminary usage shows that the most useful commands are
+: </font><font face="Arial,Helvetica">rmpack</font><font size=+1>,
+</font><font face="Arial,Helvetica">flushpack</font><font size=+1>
+and
+</font><font face="Arial,Helvetica">lspack</font><font size=+1>.</font></li>
+
+<li>
+<font size=+1>The command </font><font face="Arial,Helvetica">vipack</font><font size=+1>
+seems rather slow ; it may be better to use </font><font face="Arial,Helvetica">scanpack</font><font size=+1>
+or </font><font face="Arial,Helvetica">lspack</font><font size=+1> to locate
+first the files to edit.</font></li>
+
+<li>
+<font size=+1>The command </font>genpack<font size=+1> is very useful to
+generate new compilation scripts after a pack has been created ; for example
+let's consider again the pack </font>test0<font size=+1> ; below this pack
+the command </font>genpack<font size=+1> displays : </font>/u/gp/mrpm/mrpm602/gmkpack.6.1/util/gmkpack
+-u test0 -r cy26t1 -b main -v 01 -l L0209 -o x -p aladin</li>
+
+<br><font size=+1>To create now a script to load </font>aldodb<font size=+1>
+on the same pack, one has just to type :</font>
+<br>/u/gp/mrpm/mrpm602/gmkpack.5.1/util/gmkpack -u test0 -r cy26t1 -b main
+-v 01 -l L0209 -o x -p aldodb</ul>
+</ul>
+
+<ul>&nbsp;
+<li>
+<font size=+1><u>Fetching your source files</u> :</font></li>
+</ul>
+<font size=+1>On the machine <i>Andante</i>, you will find another useful
+procedure named </font>cc_pack<font size=+1> in the directory </font>/u/mrpm/mrpm602/bin<font size=+1>
+;</font>
+<br><font size=+1>this procedure enables you to export source files from
+a ClearCase branch to you pack on the machine <i>tora</i>, respecting the
+Clearcase directories tree.</font>
+<br><b><font face="Times New Roman,Times"><font size=+1>Usage : </font></font></b><font face="Arial,Helvetica">cc_pack
+-f filename -l list | -v | -b -P packname</font>
+<br><font face="Arial,Helvetica"><font size=+1>-P</font> packname</font><font size=+1>
+is the name of your pack on tora ; this option must be supplied.</font>
+<br><font size=+1>-f </font><font face="Arial,Helvetica">filename</font><font size=+1>
+to export a single file ; for example : </font><font face="Arial,Helvetica">cc_pack
+-Ptest0 -f dia/wrfudm.F90</font>
+<br><font size=+1>-l </font><font face="Arial,Helvetica">listname</font><font size=+1>
+to export the files listed in the file listname</font>
+<br><font size=+1>-b to export the whole branch</font>
+<br><font size=+1>-v to export the entire view</font>
+<br><font size=+1>Notice : to use </font><font face="Arial,Helvetica">cc_pack</font><font size=+1>,</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; - you should be under a ClearCase
+session,</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; - you should have exported the variable
+</font><font face="Arial,Helvetica">HOMEPACK
+</font><font size=+1>of
+<i>tora</i>
+on <i>Andante</i> (you can set it in your file </font><font face="Arial,Helvetica">.profile</font><font size=+1>
+on <i>Andante</i> for instance)</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; - you should have a file </font><font face="Arial,Helvetica">.rhosts</font><font size=+1>
+on <i>tora</i>, containing the line "</font>e-andante.meteo.fr<font size=+1>"
+(to enable remote command from <i>Andante</i> to <i>tora</i>)</font>
+<center>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Miscellaneous"></a><font size=+2>Miscellaneous</font></center>
+
+<ul>
+<li>
+<font face="Times New Roman,Times"><font size=+1>You can create "sub-packs"
+; for instance : </font></font><font face="Arial,Helvetica">%gmkpack -u
+cy24/this</font><font face="Times New Roman,Times"><font size=+1> etc ...
+But your HOMEPACK should remain a fixed directory. Anyhow if you create
+sub-packs, there will be no alias appended to your file .kshrc</font></font></li>
+
+<li>
+<font face="Times New Roman,Times"><font size=+1>You can compile in parallel
+mode : you just have to supply the number of processors requested in the
+first line of your script ics-* ; you should not change the amount of memory
+requested.</font></font></li>
+
+<br><font face="Times New Roman,Times"><font size=+1><b>Note that the number
+of processors is limited to 4 in the queue "compil"</b> for the machine
+<i>tora</i>.</font></font>
+<br><font face="Times New Roman,Times"><font size=+1>If you want to compile
+with more processors you can go and run in the queue "multi", but in this
+case, <b>it is highly recommended to switch off the part "links edition"</b>
+otherwise you might collapse the machine !!</font></font></ul>
+
+<center>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Frequently Asked Questions"></a><font size=+2><b>F</b>requently
+<b>A</b>sked
+<b>Q</b>uestions</font><font size=+1>
+(... or something like that)</font></center>
+
+<ul>
+<li>
+<b><i><font size=+1>I discovered that the libraries are not in the proper
+order.</font></i></b></li>
+
+<br><font size=+1>This may happen ; this is partly why the order of libraries
+is under the user's control. Though <i>gmkpack</i> works according to GCO's
+working rules a clash is not impossible. However since the version 5.1
+of <i>gmkpack</i> this should no more happen ...</font>
+<li>
+<b><i><font size=+1>It does not work : the subroutines have been compiled
+but the result is not saved in any library ; when I execute my program,
+my modifications are ignorded</font></i></b></li>
+
+<br><font size=+1>1/ It might be because you have put your modifications
+under <font face="Arial,Helvetica">~/src/local (as we did with mkpack).
+Now each modified element should be put under a specific project name (for
+instance : ~/src/local/arp).</font></font>
+<br><font face="Arial,Helvetica"><font size=+1>2/ The other possibility
+is that you might have chosen a wrong <i>program</i> name : the choice
+of a <i>program</i> leads <i>gmkpack</i> to a set of depending projects,
+libraries, and a default entry point. For instance, most people modifying
+something below the project "uti" are not aware that the project "uti"
+is not used for loading arpege nor aladin ; so they should not select <i>arpege</i>
+nor <i>aladin</i> as the program, but something more specific : the program
+they will actually run.</font></font>
+<li>
+<b><i><font size=+1>Where should I put temporary new modules or subroutines
+?</font></i></b></li>
+
+<br><font size=+1>Subroutines can be put at any place, but modules MUST
+be put below the directory <i>module</i> (this is due to a temporary restriction
+in the behavior of <i>gmak</i> used internally by <i>gmkpack</i>). Anyhow
+in both cases the elements still need to be put below a directory of the
+kind : <font face="Arial,Helvetica">~/src/local/<i>ppp</i>/<i>subdir</i>,
+where <i>ppp</i> is the project name and <i>subdir</i> a subdirectory</font></font></ul>
+
+<center>-----------------------------------------------------------------------------------------------------
+<p><a NAME="manuals"></a><font size=+2>Manuals</font></center>
+
+<p><font size=+1>All procedures described have man pages. For more information
+you are invited to read them !</font>
+<br><font size=+1>For example, type : </font>%man gmkpack
+<center>
+<p>-----------------------------------------------------------------------------------------------------
+<p><a NAME="Comment"></a><font size=+2>Comment &ccedil;a marche ?</font></center>
+
+<p><font size=+1>Le script construit par Gmkpack, baptis&eacute; du g&eacute;n&eacute;rique
+"ics" (Initiative de Compilations Simultan&eacute;es) par manque de modestie
+&eacute;vidente, s'articule en 3 parties :</font>
+<ol>
+<li>
+<font size=+1><a href="#Compilation">Compilation</a></font></li>
+
+<li>
+<font size=+1><a href="#Confection des librairies de code-objet">Confection
+des librairies de code-objet</a></font></li>
+
+<li>
+<font size=+1><a href="#Edition de liens">Edition de liens</a></font></li>
+</ol>
+
+<ul>
+<li>
+<a NAME="Compilation"></a><b><u><font size=+1>Compilation</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>La compilation vise &agrave; compiler les sources
+pr&eacute;sents dans le pack, sous r&eacute;serve que :</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; - le fichier-objet pour un fichier-source
+donn&eacute; n'existe pas,</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ou</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; - le fichier-objet est plus ancien
+que son fichier-source correspondant.</font>
+<br><font size=+1>On parlera alors de fichier-objet "p&eacute;rim&eacute;"
+pour le fichier-source en question.</font>
+<br><font size=+1>A cette compilation dite "locale" (car directement li&eacute;e
+aux fichiers-sources modifi&eacute;s par l'utilisateur) s'ajoute de fa&ccedil;on
+optionnelle une "compilation des d&eacute;pendances" : il s'agit de recompiler
+tous les fichiers qui se trouvent modifi&eacute;s par le jeu des d&eacute;pendances
+des sources les uns par rapport aux autres, sans que leur codes soient
+eux-m&ecirc;me modifi&eacute;s par l'utilisateur.</font>
+<br><font size=+1>La compilation de toutes les d&eacute;pendances est,
+en principe, n&eacute;cessaire avant la constitution de toute librairie
+de code-objet. On peut cependant s'en affranchir si les 2 conditions suivantes
+sont respect&eacute;es (au moins sur les machines Fujitsu) :</font>
+<br><font size=+1>&nbsp;&nbsp;&nbsp; 1/ un module de donn&eacute;es n'est
+modifi&eacute; que par l'ajout de nouvelles variables <b>&agrave; la fin
+du code du module en question</b></font>
+<br><b><font size=+1>&nbsp;&nbsp;&nbsp; 2/ un module modifi&eacute; n'est
+pas lui-m&ecirc;me utilis&eacute; par un autre module</font></b>
+<p><u><font size=+1>Voici les &eacute;tapes successives pour &eacute;laborer
+la compilation :</font></u>
+<br>&nbsp;
+<li>
+<font size=+1><b>Etablissement de la liste des &eacute;l&eacute;ments contenus
+dans le pack</b> : on recherche les fichiers ayant l'une des extensions
+suivantes : </font><font face="Arial,Helvetica">.F90</font><font size=+1>,
+</font><font face="Arial,Helvetica">.F</font><font size=+1>,
+</font><font face="Arial,Helvetica">.f90</font><font size=+1>,
+</font><font face="Arial,Helvetica">.f</font><font size=+1>,
+</font><font face="Arial,Helvetica">.c</font><font size=+1>,
+</font><font face="Arial,Helvetica">.sql</font><font size=+1>,
+</font><font face="Arial,Helvetica">.h,
+.ddl</font></li>
+
+<li>
+<font size=+1><b>Pr&eacute;compilation des fichiers *.ddl et mise &agrave;
+jour des fichiers-souches statiques : </b>ceci ne sert qu'&agrave; ODB.
+On contr&ocirc;le la gestion de nouvelles tables en analysant la date d'un
+fichier *.ddl par rapport &agrave; sont "objet" correspondant, qui est
+le fichier de m&ecirc;me radical et d'extension ".ddl_". On met ensuite
+&agrave; jour les fichiers-souche statiques en cas de modifications dans
+les requ&egrave;tes sql. les fichiers cr&eacute;&eacute;s sont rajout&eacute;s
+au contenu du pack.</font></li>
+
+<li>
+<font size=+1><b>Etablissement du fichier-descripteur des &eacute;l&eacute;ments
+du pack</b> : il s'agit d'un fichier d&eacute;crivant pour chaque &eacute;l&eacute;ment
+son nom, ses d&eacute;pendances, sa branche d'origine et &eacute;ventuellement
+sont nom de module si c'est un module.</font></li>
+
+<li>
+<font size=+1><b>Traitement des interfaces explicites</b> : on les cr&eacute;e
+si n&eacute;cessaire, puis on met &agrave; jour le contenu du pack et le
+fichier-descripteur des &eacute;l&eacute;ments du pack.</font></li>
+
+<li>
+<font size=+1><b>Etablissement de la liste des r&eacute;pertoires contenant
+des inclusions ou des modules</b> : utile &agrave; la compilation, cette
+&eacute;tape aboutit &agrave; l'&eacute;laboration des fichiers cach&eacute;s
+.incpath, .incpath.local, .modpath, .modpath.local sour le r&eacute;pertoire
+principal de tous les fichiers-source<font face="Times New Roman,Times">.
+Pour permettre la compilation en mode parall&egrave;le, il a &eacute;t&eacute;
+n&eacute;cessaire d'indiquer le chemin <i>absolu</i> de chaque r&eacute;pertoire
+pour &eacute;viter des probl&egrave;mes &agrave; la travers&eacute;e des
+liens symboliques. On fabrique &eacute;galement sous forme d'un fichier
+cach&eacute; (.srcpath) la liste des chemins contenant des fichiers-source
+: cela peut servir &agrave; un outil de debugging (Totalview par exemple,
+en s'en servant pour initialiser la variable </font></font><font face="Arial,Helvetica">TVSEARCHPATH</font><font face="Times New Roman,Times"><font size=+1>).</font></font></li>
+
+<br>&nbsp;
+<li>
+<font size=+1><b>Etablissement de la liste ordonn&eacute;e des &eacute;l&eacute;ments
+&agrave; (re)compiler</b> : l'ordre repose sur l'interd&eacute;pendances
+des &eacute;l&eacute;ments entre eux. Si on demande la compilation des
+d&eacute;pendances, la liste ordonn&eacute;e s'allonge des &eacute;l&eacute;ments
+d&eacute;pendants ext&eacute;rieurs &agrave; la branche de l'utilisateur.
+<i>Cette
+&eacute;tape est particuli&egrave;rement cruciale</i>. Dans la version
+actuelle on s&eacute;pare les &eacute;l&eacute;ments ne poss&eacute;dant
+aucune d&eacute;pendances des autres, et on rajoute un ordonnancement par
+rapport &agrave; la hi&eacute;rarchie des "projets" : respectivement pour
+acc&eacute;l&eacute;rer la compilation parall&egrave;le et permettre un
+traitement "incr&eacute;mental" de la compilation dans un souci de mise
+au point. Ce dernier point pose un probl&egrave;me avec l'existance de
+modules dupliqu&eacute;s, qui doivent &ecirc;tre bannis !</font></li>
+
+<br>&nbsp;
+<li>
+<font size=+1><b>Etablissement de fichiers-descripteurs des &eacute;l&eacute;ments
+&agrave; (re)compiler</b> : cette &eacute;tape permet d'accel&eacute;rer
+un peu l'algorithme de compilation parall&egrave;le.</font></li>
+
+<br>&nbsp;
+<li>
+<font size=+1><b>Boucle de compilation</b> : la compilation se fait par
+"&eacute;tage" : chaque &eacute;tage correspond &agrave; un ensemble d'&eacute;l&eacute;ments
+qui peuvent &ecirc;tre compil&eacute;s simultan&eacute;ment. Pour selectionner
+les &eacute;l&eacute;ments d'un &eacute;tage, on parcourt la liste ordonn&eacute;e
+des &eacute;l&eacute;ments &agrave; (re)compiler : si un &eacute;l&eacute;ment
+donn&eacute; ne d&eacute;pend pas des modules figurant parmi ses pr&eacute;decesseurs,
+il est trait&eacute; dans l'&eacute;tage courant. Si cet &eacute;l&eacute;ment
+est un module, il s'ajoute &agrave; la liste des modules pr&eacute;d&eacute;cesseurs.
+Les "inclusions" (fichiers </font><font face="Arial,Helvetica">*.h</font><font size=+1>),
+n'&eacute;tant pas compilables, sont syst&eacute;matiquement s&eacute;lectionn&eacute;es
+; cependant, une exception est faite pour certaines "interfaces" qui sont
+des fichiers non-compilables mais qui utilisent potentiellement des modules
+: elles doivent &ecirc;tre trait&eacute;es au m&ecirc;me titre que les
+modules si elles d&eacute;pendent de modules.</font></li>
+
+<br><font size=+1>D&egrave;s qu'on d&eacute;tecte un &eacute;l&eacute;ment
+utilis&eacute; par l'un de ses pr&eacute;d&eacute;cesseur, on incr&eacute;mente
+l'&eacute;tage de compilation : ce choix p&eacute;nalise un peu la parall&eacute;lisation
+d&egrave;s que l'on atteint des sous-programmes simples, mais il permet
+d'acc&eacute;l&eacute;rer la fabrication de la liste pour chaque &eacute;tage
+qui est n&eacute;cessairement mono-processeur.</font>
+<br><font size=+1>NB. : la compilation par &eacute;tage n'est pas indispensable
+en compilation monoprocesseur, mais elle est n&eacute;cessaire &agrave;
+la compilation en parall&egrave;le.</font>
+<br><font size=+1>Une fois que la liste des &eacute;l&eacute;ments d'un
+&eacute;tage est &eacute;tablie, on parcourt cette liste pour identifier
+les fichiers-sources dont l'objet est "p&eacute;rim&eacute;". Si un fichier-objet
+existe et est p&eacute;rim&eacute;, on le d&eacute;truit, et <i>on d&eacute;truit
+imm&eacute;diatement toutes ses d&eacute;pendances</i> : cette &eacute;tape
+cruciale permet de maintenir constamment &agrave; jour les &eacute;l&eacute;ments
+d'un pack, et de fa&ccedil;on <i>r&eacute;cursive</i> ; en particulier,
+c'est cette op&eacute;ration que permet de compiler successivement les
+&eacute;l&eacute;ments du pack sans les d&eacute;pendances d'abord, puis
+avec les d&eacute;pendances sans pour autant recompiler ce qui est &agrave;
+jour.</font>
+<br><font size=+1>N&eacute;ammoins, il existe une option permettant de
+supprimer cette mise &agrave; jour ; dans ce cas tout le contenu du pack
+sera recompil&eacute;.</font>
+<br><font size=+1>Une fois que la liste des &eacute;l&eacute;ments p&eacute;rim&eacute;s
+d'un &eacute;tage est &eacute;tablie, on distribue cette liste entre les
+processeurs. Pour le moment, cette distribution est simplement circulaire.
+C'est suffisant si le nombre de processeur est petit devant le nombre d'&eacute;l&eacute;ments
+&agrave; compiler ; dans le cas contraire, il faudrait, pour optimiser
+la parall&eacute;lisation, distributer circulairement la liste des &eacute;l&eacute;ments
+ordonn&eacute;s par taille d&eacute;croissante.</font>
+<br><font size=+1>La compilation peut alors se faire par "paquets" d'&eacute;l&eacute;ments.</font>
+<br><font size=+1>A la fin de la compilation de tous les &eacute;l&eacute;ments
+d'un &eacute;tage, on v&eacute;rifie que tous les fichiers-objets qui ont
+d&ucirc; &ecirc;tre cr&eacute;&eacute;s &agrave; cet &eacute;tage sont
+bien pr&eacute;sents dans le pack. Si des fichiers-objets manquent, la
+proc&eacute;dure envoie un message d'erreur signalant les manquants et
+s'interrompt : on ne passe pas &agrave; l'&eacute;tage suivant.</font>
+<br><font size=+1>N.B. : lors de l'exploration des &eacute;l&eacute;ments
+p&eacute;rim&eacute;s, on consid&egrave;re que le fichier-objet d'une inclusion
+est un fichier suffix&eacute; </font><font face="Arial,Helvetica">.ok</font><font size=+1>,
+et sa "compilation" consiste simplement &agrave; le cr&eacute;er ("touch").</font>
+<br><font size=+1>Remarque : on peut ignorer la compilation de certains
+&eacute;l&eacute;ments (en particulier quand ils deviennent p&eacute;rim&eacute;s
+mais qu'ils apparaissent dans la liste des &eacute;l&eacute;ments &agrave;
+recompiler, par le biais des d&eacute;pendances) : ils doivent alors &ecirc;tre
+signal&eacute;s de fa&ccedil;on explicite dans le script de compilation.</font>
+<br>&nbsp;
+<li>
+<font size=+1><b>Compilation</b> : elle s'effectue toujours sur un r&eacute;pertoire
+temporaire, en particulier lorsqu'il s'agit de compiler des d&eacute;pendances,
+pour deux raisons : d'une part parce que la recherche des inclusions se
+fait toujours <i>prioritairement</i> sur le r&eacute;pertoire o&ugrave;
+se trouve l'&eacute;l&eacute;ment &agrave; compiler (ainsi fonctionnent
+les compilateurs !) ; d'autre part pour &eacute;viter l'apparition de fichiers-sources
+"zombies" dans le pack local en cas d'arr&ecirc;t brutal de la proc&eacute;dure
+(par temps limite d&eacute;pass&eacute;, ou par toute interruption brutale
+du syst&egrave;me).</font></li>
+
+<br><font size=+1>La compilation des &eacute;l&eacute;ments locaux se fait
+selon les options de compilation demand&eacute;es par l'utilisateur, et
+produit un listing. La compilation des d&eacute;pendances se fait selon
+les options de compilation du pack de r&eacute;f&eacute;rence, et sans
+produire de listing.</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Confection des librairies de code-objet"></a><b><u><font size=+1>Confection
+des librairies de code-objets</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>Toute compilation r&eacute;ussie implique la fabrication
+d'une librairie de code-objet contenant les modifications faites.</font>
+<br><font size=+1>Il y a en r&eacute;alit&eacute; autant de librairies
+fabriqu&eacute;es que de "projets" (au sens Clearcase) concern&eacute;s,
+afin de diff&eacute;rentier les sous-programmes dits "dupliqu&eacute;s"
+(on peut &eacute;ventuellement cr&eacute;er plusieurs sous-librairies pour
+un m&ecirc;me projet - non d&eacute;taill&eacute; ici pour le moment, mais
+effectif pour odb et uti).</font>
+<br><font size=+1>En cas d'ambig&uuml;it&eacute; fortuite (2 fichiers-objets
+de m&ecirc;me nom essaient d'entrer dans la m&ecirc;me librairie), la proc&eacute;dure
+envoie un message d'erreur et s'interrompt (ce cas peut se produire si
+un &eacute;l&eacute;ment du pack a &eacute;t&eacute; &eacute;crit dans
+un mauvais r&eacute;pertoire, et que le jeux des d&eacute;pendances implique
+la recompilation de ce m&ecirc;me &eacute;l&eacute;ment).</font>
+<br><font size=+1>Si une librairie existe d&eacute;j&agrave; (&agrave;
+la suite d'une compilation ant&eacute;rieure) et qu'une recompilation effective
+a eu lieu, cette librairie est d&eacute;truite, puis recr&eacute;&eacute;e
+avec les fichiers-objets pr&eacute;sent dans le pack.</font>
+<br><font size=+1>Que la compilation &eacute;choue ou pas, toutes les librairies
+existantes <i>susceptibles de d&eacute;pendre de la compilation</i> sont
+d&eacute;truites.</font>
+<br><font size=+1>Si une librairie existante devient inutile &agrave; l'&eacute;dition
+de lien (car plus aucune modification n'y affaire), elle est d&eacute;truite.</font>
+<br><font size=+1>Dans les autres cas, une librairie existante n'est pas
+remise &agrave; jour si la liste des fichiers-objets du pack est identique
+&agrave; celle de la librairie et que la date de cr&eacute;ation de chacun
+de ces fichiers-objets est ant&eacute;rieure &agrave; celle de la librairie.</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Edition de liens"></a><b><u><font size=+1>Edition de liens</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>L'&eacute;dition de lien est conditionn&eacute;e par
+la d&eacute;finition (par l'utilisateur) d'un point d'entr&eacute;e. L'utilisateur
+garde la main sur le choix et l'ordre des librairies &agrave; charger (la
+proc&eacute;dure propose un choix par d&eacute;faut aussi "juste" que possible)
+ainsi que sur les options de chargement.</font>
+<br><font size=+1>Avant l'&eacute;dition de lien proprement dite, on v&eacute;rifie
+que toutes les librairies sont pr&eacute;sentes sur disque. Si ce n'est
+pas le cas pour une librairie de *GCO*, on essaie de la r&eacute;cup&eacute;rer
+depuis la machine d'archivage (par l'utilisation de la commande </font><font face="Arial,Helvetica">gget</font><font size=+1>).
+La proc&eacute;dure renvoie la liste ordonn&eacute;e des librairies effectivement
+utilis&eacute;es (en suivant les liens symboliques). Si une librairie est
+port&eacute;e manquante, la proc&eacute;dure envoie un message d'erreur
+et s'interrompt.</font>
+<br><font size=+1>On recherche ensuite le point d'entr&eacute;e en explorant
+les &eacute;l&eacute;ments du pack. Si le point d'entr&eacute;e n'est pas
+trouv&eacute;, la proc&eacute;dure envoie un message d'erreur et s'interrompt.</font>
+<br><font size=+1>L'&eacute;dition de lien se fait sur un r&eacute;pertoire
+temporaire (</font><font face="Arial,Helvetica">GMKTMP</font><font size=+1>)
+mais l'executable est sauvegard&eacute; dans un sous-r&eacute;pertoire
+du r&eacute;pertoire </font><font face="Arial,Helvetica">HOMEBIN</font><font size=+1>,
+ce qui rend l'executable volatile dans la mesure o&ugrave; </font><font face="Arial,Helvetica">HOMEBIN</font><font size=+1>
+est souvent lui-m&ecirc;me d&eacute;fini comme un sous-r&eacute;pertoire
+de la </font><font face="Arial,Helvetica">WORKDIR</font><font size=+1>
+: ce choix est pr&eacute;f&eacute;r&eacute; &agrave; celui d'un r&eacute;pertoire
+de sauvegarde permanent car les executables sont tr&egrave;s volumineux.</font>
+<br><font size=+1>Avant l'&eacute;dition de lien, les librairies &agrave;
+charger sont symboliquement li&eacute;es sur le r&eacute;pertoire temporaire
+avec des noms tr&egrave;s courts (</font><font face="Arial,Helvetica">lib[*]</font><font size=+1>)
+: ce choix est cons&eacute;cutif &agrave; un incident : il semble qu'il
+y ait une limite &agrave; la longueur de la ligne de commande du chargeur
+(par la m&ecirc;me occasion, cela rend l'&eacute;cho de la commande plus
+lisible).</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Traitement des interfaces explicites"></a><b><u><font size=+1>Traitement
+des interfaces explicites auto-g&eacute;n&eacute;r&eacute;es et "norms
+checker"</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>1/ S&eacute;lection d'un pack &agrave; interfaces
+explicites ou pas :</font>
+<br><font size=+1>Pour chaque projet on commence par d&eacute;finir &agrave;
+partir de quel cycle-cl&eacute; on traite les interfaces explicites auto-g&eacute;n&eacute;r&eacute;es
+("intfb").</font>
+<br><font size=+1>Si cette d&eacute;finition est omise, c'est qu'on traite
+l'intfb. Par d&eacute;faut pour les projets existants autre que arp et
+ald, le cycle-cl&eacute; est mis &agrave; 99.</font>
+<br><font size=+1>Ensuite, dans les scripts de compilation on d&eacute;finit
+syst&eacute;matiquement une variable listant les projets <i>suppl&eacute;mentaires</i>
+&agrave; interfaces</font>
+<br><font size=+1>explicites. Pour un pack utilisateur, par d&eacute;faut
+il n'y a aucun "projet suppl&eacute;mentaire &agrave; interface explicite".</font>
+<br><font size=+1>Pour un pack administrateur, par d&eacute;faut on d&eacute;finit
+les "projets suppl&eacute;mentaires &agrave; interfaces explicites" en
+fonction du cycle et</font>
+<br><font size=+1>des fichiers de configuration pour les intfb.</font>
+<br><font size=+1>Ainsi un pack administrateur traite les intfb indiqu&eacute;s
+dans le script ; tandis qu'un pack utilisateur traite les intfb indiqu&eacute;s
+dans le script ainsi que ceux du pack-source.</font>
+<p><font size=+1>2/Localisation des interfaces explicites dans les packs
+:</font>
+<br><font size=+1>elles son plac&eacute;es dans un r&eacute;pertoire cach&eacute;
+(".intfb" par d&eacute;faut) sous chacune des branches (afin de conserver
+l'usage de la proc&eacute;dure d'&eacute;laboration de la liste des d&eacute;pendances)
+et sous chaque projet (c'est plus simple que de cr&eacute;er les arborescences
+compl&egrave;tes).</font>
+<br><font size=+1>Au niveau de la liste des r&eacute;pertoires d'inclusion
+pour la compilation on rajoute syst&eacute;matiquement les r&eacute;pertoires
+d'intfb locaux.</font>
+<p><font size=+1>3/Etablissement du contenu du pack local :</font>
+<br><font size=+1>Les proc&eacute;dures d'exploration (scanpack, lspack)
+ignorent le r&eacute;pertoire .intfb</font>
+<br><font size=+1>Les proc&eacute;dures de nettoyage (clearpack,flushpack)
+explorent le r&eacute;pertoire .intfb s'il existe.</font>
+<br><font size=+1>En pr&eacute;lude &agrave; l'&eacute;tablissement du
+contenu d&eacute;finitif du pack, et sous r&eacute;serve que le pack n'est
+pas un pack administrateur, on d&eacute;truit toutes les intfb qui ne correspondent
+pas &agrave; une proc&eacute;dure pr&eacute;sente dans le pack local (cas
+d'un sous-programme retir&eacute; du pack local).</font>
+<br><font size=+1>Pour toutes les proc&eacute;dures (mais pas les modules)
+Fortran 90 du pack local qui appartiennent &agrave; l'ensemble des projets
+&agrave; interfaces explicites on g&eacute;n&egrave;re l'interface explicite
+dans un r&eacute;pertoire temporaire si elle n'existe pas d&eacute;j&agrave;
+ou si la proc&eacute;dure de r&eacute;f&eacute;rence est plus r&eacute;cente
+que l'intfb existante ; si cette intfb n'est pas "&agrave; jour", on la
+copie dans le pack local.</font>
+<br><font size=+1>=> Pour d&eacute;finir si une intfb est "&agrave; jour"
+on recherche d'abord s'il existe d&eacute;j&agrave; une intfb dans la "vue"
+du pack ("local", sinon</font>
+<br><font size=+1>branches, sinon "main" ... en m&eacute;langeant tous
+les projets pour ne pas cr&eacute;er d'interfaces dupliqu&eacute;es) ;
+l'intfb est "&agrave; jour" si il</font>
+<br><font size=+1>existe d&eacute;j&agrave; une intfb dans la "vue" et
+que celle-ci est identique &agrave; celle qui a &eacute;t&eacute; g&eacute;n&eacute;r&eacute;e.</font>
+<br><font size=+1>On ajoute les nouvelles intfb &agrave; la liste du contenu
+du pack.</font>
+<p><font size=+1>4/Compilation :</font>
+<br><font size=+1>=> On ex&eacute;cute un pr&eacute;compilateur qui r&eacute;alise
+les trois t&acirc;ches suivantes :</font>
+<br><font size=+1>- Contr&ocirc;le des intfb en trop :</font>
+<br><font size=+1>Une intfb en trop est l'apparition d'une directive d'inclusion
+d'une intfb dans une proc&eacute;dure alors que cette proc&eacute;dure</font>
+<br><font size=+1>n'appelle pas le sous-programme interfac&eacute; par
+l'intfb. En cas d'intfb en trop on signale l'erreur et on aborte la compilation
+de</font>
+<br><font size=+1>la proc&eacute;dure incrimin&eacute;e.</font>
+<br><font size=+1>- Contr&ocirc;le des intfb manquantes :</font>
+<br><font size=+1>Une intfb manquante est l'absence d'une directive d'inclusion
+d'une intfb alors que le sous-programme concern&eacute; est appel&eacute;,</font>
+<br><font size=+1>qu'il n'est pas associ&eacute; &agrave; un fichier-interface
+explicite dans le code-source, et qu'il appartient aux projets &agrave;
+interfaces</font>
+<br><font size=+1>explicites (n&eacute;cessite de d&eacute;finir la liste
+des intfb &agrave; inclure et la comparer &agrave; celle qui est effectivement
+utilis&eacute;e). En cas d'intfb</font>
+<br><font size=+1>manquante on signale l'erreur et on aborte la compilation
+de la proc&eacute;dure incrimin&eacute;e.</font>
+<br><font size=+1>- Ex&eacute;cution du "norms checker" dont le diagnostic
+sera copi&eacute; en fin de listing et (partiellement) sur la "dayfile"
+de compilation.</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Traitement des r f rences insatisfaites"></a><b><u><font size=+1>Traitement
+des r&eacute;f&eacute;rences insatisfaites</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>Le but ultime de cet op&eacute;ration est de ne plus
+utiliser les options non-standards de l'&eacute;diteur de liens symboliques.
+le traitement ci-dessous n'est cependant pas compl&egrave;tement au point.
+Mais il fonctionne assez pour traiter des packs administrateurs de type
+"export".</font>
+<br><font size=+1>Une r&eacute;f&eacute;rence insatisfaite est soit :</font>
+<br><font size=+1>- l'apparition d'une directive d'inclusion dans une proc&eacute;dure,
+pour laquelle le fichier &agrave; inclure n'est pas disponible</font>
+<br><font size=+1>- l'appel &agrave; un sous-programme ou une fonction
+dans une proc&eacute;dure, pour lequel le fichier-objet correspondant n'est
+pas disponible.</font>
+<br><font size=+1>Pour traiter ces probl&egrave;mes, un &eacute;bauche
+de solution est en place : un r&eacute;pertoire est cr&eacute;&eacute;
+au m&ecirc;me niveau que le r&eacute;pertoire des fichiers-source locaux.
+Ce r&eacute;pertoire est lui-m&ecirc;me subdivis&eacute; en deux sous-r&eacute;pertoire.
+On y loge dans l'un ou l'autre chacun des fichiers manquant. Quand il s'agit
+d'un fichier &agrave; inclure autre qu'une intfb, un fichier vide du m&ecirc;me
+nom suffit. Si il s'agit d'une intfb il faut que ce fichier contienne au
+moins une ligne pour "passer" le "norms checker. Pour les sous-programmes
+et les fonction, il suffit d'un fichier vide dont le nom soit celui de
+la r&eacute;f&eacute;rence insatisfaite suivie d'un caract&egrave;re "underscore"(par
+exemple : le sous-programme manquant "toto" sera r&eacute;solu par l'apparition
+d'un fichier vide nomm&eacute; "toto_").</font>
+<br><font size=+1>La liste des r&eacute;f&eacute;rences insatisfaites est
+scind&eacute;e de fa&ccedil;on &agrave; diff&eacute;rencier un comportement
+purement passif d'un comportement verbeux ("should not be called"). Elle
+reprend la liste des proc&eacute;dures externes non-export&eacute;es du
+pack de r&eacute;f&eacute;rence &agrave; la cr&eacute;ation du pack local
+via des librairies-objets suppl&eacute;mentaires.</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Gestion des packs"></a><b><u><font size=+1>Gestion des packs administrateurs
+("main") et des sur-packs (utilisateurs ou non)</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>La grande nouveaut&eacute; c'est que les sources accessibles
+pour modification d'un pack donn&eacute; se trouvent toujours dans un r&eacute;pertoire
+qui porte le m&ecirc;me nom (par exemple : "local"), quelque soit l'utilisateur.
+Pour tout sur-pack, les "branches" sont des liens sur le r&eacute;pertoire
+local d'un autre pack.</font>
+<br><font size=+1>Cette innovation a la vertu d'unifier la gestion des
+packs utilisateurs, "main", branche sur "main" ou sur un autre utilisateur.</font>
+<br><font size=+1>Une complication de gestion apparait au niveau des recherches
+de d&eacute;pendances :</font>
+<br><font size=+1>- le fichier-descripteur des fichiers-source ("gmak.pl"
+chez gco, "local.sds" sous gmkpack) doit &ecirc;tre sauvegard&eacute; et
+devient un fichier cach&eacute; (sous un r&eacute;pertoire ".gmak" sous
+le r&eacute;pertoire de tous les fichiers-source) pour &eacute;viter tout
+erreur de manipulation de la part de son propri&eacute;taire (effacement,
+modification incontr&ocirc;l&eacute;e).</font>
+<br><font size=+1>A la cr&eacute;ation d'un sur-pack, les fichiers-descripteurs
+des branches non-locales doivent &ecirc;tre import&eacute;s et modifi&eacute;s
+dans le</font>
+<br><font size=+1>pack local afin d'y remplacer le nom de branche "local"
+par celui de la branche-lien correspondante (sauf dans le cas "gco"</font>
+<br><font size=+1>ou le fichier est bon tel que : il suffit alors de faire
+un lien dessus). Dans tous les cas il serait pr&eacute;f&eacute;rable &agrave;
+terme de supprimer ce second champ (information redondante entre la localisation
+ou le nom du fichier, et son contenu !!)</font>
+<br><font size=+1>Sous re r&eacute;pertoire .gmak on trouvera &eacute;galement
+d'autres fichiers de contr&ocirc;le sauvegard&eacute;s, dont le but est
+d'acc&eacute;l&eacute;rer le processus de compilation lorsque certains
+de ces fichiers de contr&ocirc;le se trouvent &ecirc;tre "&agrave; jour"
+(analyse par rapport au non-changement des inter-d&eacute;pendances entre
+les fichiers-source du pack). N&eacute;ammoins, cette fonction peut &ecirc;tre
+"remise &agrave; z&eacute;ro" en ex&eacute;cutant la commande "resetpack"
+qui d&eacute;truira certains fichiers sous ce r&eacute;pertoire .gmak (la
+destruction des fichiers-descripteurs venant des autres branches serait
+fatale au pack !).</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Fabrication de programmes-syst"></a><b><u><font size=+1>Fabrication
+de programmes-syst&egrave;me et autres pr&eacute;compilateurs</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>C'est le cas en particulier du pr&eacute;compilateur
+"odb98.x".</font>
+<br><font size=+1>On pr&eacute;voit l'utilisation d'un compilateur odb
+externalis&eacute; : cf variable ODBNAME du fichier de configuration.</font>
+<br><font size=+1>Si cette variable est vide, on fabrique le compilateur
+dans le pack "main", et on utilise le compilateur du pack main pour les</font>
+<br><font size=+1>packs-utilisateurs. Sinon on utilise le compilateur externe.</font>
+<br><font size=+1>La variable GMKSYS repr&eacute;sente le r&eacute;pertoire
+principal pour l'installation de programmes-syst&egrave;me (non-encore</font>
+<br><font size=+1>externalis&eacute;s) li&eacute;s &agrave; l'utilisation
+de gmkpack (typiquement : odb98)</font>
+<br><font size=+1>Ce r&eacute;pertoire n'est cr&eacute;&eacute; que pour
+un pack "main". On ne cr&eacute;e ces programmes-syst&egrave;me que si
+GMKSYS est non-vide.</font>
+<br><font size=+1>On cr&eacute;e un lien (un peu maladroit !) entre une
+fonction externe (comme ODBNAME) et la fonction-rempla&ccedil;ante interne,
+par</font>
+<br><font size=+1>nom (obsolete !).</font>
+<br><font size=+1>Gmkpack lanc&eacute; avec l'option "-s" fabrique un script
+de fabrication pour ce programme-syst&egrave;me (r&eacute;pertori&eacute;
+dans les fichiers de configuration) mais il n'est pas n&eacute;cessaire
+de l'utiliser : une compilation g&eacute;n&eacute;rale d'un "pack" de base
+cr&eacute;era ce pr&eacute;compilateur "dans la foul&eacute;e".</font>
+<br>&nbsp;
+<ul>
+<li>
+<a NAME="Les m ta-fichiers d'ODB"></a><b><u><font size=+1>Les "m&eacute;ta-fichiers"
+d'ODB</font></u></b></li>
+</ul>
+
+<p><br><font size=+1>Les fichiers *.ddl sont transcod&eacute;s par odb98.x
+en fichiers une s&eacute;rie de fichiers : *.ddl_, *.h et *.c qu'on rajoute
+dans le pack le</font>
+<br><font size=+1>cas &eacute;ch&eacute;ant (c'est &agrave; dire : si le
+fichier *.ddl_ est diff&eacute;rent du fichier *.ddl). On applique en premier
+lieu le pr&eacute;processeur cpp,</font>
+<br><font size=+1>ce qui permet de travailler de fa&ccedil;on ind&eacute;pendante
+de l'organisation des fichiers-source. Il est ainsi inutile de recopier
+sous chaque "base" les fichiers d'inclusion n&eacute;cessaires. par contre,
+chaque "base" doit absolument contenir son fichier *.ddl &agrave; c&ocirc;t&eacute;
+des requ&egrave;tes .sql, car c'est la seule fa&ccedil;on s&ucirc;re de
+pr&eacute;compiler les requ&egrave;tes .sql sans faire d'hypoth&egrave;se
+sur les noms des fichiers .c qui seront cr&eacute;&eacute;s par le pr&eacute;compilateur
+odb98.x ; ainsi, &agrave; la premi&egrave;re compilation, un r&eacute;p&eacute;rtoire
+contenant des requ&egrave;tes .sql ne devrait contenir que des fichiers
+.ddl.</font>
+<br>&nbsp;
+</body>
+</html>

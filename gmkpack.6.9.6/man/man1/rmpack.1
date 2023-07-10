@@ -1,0 +1,43 @@
+.TH rmpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+rmpack \- remove packs
+.PP
+.SH SYNOPSIS
+.B rmpack
+[
+.B -f
+]
+.I pack1
+[
+.I pack2
+] \0...
+.PP
+.SH DESCRIPTION
+.B rmpack
+removes the packs directories. If the executables directories are links outside
+the packs, then they are removed as well. If aliases have been created in the
+shell
+.I rc
+file, then these aliases are removed as well.
+.PP
+.SH OPTIONS
+.IP \fB-f\fR
+By default,
+.B rmpack
+asks for confirmation before running. Use this option to force the action
+without confirmation.
+.PP
+.SH DIAGNOSTICS
+This command will not work for an argument which does not look like a pack. Then
+the following message would be displayed :
+.br
+"The directory
+.I target
+does not look like a pack. No remove."
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR gmkpack(1).

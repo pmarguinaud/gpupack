@@ -1,0 +1,103 @@
+#!/bin/bash
+########################################################################
+#
+#    Script modintfbF90
+#    ------------------
+#
+#    Purpose : In the framework of a pack : F90 wrapper for auto-generated explicit interfaces
+#    -------
+#
+#    Usage : modintfbF90 $1 $2 $3 $4
+#    -----
+#            $1 : filename to treat
+#            $2 : output listing (if precompilation fails)
+#            $3 : true compilation command
+#
+#    Environment variables :
+#    ---------------------
+#            GMKROOT        : gmkpack root directory
+#            MKTOP          : directory of all source files
+#            GMKINTFB       : relative auto-generated interfaces blocks directory
+#            ICS_ECHO       : Verboose level
+#            ICS_VPATH      : Normal pathes for include files
+#            GMKUNSX        : relative directory for unsatisfied external -main
+#            GMKUNSX_QUIET : relative directory for unsatisfied external -quiet
+#            GMKUNSX_VERBOOSE : relative directory for unsatisfied external -verboose
+#            MKLIB          : libraries directory
+#            AWK            : awk program 
+#            AR             : ar command
+#
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+# Precompile
+# ----------
+
+if [ $ICS_ECHO -gt 2 ] ; then
+  echo modintfbF90 $1 $2
+fi
+$GMKROOT/aux/my_check_inc_intfb.pl $1 1> intfb_report 2>&1
+if [ $? -eq 0 ] ; then
+  \mv intfb_report intfb_list
+  grep -i "USE MODI_" $1 | grep -v "^ *\!.*" | tr '[A-Z]' '[a-z]' | sed -e "s/use modi_//g" | sed -e "s/ //g" -e "s/\!.*//" | sort -u > include
+  grep "^CALL [^ ]" intfb_list | cut -d" " -f2 | sort -u > calls
+  \rm -f intfb_fatal
+  if [ "$GMK_IGNORE_USELESS_INTFB" != "YES" ] && [ "$GMK_IGNORE_USELESS_INTFB" != "1" ] ; then
+    for subroutine in $(comm -23 include calls) ; do
+#     Though the auto-generated interface should be present in usual cases, this alert can be wrong if cpp macros
+#     are such that the pre-processed subroutine would not include this auto-generated interface.
+#     Therefore the alert must be cancelled if the auto-generated interface is missing.
+#     Anyway, the compilation will fail later on if this auto-generated interface is needed.
+      if [ $(find $MKTOP/*/$GMKINTFB/* -name "modi_${subroutine}.mod" -print -type f | wc -l) -ne 0 ] ; then
+#       Unless the researched procedure is a function, the interface must be useless :
+#       A very rough test :
+        if [ $(grep -ci "${subroutine}" $1) -eq 0 ] ; then
+          echo USELESS INTERFACE BLOCK - REMOVE LINE : USE MODI_$(echo $subroutine | tr '[a-z]' '[A-Z]') >> intfb_fatal
+        fi
+      fi
+    done
+  fi
+  for subroutine in $(comm -13 include calls) ; do
+    if [ $(\ls -1 $MKTOP/*/$GMKINTFB/*/modi_${subroutine}.mod 2>/dev/null | wc -l) -ne 0 ] ; then
+      echo MISSING INTERFACE BLOCK - ADD LINE : USE MODI_$(echo $subroutine | tr '[a-z]' '[A-Z]') >> intfb_fatal
+    fi
+  done
+  if [ -s intfb_fatal ] ; then
+    cat $1 > $2
+    echo >> $2
+    echo "Interface blocks checker diagnostic messages 1 : file $1" >> $2
+    cat intfb_report intfb_fatal 1>> $2 2>/dev/null
+  else
+    eval "$3 $1 2> err"
+    if [ -f $2 ] ; then
+      echo >> $2
+      if [ -s err ] ; then
+        cat err >> $2
+        echo >> $2
+      fi
+      echo "Interface blocks checker diagnostic messages 3 : file $1" >> $2
+      cat intfb_report 1>> $2 2>/dev/null
+      echo >> $2
+    else
+      if [ -s err ] ; then
+        cat err
+      fi
+    fi
+  fi
+#  for subroutine in $(comm -12 include calls) ; do
+#    \rm -f ${subroutine}.intfb.h
+#  done
+  \rm -f calls include
+else
+# Report errors
+  cat $1 > $2
+  echo >> $2
+  echo "Interface blocks checker diagnostic messages 4 : file $1" >> $2
+  cat intfb_report 1>> $2 2>/dev/null
+fi
+\rm -f intfb_report intfb_fatal intfb_list err
+#

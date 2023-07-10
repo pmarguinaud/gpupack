@@ -1,0 +1,35 @@
+.TH genpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+genpack \- display the genesis of a pack.
+.PP
+.SH SYNOPSIS
+.B genpack
+.PP
+.SH DESCRIPTION
+.B genpack
+displays on the standard output how a pack has been generated at the time of
+its creation. The working directory must be the pack main directory.
+.br
+The information displayed consists in the absolute path of the procedure
+.B gmkpack
+invoked, followed by all the options values explicitely used.
+.br
+This command is helpful to create new scripts for compilation, libraries
+archiving and/or links editions with
+.B gmkpack
+upon a pack which already exists, because it ensures the compatibility of the
+background codes and libraries used.
+.PP
+.SH DIAGNOSTICS
+If the working directory is not a pack main directory then the following
+message is displayed :
+.br
+"No gmkpack genesis file in this directory."
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR logpack(1),
+.BR gmkpack(1).

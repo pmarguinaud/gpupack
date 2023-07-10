@@ -1,0 +1,1992 @@
+#!/bin/bash
+########################################################################
+#
+#    Script gmkpack
+#    --------------
+#
+#    Purpose :  To create a pack.
+#    -------    
+#
+#    Usage :  gmkpack -r release [-u target-pack] [-b branch] [-a] [-K] [-k]
+#    -----            [-v reference-pack-version] [-l compiler-label]
+#    -----            [-g generic-for-release] [-e pack extension]
+#                     [-o compiling-flag] [-f rootpack]
+#                     [-p program] [-m] [-n local-pack-version]
+#                     [-s] [ -h homepack ] [-V]
+#
+#
+#    Parameters :  -r = reference release label
+#    ----------    -u = target pack/branch name
+#                  -b = reference branch name
+#                  -v = version number of the reference pack
+#                  -l = reference compiler version
+#                  -o = compiler options family
+#                  -f = rootpack directory
+#                  -p = program name for the compilation script
+#                  -m = mode ( = "quiet" <=> create compilation script only)
+#                  -a = to create a main (administrative) pack
+#                  -k = to *not* create a local branch of src (existing background is propagated, anyway)
+#                  -K = to create a local branch of the hub
+#                  -n = version number of the local pack
+#                  -s = script for system programs compilation
+#                  -h = homepack directory
+#                  -e = pack name extension
+#                  -g =  generic for the release number
+#                  -V = to display the version number of gmkpack
+#
+########################################################################
+#
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+#     0. Get this version of gmkpack
+#        ---------------------------
+#
+THESE_OPTIONS="$*"
+THIS_GMKPACK=/home/gmap/mrpm/khatib/public/bin/gmkpack.6.9.6/util/gmkpack
+THIS_COMMAND="$THIS_GMKPACK $THESE_OPTIONS"
+#
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+export GMK_SUPPORT
+#
+export GMKROOT=$(dirname $(dirname $THIS_GMKPACK))
+#-----------------------------------------------------------------------
+#
+#     1. Control reliability of environment variables
+#        --------------------------------------------
+#
+export GMKTMP=${GMKTMP:=/tmp}
+export HOMEPACK=${HOMEPACK:=$HOME/pack}
+export ROOTPACK=${ROOTPACK:=$HOME/rootpack}
+
+ierr_env=0
+if [ ! "$SHELL" ] ; then
+  ierr_env=1
+  echo Environment variable SHELL is not set
+fi
+export GMKWRKDIR=$GMKTMP/gmktmp.$$
+trap "cd $GMKTMP ; \rm -rf gmktmp.$$ ; echo Working directory removed ; exit 1" 2 6 9 14 15 20
+mkdir -p $GMKWRKDIR 2> /dev/null
+if [ ! -d $GMKWRKDIR ] ; then
+  echo directory $GMKWRKDIR could not be created
+  exit 1
+fi
+
+if [ $ierr_env -eq 1 ] ; then
+  \rm -rf $GMKWRKDIR
+  exit 1
+fi
+
+#
+if [ ! -d $HOME/.gmkpack/link ] ; then
+  mkdir -p $HOME/.gmkpack/link
+fi
+if [ ! -d $HOME/.gmkpack/norms ] ; then
+  \cp -R $GMKROOT/norms $HOME/.gmkpack
+fi
+if [ ! -d $HOME/.gmkpack/arch ] ; then
+  mkdir -p $HOME/.gmkpack/arch
+fi
+#-----------------------------------------------------------------------
+#
+#     3. Set defaults for parameters
+#        ---------------------------
+#
+GMK_OPT_DF=x
+if [ "$GMK_OPT" ] ; then
+  GMK_OPT_DF=$GMK_OPT
+fi
+export GMK_OPT=$GMK_OPT_DF
+
+GMK_PACK_PREFIX=$PACK_PREFIX
+GMK_PACK_EXT=$PACK_EXT
+
+LIBFRT_DF=
+GMKMAIN=main
+if [ "$GMKFILE" ] ; then
+  FLAVOUR=$GMKFILE.$GMK_OPT
+  if [ -f $HOME/.gmkpack/arch/$FLAVOUR ] || [ -f $GMK_SUPPORT/arch/$FLAVOUR ] ; then
+    $GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+    chmod 755 $GMKWRKDIR/gmkpack_env_variables
+    . $GMKWRKDIR/gmkpack_env_variables
+    export LIBFRT_DF=$LIBFRT
+  fi
+fi
+
+PACK_PREFIX=$GMK_PACK_PREFIX
+PACK_EXT=$GMK_PACK_EXT
+#
+RELEASE=
+RELATIVE_TARGET_PACK=
+BRANCH=${GMKMAIN}
+VERSION=
+LIBFRT=$LIBFRT_DF
+LIBOPT=$GMK_OPT
+PROGRAMS=
+MODE=normal
+MAINPACK=
+NO_LOCAL_SRC=
+LOCAL_HUB=
+NEXT=
+PROGSYS=
+FROM=$ROOTPACK
+TO=$HOMEPACK
+GMKVERSION=
+USAGE1="Usage: gmkpack -r release [-b branch ] [-n local-pack-version ]"
+USAGE2="[-a -s | -u target-pack [-v reference-pack-version ]] [-K] [-k] [-l compiler-label ]"
+USAGE3="[-o compiling-flag ] [-f rootpack-directory ] [-h homepack-directory ]"
+USAGE4="[-p program ] [-m] [-V]"
+USAGE_r=" -r = reference release label (mandatory)"
+USAGE_a=" -a = To create a main pack"
+USAGE_K=" -K = To create a local branch of the hub"
+USAGE_k=" -k = To *NOT* create a local branch of src (existing background is propagated, anyway)"
+USAGE_u=" -u = target pack name (optional for user packs, default is the reference packname)"
+USAGE_b=" -b = branch name of reference pack (optional, default is \"${GMKMAIN}\")"
+USAGE_v=" -v = version number of reference pack (optional, 2 digits, default is the latest)"
+USAGE_n=" -n = version number of target main pack (optional, 2 digits or \"++\", default is the latest)"
+USAGE_p=" -p = program names for the compilation script (separator not alphanumeric, blank nor \"_\")"
+USAGE_s=" -s = To create a script to compile the precompilers only"
+USAGE_f=" -f = rootpack directory (optional, default is $ROOTPACK)"
+USAGE_h=" -h = homepack directory (optional, default is $HOMEPACK)"
+USAGE_l=" -l = reference compiler version (optional, default is \"$LIBFRT_DF\")"
+USAGE_o=" -o = compiler options family, (optional, default is \"$GMK_OPT\")"
+USAGE_g=" -g = generic of the label release, (optional, default is \"$PACK_PREFIX\")"
+USAGE_e=" -e = pack name suffix, (optional, default is \"$PACK_EXT\")"
+USAGE_m=" -m = quiet mode (optional ; to make the compilation script only)"
+USAGE_V=" -V = display version number of gmkpack"
+#
+#
+#-----------------------------------------------------------------------
+#
+#     4. Crack parameters
+#        ----------------
+#
+errflg=0
+while getopts r:u:b:v:l:o:f:h:g:e:p:n:makKsV option
+do
+   case $option in
+   r)  RELEASE=$OPTARG;;
+   u)  RELATIVE_TARGET_PACK=$OPTARG;;
+   b)  BRANCH=$OPTARG;;
+   v)  VERSION=$OPTARG;;
+   l)  LIBFRT=$OPTARG;;
+   o)  LIBOPT=$OPTARG;;
+   f)  FROM=$OPTARG;;
+   h)  TO=$OPTARG;;
+   g)  GMK_PACK_PREFIX=$OPTARG;;
+   e)  GMK_PACK_EXT=$OPTARG;;
+   p)  PROGRAMS=$OPTARG;;
+   m)  MODE=quiet;;
+   n)  NEXT=$OPTARG;;
+   a)  MAINPACK=yes;;
+   k)  NO_LOCAL_SRC=yes;;
+   K)  LOCAL_HUB=yes;;
+   s)  PROGSYS=yes;;
+   V)  GMKVERSION=yes;;
+   \?) errflg=1;;
+   esac
+done
+#
+if [ "$GMKVERSION" ] ; then
+  echo gmkpack $(echo $(dirname $(dirname $THIS_GMKPACK)) | cut -d "." -f2-)
+  LINE=$(echo $THESE_OPTIONS | sed "s/ //g")
+  if [ "$LINE" = "-V" ] ; then
+    exit 0
+  fi
+fi
+
+if [ "$VERSION" = "" ] ; then
+  VERSION="  "
+elif [ $(echo $VERSION | wc -c ) -eq 1 ] ; then
+  VERSION="0$VERSION"
+fi
+if [ "$NEXT" = "" ] ; then
+  NEXT="  "
+elif [ "$(echo "$NEXT" | sed "s/ //g" | cut -c1)" = "-" ] ; then
+# -n has been specified without argument, actually :
+  echo
+  echo "option -n requires an argument or should be removed" >&2
+  errflg=1
+elif [ $(echo $NEXT | wc -c ) -eq 1  ] ; then
+  NEXT="0$NEXT"
+fi
+if [ "$ROOTPACK" != "$FROM" ] ; then
+  ALTERNATIVE_ROOTPACK=yes
+  ROOTPACK=$FROM
+fi
+# added to avoid endless complains :-(
+ALTERNATIVE_ROOTPACK=yes
+
+if [ "$HOMEPACK" != "$TO" ] ; then
+  ALTERNATIVE_HOMEPACK=yes
+  HOMEPACK=$TO
+fi
+
+export HOMEBIN=${HOMEBIN:=$HOMEPACK}
+export HOMELIB=${HOMELIB:=$HOMEPACK}
+export ROOTLIB=${ROOTLIB:=$ROOTPACK}
+export ROOTBIN=${ROOTBIN:=$ROOTPACK}
+#-----------------------------------------------------------------------
+#
+#     5. Check parameters, issue error messages
+#        --------------------------------------
+#
+if [ $errflg -eq 0 ] ; then
+  if [ ! "$RELEASE" ] ; then
+    echo
+    echo "Release should be specified" >&2
+    errflg=1
+  fi
+fi
+#
+if [ $errflg -ne 0 ] ; then
+     echo
+     echo $USAGE1 >&2
+     echo $USAGE2 >&2
+     echo $USAGE3 >&2
+     echo $USAGE4 >&2
+     echo
+     echo Parameters :
+     echo ----------
+     echo "$USAGE_r" >&2
+     echo "$USAGE_f" >&2
+     echo "$USAGE_h" >&2
+     echo "$USAGE_u" >&2
+     echo "$USAGE_b" >&2
+     echo "$USAGE_v" >&2
+     echo "$USAGE_l" >&2
+     echo "$USAGE_o" >&2
+     echo "$USAGE_p" >&2
+     echo "$USAGE_a" >&2
+     echo "$USAGE_K" >&2
+     echo "$USAGE_k" >&2
+     echo "$USAGE_n" >&2
+     echo "$USAGE_g" >&2
+     echo "$USAGE_e" >&2
+     echo "$USAGE_s" >&2
+     echo "$USAGE_m" >&2
+     echo "$USAGE_V" >&2
+     \rm -rf $GMKWRKDIR
+     \exit 1
+fi
+#
+errflg=0
+
+if [ ! "$MAINPACK" ] ; then
+  if [ ! -d $ROOTPACK ] ; then
+    echo "Directory $ROOTPACK does not exist" >&2
+    errflg=1
+  fi
+fi
+
+for var in $RELEASE $BRANCH $LIBFRT $LIBOPT ; do
+  if [ $(echo $var | grep "\." | wc -l) -ne 0 ] ; then
+    echo "Variable $var should not contain any dot character" >&2
+    errflg=1
+  fi
+done
+
+if [ "$MAINPACK" ] ; then
+# Find an arch file with extension LIBOPT which fits LIBFRT :
+  ii=0
+  for file in $(find $HOME/.gmkpack/arch $GMK_SUPPORT/arch -type f -name "*.${LIBOPT}") ; do
+    grep "^LIBFRT = " $file | cut -d " " -f3- > $GMKWRKDIR/libfrt_test
+    chmod 755 $GMKWRKDIR/libfrt_test
+    if [ "$LIBFRT" = "$(echo $(. $GMKWRKDIR/libfrt_test 2>/dev/null))" ] ; then 
+      ii=$((ii+1))
+      GMKFILE_OK[$ii]=$(basename $file .${LIBOPT})
+    fi
+  done
+  if [ $ii -ge 2 ] ; then
+    echo "Ambiguous configuration files for the parameter LIBFRT=$LIBFRT : ${GMKFILE_OK[*]}"
+    errflg=1
+  elif [ $ii -eq 0 ] ; then
+    if [ ! "$LIBFRT" ] && [ "$GMKFILE" ] ; then
+      echo "No configuration file $GMKFILE could be found." >&2
+      echo "Make sure this file is present in the directory $GMK_SUPPORT/arch" >&2
+    elif [ ! "$LIBFRT" ] ; then
+      echo "Option -l is not specified." >&2
+      N_OPTIONS=$($GMKROOT/util/optionspack | wc -l)
+      if [ $N_OPTIONS -gt 0 ] ; then
+        echo "You can export GMKFILE or select a combination (-l,-o) among the ones below,"
+        echo "or make a new configuration file."
+        echo "You can use the gmkfile maker assistant (% gmkfilemaker) to make a new configuration file."
+        $GMKROOT/util/optionspack
+      elif [ ! "$GMKFILE" ] ; then
+        echo "You should make at least one configuration file to setup compilers, options, etc."
+        echo "You can use the gmkfile maker assistant (% gmkfilemaker) to make them."
+      fi
+    else
+      echo "No valid configuration file could be found for -l $LIBFRT and -o $LIBOPT" >&2
+      N_OPTIONS=$($GMKROOT/util/optionspack | wc -l)
+      if [ $N_OPTIONS -gt 0 ] ; then
+        echo "Possible combinations :"
+        $GMKROOT/util/optionspack
+      else
+        echo "You should make at least one to setup compilers, options, etc."
+        echo "You can use the gmkfile maker assistant (% gmkfilemaker) to make them."
+      fi
+    fi
+    errflg=1
+  elif [ $ii -eq 1 ] && [ "$LIBFRT" != "$LIBFRT_DF" ] ; then
+#   Only one file has been found and different from the default => use it
+    export GMKFILE=${GMKFILE_OK[$ii]}
+    LIBFRT_BAK=$LIBFRT
+    $GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+    if [ $? -eq 0 ] ; then
+      chmod 755 $GMKWRKDIR/gmkpack_env_variables
+      . $GMKWRKDIR/gmkpack_env_variables
+    fi
+    if [ ! "$LIBFRT" ] ; then
+      LIBFRT=$LIBFRT_BAK
+    fi
+  elif [ $ii -eq 1 ] && [ "$LIBFRT" = "" ] ; then
+#   Only one file has been found and equal to the default (empty) which is not valid :
+    echo "Option -l is not specified." >&2
+    N_OPTIONS=$($GMKROOT/util/optionspack | wc -l)
+    if [ $N_OPTIONS -gt 0 ] ; then
+      echo "You can export GMKFILE or select a combination (-l,-o) among the ones below,"
+      echo "or make a new configuration file."
+      echo "You can use the gmkfile maker assistant (% gmkfilemaker) to make a new configuration file."
+      $GMKROOT/util/optionspack
+    elif [ ! "$GMKFILE" ] ; then
+      echo "You should make at least one configuration file to setup compilers, options, etc."
+      echo "You can use the gmkfile maker assistant (% gmkfilemaker) to make them."
+    fi
+    errflg=1
+# else we use the default configuration file
+  fi
+fi
+if [ "$MAINPACK" ] && [ "$RELATIVE_TARGET_PACK" ] ; then
+  if [ "$GMK_PREVAIL_CUSTOMNAME" != 1 ] ; then
+    echo "Options -a and -u are exclusive" >&2
+    errflg=1
+  fi
+fi
+if [ "$VERSION" != "  " ] ; then
+  if [ $(echo $VERSION | egrep "^[0-9][0-9]$" | wc -l) -eq 0 ] ; then
+    echo "Reference pack version should be a string of 2 numbers" >&2
+    errflg=1
+  fi
+fi
+if [ "$NEXT" != "  " ] ; then
+  if [ $(echo $NEXT | egrep "^[0-9][0-9]$" | wc -l) -eq 0 ] && [ "$NEXT" != "++" ] ; then
+    echo "Local pack version should be either a string of 2 numerics or the string \"++\" to determine the next version" >&2
+    errflg=1
+  fi
+fi
+if [ "$GMK_IMPORT_PLUGIN" ] && [ "$MAINPACK" ] ; then
+  if [ ! -s $GMK_IMPORT_PLUGIN ] ; then
+    echo "GMK_IMPORT_PLUGIN=\"$GMK_IMPORT_PLUGIN\" does not exist or is empty." >&2
+    errflg=1
+  fi
+fi
+if [ $errflg -ne 0 ] ; then
+  \rm -rf $GMKWRKDIR
+  exit 1
+fi
+
+PACK_EXT=$GMK_PACK_EXT
+PACK_PREFIX=$GMK_PACK_PREFIX
+
+
+echo "$THIS_GMKPACK starts."
+#
+if [ "$GMK_RELEASE_CASE_SENSITIVE" = 1 ] ; then
+  RELEASE_NUMBER=$RELEASE
+else
+# Convert to small letters
+  RELEASE_NUMBER_SMALL=$(echo $RELEASE | tr '[A-Z]' '[a-z]')
+  RELEASE_NUMBER=$RELEASE_NUMBER_SMALL
+fi
+# Remove prefix
+while [ "$(echo $RELEASE_NUMBER | cut -c1 | sed "s/^[0-9]/ /")" != " " ] ; do
+  XX_NUMBER=$(echo $RELEASE_NUMBER | sed "s/^[a-z]//")
+  RELEASE_NUMBER=$XX_NUMBER
+done
+RELEASE="${PACK_PREFIX}${RELEASE_NUMBER}"
+if [ "$MAINPACK" ] ; then
+  if [ "$NO_LOCAL_SRC" ] ; then
+    if [ "$LOCAL_HUB" ] ; then
+      echo "### configuration for main hub ###"
+    else
+      echo  "### configuration for empty pack  ###"
+    fi
+  else
+    if [ "$LOCAL_HUB" ] ; then
+      echo "### configuration for main pack with hub ###"
+    else
+      echo "### configuration for main pack ###"
+    fi
+  fi
+  ROOTPACK=$HOMEPACK
+fi
+#
+export LIBFRT
+export ROOTPACK
+
+#-----------------------------------------------------------------------
+
+#     7. Evaluate source pack
+#        --------------------
+
+if [ ! "$MAINPACK" ] ; then
+  if [ $(\ls -1 $ROOTPACK | grep ^${RELEASE} | wc -l) -eq 0 ] ; then
+    echo "Release ${RELEASE} does not exist for rootpack directory ${ROOTPACK}." >&2
+    echo "Existing releases are : " >&2
+    $GMKROOT/util/rlspack | more
+    STYLE_USR=$(echo ${RELEASE} | grep -c ^${PACK_PREFIX})
+    if [ $($GMKROOT/util/rlspack | grep -c ^${PACK_PREFIX}) -gt 0 ] ; then
+      STYLE_SRC=1
+    else
+      STYLE_SRC=0
+    fi
+    if [ $STYLE_USR -ne $STYLE_SRC ] ; then
+      echo "This looks like a misusage of the option -g of gmkpack."
+    fi
+    \rm -rf $GMKWRKDIR
+    exit 1
+  else
+    if [ $(\ls -1 $ROOTPACK | grep "^${RELEASE}_${BRANCH}\." | wc -l) -eq 0 ] ; then
+      echo "Branch ${BRANCH} does not exist for release ${RELEASE}." >&2
+      echo "Existing branches for this release are : " >&2
+      $GMKROOT/util/admpack | grep ^${RELEASE}_ | cut -d"." -f1 | cut -d"_" -f2 | sort -u >&2
+      \rm -rf $GMKWRKDIR
+      exit 1
+    else
+      PREFIX="${RELEASE}_${BRANCH}"
+      if [ $(\ls -1 $ROOTPACK | grep ^${PREFIX}.*.${LIBOPT}${PACK_EXT}$ | wc -l) -eq 0 ] ; then
+        echo "Compilation family option \"${LIBOPT}\" does not exist for this release and branch." >&2
+        STYLE_ADM=$($GMKROOT/util/admpack | grep "^${PREFIX}\..*${PACK_EXT}$" | cut -d"." -f4 | sort -u >&2 | wc -l)
+        if [ $STYLE_ADM -ne 0 ] ; then
+          echo "Existing option for this release and branch are : " >&2
+          $GMKROOT/util/admpack | grep "^${PREFIX}\..*${PACK_EXT}$" | cut -d"." -f4 | sort -u >&2
+        else
+          if [ $(\ls -1 $ROOTPACK | grep ^${PREFIX}.*.${LIBOPT}$ | wc -l) -ne 0 ] ; then
+            STYLE_SRC=0
+          else
+            STYLE_SRC=1
+          fi
+          if [ "$PACK_EXT" ] ; then
+            STYLE_USR=1
+          else
+            STYLE_USR=0
+          fi
+          if [ $STYLE_USR -ne $STYLE_SRC ] ; then
+            echo "This looks like a misusage of the option -e of gmkpack."
+          else
+            echo "Existing option for this release and branch are : " >&2
+            $GMKROOT/util/admpack | grep "^${PREFIX}\." | cut -d"." -f4 | sort -u >&2
+          fi
+        fi
+        \rm -rf $GMKWRKDIR
+        exit 1
+      else
+        if [ ! "${LIBFRT}" ] ; then
+          echo "Error : if GMKFILE is not set, then the option -l must be set." 
+          \rm -rf $GMKWRKDIR
+          exit 1
+        elif [ $(\ls -1 $ROOTPACK | grep ^${PREFIX}.*.${LIBFRT}\.${LIBOPT}${PACK_EXT}$ | wc -l) -eq 0 ] ; then
+          echo "Compiler version \"${LIBFRT}\" does not exist for this release, branch and compilation family option." >&2
+          echo "Existing compiler version for this release, branch and option are : " >&2
+          $GMKROOT/util/admpack | grep "^${PREFIX}\." | grep "\.${LIBOPT}${PACK_EXT}$" | cut -d"." -f3 | sort -u >&2
+          \rm -rf $GMKWRKDIR
+          exit 1
+        else
+          SUFFIX="${LIBFRT}.${LIBOPT}${PACK_EXT}"
+          if [ "$VERSION" = "  " ] ; then
+            if [ $(\ls -1 $ROOTPACK | egrep "^${PREFIX}\.[0-9][0-9]\.${SUFFIX}$" | wc -l) -eq 0 ] ; then
+              echo "There are no valid versions for this source pack." >&2
+              \rm -rf $GMKWRKDIR
+              exit 1
+            else
+#             Evaluation of the latest version number :
+              LATEST=$(\ls -1 $ROOTPACK | egrep "^${PREFIX}\.[0-9][0-9]\.${SUFFIX}$" | cut -d"." -f2 | tail -1)
+            fi
+          else
+            if [ ! -d ${ROOTPACK}/${PREFIX}.${VERSION}.${SUFFIX} ] ; then
+              echo "Version \"${VERSION}\" does not exist for this pack." >&2
+              echo "Existing versions are :" >&2
+              $GMKROOT/util/admpack | egrep "^${PREFIX}\.[0-9][0-9]\.${SUFFIX}$" | cut -d"." -f2
+              \rm -rf $GMKWRKDIR
+              exit 1
+            else
+              LATEST=$VERSION
+            fi
+          fi
+          if [ $(echo $LATEST | wc -c ) -eq 1 ] ; then
+            LATEST="0$LATEST"
+          fi
+          RELATIVE_SOURCE_PACK=${PREFIX}.${LATEST}.${SUFFIX}
+          SOURCE_PACK=${ROOTPACK}/${RELATIVE_SOURCE_PACK}
+#         Control that LIBFRT still fits the configuration file inside the source pack :
+          grep "^LIBFRT = " $SOURCE_PACK/.gmkfile/* | cut -d " " -f3- > $GMKWRKDIR/libfrt_test
+          chmod 755 $GMKWRKDIR/libfrt_test
+          if [ "$LIBFRT" != "$(echo $(. $GMKWRKDIR/libfrt_test 2>/dev/null))" ] ; then 
+            if [ $(find $SOURCE_PACK/.gmkfile -type f | wc -l) -gt 1 ] ; then
+              echo "Multiple configuration files in pack !! There should be only one !" >&2 
+              find $SOURCE_PACK/.gmkfile -type f
+            else
+              echo "Configuration file of reference pack broken with respect to -l $LIBFRT" >&2 
+            fi
+            \rm -rf $GMKWRKDIR
+            exit 1
+          fi
+#         If GMKFILE was not in the environment, take the source pack one:
+          if [ ! "$GMKFILE" ] ; then
+            export GMKFILE=$(\ls -1t $SOURCE_PACK/.gmkfile | head -1)
+            $GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+            if [ $? -eq 0 ] ; then
+              chmod 755 $GMKWRKDIR/gmkpack_env_variables
+              . $GMKWRKDIR/gmkpack_env_variables
+            else
+              echo "Error in envvarpack.sh :"
+              cat $GMKWRKDIR/gmkpack_env_variables
+              \rm -rf $GMKWRKDIR
+              exit 1
+            fi
+          fi
+        fi
+      fi 
+    fi
+  fi
+fi
+
+#-----------------------------------------------------------------------
+
+#     6. Evaluate target pack name
+#        -------------------------
+
+if [ "$RELATIVE_TARGET_PACK" ] ; then
+  OPTION_U="u"
+else
+  unset OPTION_U
+fi
+if [ "$RELATIVE_TARGET_PACK" ] && [ "$ROOTPACK" != "$HOMEPACK" ] ; then
+# Normal users provide -u option to name the pack 
+  if [ "$GMK_USER_PACKNAME_STYLE" ] ; then
+    LOCAL_TARGET_PACK=$(eval echo ${GMK_USER_PACKNAME_STYLE})
+  else
+    LOCAL_TARGET_PACK=$RELATIVE_TARGET_PACK
+  fi
+elif [ ! "$MAINPACK" ]  && [ "$ROOTPACK" != "$HOMEPACK" ] ; then
+# Normal users may not provide -u option to name the pack
+#  => take the name of the source pack
+  LOCAL_TARGET_PACK=${RELATIVE_SOURCE_PACK}
+elif [ "$MAINPACK" ] && [ "$RELATIVE_TARGET_PACK" ] && [ "$GMK_PREVAIL_CUSTOMNAME" = 1 ] ; then
+# Custom name (-u) as such will always prevail :
+  LOCAL_TARGET_PACK=$RELATIVE_TARGET_PACK
+else
+# Main pack or no explicit branch name
+# Default local pack name is based on the source pack:
+  if [ ! "$RELATIVE_TARGET_PACK" ] ; then
+    RELATIVE_TARGET_PACK=$BRANCH
+  fi
+  PREFIX=${RELEASE}_${RELATIVE_TARGET_PACK}
+  SUFFIX="${LIBFRT}.${LIBOPT}${PACK_EXT}"
+  if [ "$NEXT" = "  " ] || [ "$NEXT" = "++" ] ; then
+#   Find the last existing version
+    if [ $(\ls -1 $ROOTPACK | egrep "^${PREFIX}.[0-9][0-9].${SUFFIX}$" | wc -l) -eq 0 ] ; then
+#     No existing version, this one is the first :
+      VERSUS=01
+    else
+      VERSUS=$(\ls -1 $ROOTPACK | egrep "^${PREFIX}.[0-9][0-9].${SUFFIX}$" | cut -d"." -f2 | tail -1)
+      if [ "$NEXT" = "++" ] ; then
+        VERSUS=$(($VERSUS+1))
+        if [ $VERSUS -le 9 ] ; then
+          VERSUS="0${VERSUS}"
+        elif [ $VERSUS -gt 99 ] ; then
+          echo "Too much versions for this pack !!" >&2
+          \rm -rf $GMKWRKDIR
+          exit 1
+        fi
+      fi
+    fi 
+  else
+    VERSUS=$NEXT
+  fi
+  LOCAL_TARGET_PACK=${PREFIX}.${VERSUS}.${SUFFIX}
+fi
+export TARGET_PACK=${HOMEPACK}/${LOCAL_TARGET_PACK}
+
+#-----------------------------------------------------------------------
+
+if [ "$MAINPACK" ] ; then
+  SOURCE_PACK=$TARGET_PACK
+  RELATIVE_SOURCE_PACK=$LOCAL_TARGET_PACK
+fi
+#
+export SOURCE_PACK
+#
+if [ -f $SOURCE_PACK/$GMKSRC/$GMKMAIN/gmak.pl ] ; then
+  GCO=gmak
+else
+  GCO=gmkpack
+fi
+
+#-----------------------------------------------------------------------
+#
+#     8. Make target pack
+#        ----------------
+
+export LIBOPT
+PRECOMPILER_LIST="odb98 bl95"
+if [ "$MODE" = "normal" ] ; then
+  if [ -d ${TARGET_PACK} ] ; then
+    echo "target pack ${LOCAL_TARGET_PACK} already exists - not changed."
+  else
+    if [ "$(\ls -1t $SOURCE_PACK/.gmkfile 2>/dev/null | tail -1)" ] ; then
+#     Always false if main pack
+      GMKFILEPATH=$SOURCE_PACK/.gmkfile
+      FLAVOUR=$(\ls -1t $GMKFILEPATH | tail -1)
+#     Overwrite locally GMKFILE in cas it has a (different) default value
+      GMKFILE=$FLAVOUR
+    elif [ -f $HOME/.gmkpack/arch/${GMKFILE}.${LIBOPT} ] ; then
+      GMKFILEPATH=$HOME/.gmkpack/arch
+      FLAVOUR=${GMKFILE}.${LIBOPT}
+    elif [ -f $GMK_SUPPORT/arch/${GMKFILE}.${LIBOPT} ] ; then
+      GMKFILEPATH=$GMK_SUPPORT/arch
+      FLAVOUR=${GMKFILE}.${LIBOPT}
+    else
+      echo "Error : no file ${GMKFILE}* could be found either in source pack, \$HOME/.gmkpack/arch or \$GMK_SUPPORT/arch."
+      \rm -rf $GMKWRKDIR
+      exit 1
+    fi
+    export GMKFILEPATH
+    export FLAVOUR
+    $GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+    if [ $? -eq 0 ] ; then
+      chmod 755 $GMKWRKDIR/gmkpack_env_variables
+      . $GMKWRKDIR/gmkpack_env_variables
+#     these two ones where overwritten, recover them :
+      PACK_EXT=$GMK_PACK_EXT
+      PACK_PREFIX=$GMK_PACK_PREFIX
+    else
+      echo "Error in envvarpack.sh :"
+      cat $GMKWRKDIR/gmkpack_env_variables
+#    \rm -rf $GMKWRKDIR
+      exit 1
+    fi
+    mkdir -p $TARGET_PACK/.gmkfile
+    GMK_LOG=${TARGET_PACK}/$GMK_LOG
+    echo "original invokation :" > $GMK_LOG
+    echo $THIS_COMMAND >> $GMK_LOG
+    Text="$THIS_GMKPACK"
+    if [ "$ALTERNATIVE_ROOTPACK" ] ; then
+      Text="$Text -f $ROOTPACK"
+    fi
+    if [ "$ALTERNATIVE_HOMEPACK" ] ; then
+      Text="$Text -h $HOMEPACK"
+    fi
+    Text="$Text -r $RELEASE_NUMBER -b $BRANCH"
+    if [ "$LOCAL_HUB" ] ; then
+      Text="$Text -K"
+    fi
+    if [ "$NO_LOCAL_SRC" ] ; then
+      Text="$Text -k"
+    fi
+    if [ "$MAINPACK" ] ; then
+      Text="$Text -a"
+      if [ "$NO_LOCAL_SRC" ] ; then
+        if [ "$LOCAL_HUB" ] && [ "$GMK_HUB_DIR" ] ; then
+          echo "Creating hub-only main pack ${LOCAL_TARGET_PACK} ..." | tee -a $GMK_LOG
+        else
+          echo "Creating empty main pack ${LOCAL_TARGET_PACK} ..." | tee -a $GMK_LOG
+        fi
+      else
+        if [ "$LOCAL_HUB" ] && [ "$GMK_HUB_DIR" ] ; then
+          echo "Creating main pack with hub ${LOCAL_TARGET_PACK} ..." | tee -a $GMK_LOG
+        else
+          echo "Creating main pack ${LOCAL_TARGET_PACK} ..." | tee -a $GMK_LOG
+        fi
+      fi
+    else
+      if [ "$OPTION_U" ] ; then
+        Text="$Text -v $LATEST -u $RELATIVE_TARGET_PACK"
+      else
+        Text="$Text -v $LATEST"
+      fi
+      if [ "$NO_LOCAL_SRC" ] ; then
+        if [ "$LOCAL_HUB" ] && [ "$GMK_HUB_DIR" ] ; then
+          echo "Creating hub-only pack ${TARGET_PACK} on top of ${SOURCE_PACK} ..." | tee -a $GMK_LOG
+        else
+          echo "Creating empty pack ${TARGET_PACK} on top of ${SOURCE_PACK} ..." | tee -a $GMK_LOG
+        fi
+      else
+        if [ "$LOCAL_HUB" ] && [ "$GMK_HUB_DIR" ] ; then
+          echo "Creating pack with hub ${TARGET_PACK} on top of ${SOURCE_PACK} ..." | tee -a $GMK_LOG
+        else
+          echo "Creating pack ${TARGET_PACK} on top of ${SOURCE_PACK} ..." | tee -a $GMK_LOG
+        fi
+      fi
+    fi
+#   Local arch file business
+    echo Architecture file directory : | tee -a $GMK_LOG
+    echo .gmkfile/ | tee -a $GMK_LOG
+    echo copy $FLAVOUR from directory $GMKFILEPATH | tee -a $GMK_LOG
+    \cp $GMKFILEPATH/$FLAVOUR $TARGET_PACK/.gmkfile/$GMKFILE
+    GMKFILEPATH=$TARGET_PACK/.gmkfile
+
+#   Hub management :
+    if [ "$GMK_HUB_DIR" ] ; then
+      echo Hub directories : | tee -a $GMK_LOG
+      if [ -d ${SOURCE_PACK}/$GMK_HUB_DIR ] || [ "$LOCAL_HUB" ] ; then
+        mkdir -p $TARGET_PACK/$GMK_HUB_DIR
+      fi
+      if [ "$LOCAL_HUB" ] ; then
+        for dir in $GMK_HUB_DIR/$GMKLOCAL/$GMKSRC $GMK_HUB_DIR/$GMKLOCAL/$GMK_HUB_INSTALL ; do
+          mkdir -p $TARGET_PACK/$dir
+          echo $dir | tee -a $GMK_LOG
+        done
+      fi
+      echo Hub view : | tee -a $GMK_LOG
+      if [ "$MAINPACK" ] ; then
+        if [ -d ${TARGET_PACK}/$GMK_HUB_DIR/$GMKLOCAL ] ; then
+          echo "$GMKLOCAL" > $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        elif [ -d $TARGET_PACK/$GMK_HUB_DIR ] ; then
+          touch ${TARGET_PACK}/$GMK_HUB_DIR/$GMK_VIEW
+        fi
+      elif [ -f ${SOURCE_PACK}/$GMK_HUB_DIR/$GMK_VIEW ] ; then
+#       background view :
+        /bin/cp ${SOURCE_PACK}/$GMK_HUB_DIR/$GMK_VIEW $GMKWRKDIR/gmkview_tmp
+#       Give a pre-defined name to the background local hub directory :
+        nview=$(cat $GMKWRKDIR/gmkview_tmp | wc -l)
+        if [ $nview -eq 1 ] ; then
+          sed "s/$GMKLOCAL/$GMKMAIN/" $GMKWRKDIR/gmkview_tmp > $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        elif [ $nview -gt 1 ] ; then
+          nview=1
+          while [ $(grep -c "^${GMKINTER}\.${nview}$" $GMKWRKDIR/gmkview_tmp) -ne 0 ] ; do
+            nview=$(($nview+1))
+          done
+          sed "s/$GMKLOCAL/$GMKINTER.$nview/" $GMKWRKDIR/gmkview_tmp > $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        else
+          touch $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        fi
+        \rm -f $GMKWRKDIR/gmkview_tmp
+ #      Update view:
+        LAST_HUB_BRANCH=$(head -1 $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW)
+        BAK_VIEW="$(echo $(cat $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW))"
+        if [ "$LOCAL_HUB" ] ; then
+          VAR_VIEW="$GMKLOCAL $BAK_VIEW"
+        else
+          VAR_VIEW="$BAK_VIEW"
+        fi
+        chmod 644 $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        echo $VAR_VIEW | tr " " "[\012*]" | grep -v "^$"> $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+      else
+#       local pack with first hub in it (main pack for hub, in other words) :
+        if [ -d ${TARGET_PACK}/$GMK_HUB_DIR/$GMKLOCAL ] ; then
+          echo "$GMKLOCAL" > $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        elif [ -d $TARGET_PACK/$GMK_HUB_DIR ] ; then
+          touch ${TARGET_PACK}/$GMK_HUB_DIR/$GMK_VIEW
+        fi
+      fi
+      if [ -f $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW ] ; then
+        chmod 444 $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW
+        cat $TARGET_PACK/$GMK_HUB_DIR/$GMK_VIEW | tee -a $GMK_LOG
+      fi
+#
+      if [ ! "$MAINPACK" ] ; then
+        echo Hub links : | tee -a $GMK_LOG
+        for view in $(eval echo $BAK_VIEW) ; do
+#         The source pack might miss a local branch :
+          if [ "$view" = "$LAST_HUB_BRANCH" ] && [ -d ${SOURCE_PACK}/$GMK_HUB_DIR/$GMKLOCAL ] ; then
+#           Link the local hub branch to the target last hub branch
+            hublink=${SOURCE_PACK}/$GMK_HUB_DIR/$GMKLOCAL
+          else
+            hublink=$(\ls -ld ${SOURCE_PACK}/$GMK_HUB_DIR/$view 2> /dev/null | $AWK '{print $NF}')
+          fi
+          if [ "$hublink" ] ; then
+            if [ -d $hublink ] ; then
+              \ln -s $hublink $TARGET_PACK/$GMK_HUB_DIR/$view
+              echo $GMK_HUB_DIR/$view -\> $hublink | tee -a $GMK_LOG
+            else
+              echo "expected link to $hublink not a directory" | tee -a $GMK_LOG
+            fi
+          fi
+        done
+      fi
+    fi
+
+#   Traditional source code management :
+    if [ ! "$NO_LOCAL_SRC" ] ; then
+      echo Basic directories : | tee -a $GMK_LOG
+      dir=$GMKSRC/$GMKLOCAL
+      mkdir -p $TARGET_PACK/$dir
+      echo $dir | tee -a $GMK_LOG
+    fi
+
+    if [ ! "$MAINPACK" ] || [ ! "$NO_LOCAL_SRC" ] ; then
+      if [ "$HOMELIB" != "$HOMEPACK" ] ; then
+        mkdir -p $HOMELIB/$LOCAL_TARGET_PACK/$GMKLIB
+        \ln -s $HOMELIB/$LOCAL_TARGET_PACK/$GMKLIB $TARGET_PACK/$GMKLIB
+        echo $GMKLIB -\> $HOMELIB/$LOCAL_TARGET_PACK/$GMKLIB | tee -a $GMK_LOG
+      else
+        mkdir -p $TARGET_PACK/$GMKLIB
+        echo $GMKLIB | tee -a $GMK_LOG
+      fi
+      if [ "$HOMEBIN" != "$HOMEPACK" ] ; then
+        mkdir -p $HOMEBIN/$LOCAL_TARGET_PACK/$GMKBIN
+        \ln -s $HOMEBIN/$LOCAL_TARGET_PACK/$GMKBIN $TARGET_PACK/$GMKBIN
+        echo $GMKBIN -\> $HOMEBIN/$LOCAL_TARGET_PACK/$GMKBIN | tee -a $GMK_LOG
+      else
+        mkdir -p $TARGET_PACK/$GMKBIN
+        echo $GMKBIN | tee -a $GMK_LOG
+      fi
+      echo Unsatisfied external references directories : | tee -a $GMK_LOG
+      for dir in ${GMKUNSX_QUIET} ${GMKUNSX_VERBOOSE} ; do
+        mkdir -p $TARGET_PACK/${GMKSRC}/${GMKUNSX}/${dir}
+        echo ${GMKSRC}/${GMKUNSX}/${dir} | tee -a $GMK_LOG
+      done
+      echo Sources control directory :
+      mkdir -p $TARGET_PACK/${GMKSRC}/.gmak
+      echo ${GMKSRC}/.gmak | tee -a $GMK_LOG
+      echo Sources view : | tee -a $GMK_LOG
+    fi
+    if [ "$MAINPACK" ] ; then
+      if [ "$NO_LOCAL_SRC" ] ; then
+#       Signal source view is empty (at least at this stage) :
+        touch $TARGET_PACK/$GMK_VIEW
+      else
+        echo "$GMKLOCAL" > $TARGET_PACK/$GMK_VIEW
+      fi
+    else
+#     background view :
+      \rm -f $GMKWRKDIR/gmkview_tmp
+      if [ ! -f ${SOURCE_PACK}/$GMK_VIEW ] && [ "$GCO" = "gmak" ] ; then
+#       It is high time to write it from gco's management !
+        grep MKBRANCHES ${SOURCE_PACK}/doc/*.gco | cut -d"=" -f2 | $AWK '{ for (i = NF; i > 0; --i) print $i }' > $GMKWRKDIR/gmkview_tmp
+      else
+        \cp ${SOURCE_PACK}/$GMK_VIEW $GMKWRKDIR/gmkview_tmp
+      fi
+#     Give a pre-defined name to the background local source directory :
+      nview=$(cat $GMKWRKDIR/gmkview_tmp | wc -l)
+      if [ $nview -eq 1 ] ; then
+        sed "s/$GMKLOCAL/$GMKMAIN/" $GMKWRKDIR/gmkview_tmp > $TARGET_PACK/$GMK_VIEW
+      elif [ $nview -gt 1 ] ; then
+        nview=1
+        while [ $(grep -c "^${GMKINTER}\.${nview}$" $GMKWRKDIR/gmkview_tmp) -ne 0 ] ; do
+          nview=$(($nview+1))
+        done
+        sed "s/$GMKLOCAL/$GMKINTER.$nview/" $GMKWRKDIR/gmkview_tmp > $TARGET_PACK/$GMK_VIEW
+      else
+        touch $TARGET_PACK/$GMK_VIEW
+      fi
+      \rm -f $GMKWRKDIR/gmkview_tmp
+#     Update view:
+      LAST_BRANCH=$(head -1 $TARGET_PACK/$GMK_VIEW)
+      BAK_VIEW="$(echo $(cat $TARGET_PACK/$GMK_VIEW))"
+      if [ "$NO_LOCAL_SRC" ] ; then
+        VAR_VIEW="$BAK_VIEW"
+      else
+        VAR_VIEW="$GMKLOCAL $BAK_VIEW"
+      fi
+      chmod 644 $TARGET_PACK/$GMK_VIEW
+      echo $VAR_VIEW | tr " " "[\012*]" | grep -v "^$"> $TARGET_PACK/$GMK_VIEW
+    fi
+    chmod 444 $TARGET_PACK/$GMK_VIEW
+    cat $TARGET_PACK/$GMK_VIEW | tee -a $GMK_LOG
+
+    if [ ! "$NO_LOCAL_SRC" ] && [ "$GMKSYS" ] ; then
+      echo Programs system directories : | tee -a $GMK_LOG
+      mkdir -p $TARGET_PACK/$GMKSYS
+      echo $GMKSYS | tee -a $GMK_LOG
+      if [ ! "$MAINPACK" ] && [ -d ${SOURCE_PACK}/$GMKSYS ] ; then
+        for PRECOMPILER in $(eval echo $PRECOMPILER_LIST) ; do
+          precompilerlink=$(\ls -l ${SOURCE_PACK}/$GMKSYS/${PRECOMPILER}.x 2> /dev/null | $AWK '{print $NF}')
+          ###############
+          # Special gco :
+          if [ "$GCO" = "gmak" ] ; then
+            if [ "$PRECOMPILER" = "odb98" ] ; then
+              gcodir=${SOURCE_PACK}/$GMKSRC/$GMKMAIN/odb
+              precompilerlink=$(\ls -l ${gcodir}/*/odb98.x 2> /dev/null | $AWK '{print $NF}' | tail -1)
+            elif [ "$PRECOMPILER" = "bl95" ] ; then 
+              gcodir=${SOURCE_PACK}/$GMKSRC/$GMKMAIN/bla
+              precompilerlink=$(\ls -l ${gcodir}/*/bla95.x 2> /dev/null | $AWK '{print $NF}' | tail -1)
+            fi
+          fi
+          if [ "$precompilerlink" ] ; then
+            if [ -f $precompilerlink ] ; then
+              \ln -s $precompilerlink ${TARGET_PACK}/$GMKSYS/${PRECOMPILER}.x
+              echo $GMKSYS/${PRECOMPILER}.x -\> $precompilerlink | tee -a $GMK_LOG
+            else
+              echo "WARNING : precompiler ${PRECOMPILER}.x named \"$precompilerlink\" not found."
+            fi
+          else
+            echo "WARNING : No precompiler ${PRECOMPILER}.x could be found from source pack."
+          fi
+        done
+      fi
+    fi
+
+    if [ ! "$MAINPACK" ] ; then
+      echo Links : | tee -a $GMK_LOG
+      for view in $(eval echo $BAK_VIEW) ; do
+#       The source pack might miss a local branch :
+        if [ "$view" = "$LAST_BRANCH" ] && [ -d ${SOURCE_PACK}/$GMKSRC/$GMKLOCAL ] ; then
+#         Link the local source branch to the target last branch
+          link=${SOURCE_PACK}/$GMKSRC/$GMKLOCAL
+          ###############
+#         Special gco :
+          if [ "$GCO" = "gmak" ] ; then
+#           la branche locale ne s'appelle pas GMKLOCAL !
+            gco_local_branch=$(grep MKBRANCHES ${SOURCE_PACK}/doc/*.gco | $AWK '{print $NF}')
+            link=$(\ls -ld ${SOURCE_PACK}/$GMKSRC/$gco_local_branch 2> /dev/null | $AWK '{print $NF}')
+          fi
+          ###############
+        else
+          link=$(\ls -ld ${SOURCE_PACK}/$GMKSRC/$view 2> /dev/null | $AWK '{print $NF}')
+        fi
+        if [ "$link" ] ; then
+          if [ -d $link ] ; then
+            \ln -s $link $TARGET_PACK/$GMKSRC/$view
+            echo $GMKSRC/$view -\> $link | tee -a $GMK_LOG
+          elif  [ -f $link ] ; then
+            echo "expected link to ${SOURCE_PACK}/$GMKSRC/$view not a directory" | tee -a $GMK_LOG
+          fi
+        else
+          echo "expected link to ${SOURCE_PACK}/$GMKSRC/$view not found" | tee -a $GMK_LOG
+        fi
+      done
+
+      export MKTOP=$TARGET_PACK/$GMKSRC
+
+      if [ $(grep -v "^${GMKLOCAL}$" $TARGET_PACK/$GMK_VIEW | wc -l) -gt 0 ] ; then
+        echo Background source descriptors files : | tee -a $GMK_LOG
+        for view in $(cat $TARGET_PACK/$GMK_VIEW | grep -v "^${GMKLOCAL}$") ; do
+          link=$(ls -ld $MKTOP/$view | $AWK '{print $NF}')
+          dirtop=$(dirname $link)
+          basetop=$(basename $link)
+          if [ "$GCO" = "gmak" ] ; then
+#           gco style, take it like it is (the operation is neutral)
+            \ln -s $dirtop/$basetop/gmak.pl $MKTOP/.gmak/${view}.sds
+            echo ${view}.sds
+          elif [ -f $dirtop/.gmak/${basetop}.sds ] ; then
+            cat $dirtop/.gmak/${basetop}.sds 2>/dev/null | sed "s/{branch} = '${basetop}';/{branch} = '${view}';/" > $MKTOP/.gmak/${view}.sds
+            echo ${view}.sds
+          else
+            #echo "Warning : no file $dirtop/.gmak/${basetop}.sds. An empty one will be used instead."
+            touch $MKTOP/.gmak/${view}.sds
+	    echo "${view}.sds (empty)"
+          fi
+        done
+      fi
+
+      if [ ! "$NO_LOCAL_SRC" ] ; then
+        $GMKROOT/aux/mkdirpack.sh $HOMEPACK/$LOCAL_TARGET_PACK | tee -a $GMK_LOG
+      fi
+#
+      if [ -d ${SOURCE_PACK}/${GMKLIB} ] ; then
+        for file in $(\ls ${SOURCE_PACK}/${GMKLIB} | grep ^lib | grep "\.${GMKLOCAL}\.a$") ; do
+          link=$(echo $file | sed "s/\.${GMKLOCAL}\.a$/\.${LAST_BRANCH}\.a/")
+          \ln -s ${SOURCE_PACK}/${GMKLIB}/$file $TARGET_PACK/${GMKLIB}/$link
+          echo $link -\> ${SOURCE_PACK}/${GMKLIB}/$file | tee -a $GMK_LOG
+        done
+        for file in $(\ls ${SOURCE_PACK}/${GMKLIB} | grep ^lib | grep "\.a$" | grep -v "\.${GMKLOCAL}\.a$") ; do
+          link=$(\ls -l ${SOURCE_PACK}/${GMKLIB}/$file | $AWK '{print $NF}')
+          \ln -s $link $TARGET_PACK/${GMKLIB}/$file
+          echo $file -\> $link | tee -a $GMK_LOG
+        done
+      fi
+
+      if [ ! "$NO_LOCAL_SRC" ] ; then
+#       Background include/module pathes in 2 separated files :
+        if [ $(grep -v "^${GMKLOCAL}$" $TARGET_PACK/$GMK_VIEW | wc -l) -gt 0 ] ; then
+          echo "Background include/module paths ..." | tee -a $GMK_LOG
+        fi
+#
+        if [ -f $MKTOP/$LAST_BRANCH/gmak.inc ] ; then
+#         The background pack is from gco :
+          for dir in $(cat $MKTOP/$LAST_BRANCH/gmak.inc | tr " " "[\012*]" | sed "1,2 d" | cut -d"/" -f2-) ; do
+            branch=$(echo $dir | cut -d'/' -f1)
+            path=$(echo $dir | cut -d'/' -f2-)
+            root=$(\ls -ld $MKTOP/$branch | $AWK '{print $NF}')
+#           Select actually used directories and interface blocks directories :
+            if [ -d $MKTOP/${GMKLOCAL}/$path ] || [ "$(dirname $path)" = "$GMKINTFB" ] ; then
+              if [ $(\ls -1 ${root}/${path} 2>/dev/null | grep -c "\.h$") -gt 0 ] ; then
+                echo "${MODINC}${root}/${path}" >> $MKTOP/.incpath
+              else
+                echo "${MODINC}${root}/${path}" >> $MKTOP/.modpath
+              fi
+            fi
+          done
+        else
+#         The background pack is from gmkpack : (option -s should not be there since the files must exist)
+          cat $SOURCE_PACK/$GMKSRC/.incpath.local $SOURCE_PACK/$GMKSRC/.incpath > $MKTOP/.incpath 2>/dev/null
+#         No, ghostpack should be added to modpath :       
+#         cat $SOURCE_PACK/$GMKSRC/.modpath.local $SOURCE_PACK/$GMKSRC/.modpath > $MKTOP/.modpath 2>/dev/null
+#         cat $SOURCE_PACK/$GMKSRC/.ghostpath.local $SOURCE_PACK/$GMKSRC/.ghostpath > $MKTOP/.ghostpath 2>/dev/null
+          cat -s $SOURCE_PACK/$GMKSRC/.ghostpath.local $SOURCE_PACK/$GMKSRC/.modpath.local \
+	      $SOURCE_PACK/$GMKSRC/.ghostpath $SOURCE_PACK/$GMKSRC/.modpath > $MKTOP/.modpath 2>/dev/null
+        fi
+#       Signal this pack is up-to-date for background explicit interfaces pathes :
+#       (useful for compatibility with the previous versions of gmkpack)
+        touch $MKTOP/.intfbpathflag
+###
+        cat $MKTOP/.modpath $MKTOP/.incpath | tee -a $GMK_LOG
+#
+      fi
+
+    fi
+#
+    echo "done."
+#   Source code importation, if relevent
+    if [ "$GMK_IMPORT_PLUGIN" ] ; then
+      export MAINPACK
+      export NO_LOCAL_SRC
+      export RELEASE_NUMBER
+      export VERSUS
+      export BRANCH
+      export LATEST
+      export RELATIVE_TARGET_PACK
+      $GMK_IMPORT_PLUGIN | tee -a $GMK_LOG
+      if [ $? -ne 0 ] ; then
+        echo "Importation of source code with $GMK_IMPORT_PLUGIN failed !" | tee -a $GMK_LOG
+      fi
+    else
+      echo "No plug-in to import source code" >&2
+    fi
+#   Log file :
+    if [ "$NEXT" != "  " ] ; then
+      Text="$Text -n $VERSUS"
+    fi
+    Text="$Text -l $LIBFRT -o $LIBOPT"
+    if [ "$PROGSYS" ] ; then
+      Text="$Text -s"
+    fi
+    if [ "$PACK_PREFIX" ] ; then
+      Text="$Text -g $PACK_PREFIX"
+    fi
+    if [ "$PACK_EXT" ] ; then
+      Text="$Text -e $PACK_EXT"
+    fi
+    if [ "$PROGRAMS" ] ; then
+      Text="$Text -p $PROGRAMS"
+    fi
+    echo "Genesis :" | tee -a $GMK_LOG
+    GMK_GENESIS=$TARGET_PACK/$GMK_GENESIS
+    echo $Text > $GMK_GENESIS
+    cat $GMK_GENESIS | tee -a $GMK_LOG
+    chmod 444 $GMK_GENESIS
+#   Alias to reach user's pack, if allowed and required
+    if [ "$GMK_ALIASES" ] ; then
+      shell_rc=yes
+      if [ -f $HOME/.${GMKUSERFILE}$(basename $SHELL)rc ] ; then
+        if [ "$(\ls -l $HOME/.${GMKUSERFILE}$(basename $SHELL)rc | $AWK '{print $3}')" != "$LOGNAME" ] ; then
+          unset shell_rc
+        fi
+      fi
+      if [ "$shell_rc" ] && [ $(echo $LOCAL_TARGET_PACK | grep -c "/") -eq 0 ] ; then
+        echo "alias $LOCAL_TARGET_PACK='cd \$HOMEPACK/$LOCAL_TARGET_PACK;ls -l'" >> $HOME/.${GMKUSERFILE}$(basename $SHELL)rc
+        . $HOME/.${GMKUSERFILE}$(basename $SHELL)rc
+        echo " The following line has been appended to your file ~/.${GMKUSERFILE}$(basename $SHELL)rc : " | tee -a $GMK_LOG
+        tail -1 $HOME/.${GMKUSERFILE}$(basename $SHELL)rc | tee -a $GMK_LOG
+      fi
+    fi
+    chmod 444 $GMK_LOG
+  fi
+else
+  if [ -d ${TARGET_PACK} ] ; then
+    echo "target pack ${LOCAL_TARGET_PACK} already exists."
+  else
+    if [ "$MAINPACK" ] ; then
+      echo "Simulating main pack ${LOCAL_TARGET_PACK} ..." >&2
+    else
+      echo "Simulating pack ${LOCAL_TARGET_PACK} upon ${SOURCE_PACK} ..." >&2
+    fi
+  fi
+fi
+#
+#-----------------------------------------------------------------------
+#
+#     11. Build a script for compilation and link edition
+#         -----------------------------------------------
+#
+echo
+if [ "$PROGRAMS" ] || [ "$PROGSYS" ] || [ "$LOCAL_HUB" ] ; then
+  echo "Prepare script(s) ..."
+else
+  echo "Use option -p to generate a script to link programs."
+  echo "Prepare script for compiling and archiving libraries ..."
+fi
+# Update configuration file :
+unset FLAVOUR
+$GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+if [ $? -ne 0 ] ; then
+  echo "Error in envvarpack.sh :"
+  cat $GMKWRKDIR/gmkpack_env_variables
+  \rm -rf $GMKWRKDIR
+  exit 1
+fi
+#
+#-----------------------------------------------------------------------
+#
+#     12. Select binaries
+#         ---------------
+#
+# Search in user preferences first, then in administration support :
+\rm -f $GMKWRKDIR/binary_list
+if [ "$PROGRAMS" = "?" ] ; then
+# Select all binaries
+  \ls -1d $GMKROOT/link/* $GMK_SUPPORT/link/* $HOME/.gmkpack/link/* 2>/dev/null | $AWK -F"/" '{print $NF}' | sort -u > $GMKWRKDIR/binary_list
+elif [ "$PROGRAMS" ] ; then
+# "PROGRAMS" can be a file list of binary names
+# or a list of binary names separated with a special character:
+  echo $PROGRAMS | tr -cs "[A-Z][a-z][0-9]"_. "[\012*]" > $GMKWRKDIR/binary_list
+  if [ $(cat $GMKWRKDIR/binary_list | wc -l) -gt 1 ] ; then
+    SCRIPT_SUFFIX="_etc"
+  fi
+# Expand lists :
+  \rm -f $GMKWRKDIR/binary_list.expanded
+  for binary in $(cat $GMKWRKDIR/binary_list) ; do
+    if [ -s $HOME/.gmkpack/support/list/$binary ] ; then
+      echo expand list $binary from $HOME/.gmkpack/support/list :
+      echo $(cat $HOME/.gmkpack/support/list/$binary)
+      cat $HOME/.gmkpack/support/list/$binary >> $GMKWRKDIR/binary_list.expanded
+    elif [ -s $GMK_SUPPORT/list/$binary ] ; then
+      echo expand list $binary :
+      echo $(cat $GMK_SUPPORT/list/$binary)
+      cat $GMK_SUPPORT/list/$binary >> $GMKWRKDIR/binary_list.expanded
+    else
+      echo $binary >> $GMKWRKDIR/binary_list.expanded
+    fi
+  done
+  sort -u $GMKWRKDIR/binary_list.expanded >  $GMKWRKDIR/binary_list
+# Check existence of executables :
+  unset BINARY_ERROR
+  for binary in $(cat $GMKWRKDIR/binary_list) ; do
+    if [ ! -d $GMKROOT/link/$binary ] && [ ! -d $GMK_SUPPORT/link/$binary ] && [ ! -d $HOME/.gmkpack/link/$binary ] ; then
+      BINARY_ERROR=1
+      echo "Fatal : binary \"${binary}\" not found !"
+    fi
+    if [ "$BINARY_ERROR" ] ; then
+      echo "Possible binary names :"
+      $GMKROOT/util/progpack
+      echo "Abort script creation."
+      \rm -rf $GMKWRKDIR
+      exit 1
+    fi
+  done
+fi
+#
+if [ -s $GMKWRKDIR/binary_list ] ; then
+  sort -u $GMKWRKDIR/binary_list > $GMKWRKDIR/binary_list.su
+  \mv $GMKWRKDIR/binary_list.su $GMKWRKDIR/binary_list
+else
+  touch $GMKWRKDIR/binary_list
+fi
+#
+#-----------------------------------------------------------------------
+#
+#     12. Submission command and first users settings
+#         -------------------------------------------
+#
+if [ ! "$GMK_VIEW" ] ; then
+#  try again :
+  $GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+  chmod 755 $GMKWRKDIR/gmkpack_env_variables
+  . $GMKWRKDIR/gmkpack_env_variables
+fi
+if [ ! -f $TARGET_PACK/$GMK_VIEW ] ; then
+# This is an old pack, not created with this version of gmkpack ; let's "update" it :
+  echo $(grep MKBRANCHES ${SOURCE_PACK}/doc/*.gco | cut -d"=" -f2) ${GMKLOCAL} | $AWK '{ for (i = NF; i > 0; --i) print $i }' > $GMKWRKDIR/gmkview
+  if [ "$MODE" = "normal" ] ; then
+    \cp $GMKWRKDIR/gmkview $TARGET_PACK/$GMK_VIEW
+  fi
+else
+  \cp $TARGET_PACK/$GMK_VIEW $GMKWRKDIR/gmkview
+# for debugging ... 
+  chmod 644 $GMKWRKDIR/gmkview
+fi
+#
+if [ "$PROGRAMS" = "?" ] ; then
+  ICS=$GMKWRKDIR/${GMK_ICS}usr_
+else
+  if [ -s $GMKWRKDIR/binary_list ] ; then
+    if [ $(cat $GMKWRKDIR/binary_list | wc -l) -eq 1 ] ; then
+      ICS=$GMKWRKDIR/${GMK_ICS}${PROGRAMS}
+    else
+      ICS=$GMKWRKDIR/${GMK_ICS}$(echo $PROGRAMS | tr -cs "[A-Z][a-z][0-9]"_ "[\012*]" | head -1)$SCRIPT_SUFFIX
+    fi
+  else
+    ICS=$GMKWRKDIR/${GMK_ICS}
+  fi
+fi
+ICS_TMP=${ICS}.tmp
+ICS_SYS=$GMKWRKDIR/${GMK_ICS}precompilers
+ICS_HUB=$GMKWRKDIR/${GMK_ICS}packages
+#
+echo "#!"$SHELL | tee $ICS_SYS $ICS_HUB > $ICS
+#
+CARD="$(readpack GMK_NQS_NODES | cut -d'"' -f2)"
+if [ "$CARD" ] ; then
+  echo $CARD | tee -a $ICS_SYS $ICS_HUB >> $ICS
+fi
+#
+# Memory:
+CARD="$(readpack GMK_NQS_LARGE | cut -d'"' -f2)"
+if [ "$CARD" ] ; then
+  echo $CARD | tee -a $ICS_SYS $ICS_HUB >> $ICS
+fi
+#
+# Time:
+CARD="$(readpack GMK_NQS_TIME | cut -d'"' -f2- | sed "s/\"$//")"
+if [ "$CARD" ] ; then
+  echo $CARD | tee -a $ICS_SYS $ICS_HUB >> $ICS
+fi
+#
+unset Var VarSys VarHub
+Var="$(readpack GMK_NQS_OUT_P | cut -d'"' -f2)"
+if [ "$Var" ] ; then
+  if [ "$PROGSYS" ] || [ "$LOCAL_HUB" ] ; then
+    VarSys="$Var precompilers"
+    VarHub="$Var libraries"
+  fi
+  if [ "$PROGRAMS" ] && [ "$PROGRAMS" != "?" ] ; then
+    if [ -s $GMKWRKDIR/binary_list ] ; then
+      if [ $(cat $GMKWRKDIR/binary_list | wc -l) -eq 1 ] ; then
+        Var="$Var $PROGRAMS"
+      else
+        Var="$Var $(echo $PROGRAMS | tr -cs "[A-Z][a-z][0-9]"_ "[\012*]" | head -1 )$SCRIPT_SUFFIX"
+      fi
+    fi
+  else
+    Var="$Var usr_"
+  fi
+  Stamp="$(readpack GMK_NQS_JOBID | cut -d'"' -f2)"
+  if [ "$Stamp" ] ; then
+   Var=${Var}.$Stamp
+  fi
+  echo $Var >> $ICS
+  echo $VarSys >> $ICS_SYS
+  echo $VarHub >> $ICS_HUB
+fi
+#
+unset Var VarSys VarHub
+Var="$(readpack GMK_NQS_ERR_P | cut -d'"' -f2)"
+if [ "$Var" ] ; then
+  if [ "$PROGSYS" ] || [ "$LOCAL_HUB" ] ; then
+    VarSys="$Var precompilers"
+    VarHub="$Var libraries"
+  fi
+  if [ "$PROGRAMS" ] && [ "$PROGRAMS" != "?" ] ; then
+    if [ -s $GMKWRKDIR/binary_list ] ; then
+      if [ $(cat $GMKWRKDIR/binary_list | wc -l) -eq 1 ] ; then
+        Var="$Var $PROGRAMS"
+      else
+        Var="$Var $(echo $PROGRAMS | tr -cs "[A-Z][a-z][0-9]"_ "[\012*]" | head -1 )$SCRIPT_SUFFIX"
+      fi
+    fi
+  else
+    Var="$Var usr_"
+  fi
+  Stamp="$(readpack GMK_NQS_JOBID | cut -d'"' -f2)"
+  if [ "$Stamp" ] ; then
+   Var=${Var}.$Stamp
+  fi
+  if [ "$Var" ] ; then
+    echo $Var >> $ICS
+  fi
+  if [ "$VarSys" ] ; then
+    echo $VarSys >> $ICS_SYS
+  fi
+  if [ "$VarHub" ] ; then
+    echo $VarHub >> $ICS_HUB
+  fi
+fi
+#
+if [ "$(\ls -1t $TARGET_PACK/.gmkfile 2>/dev/null | tail -1)" ] ; then
+  GMKFILEPATH=$TARGET_PACK/.gmkfile
+  FLAVOUR=$(\ls -1t $GMKFILEPATH | tail -1)
+elif [ -f $HOME/.gmkpack/arch/$GMKFILE.$GMK_OPT ] ; then
+  GMKFILEPATH=$HOME/.gmkpack/arch
+  FLAVOUR=$GMKFILE.$GMK_OPT
+elif [ -f $GMK_SUPPORT/arch/$GMKFILE.$GMK_OPT ] ; then
+  GMKFILEPATH=$GMK_SUPPORT/arch
+  FLAVOUR=$GMKFILE.$GMK_OPT
+else
+  echo "Error : no file ${GMKFILE}* could be found either in source pack, \$HOME/.gmkpack/arch or \$GMK_SUPPORT/arch."
+  \rm -rf $GMKWRKDIR
+  exit 1
+fi
+$GMKROOT/aux/envvarpack.sh > $GMKWRKDIR/gmkpack_env_variables
+if [ $? -eq 0 ] ; then
+  chmod 755 $GMKWRKDIR/gmkpack_env_variables
+  . $GMKWRKDIR/gmkpack_env_variables
+else
+  echo "Error in envvarpack.sh :"
+  cat $GMKWRKDIR/gmkpack_env_variables
+  \rm -rf $GMKWRKDIR
+  exit 1
+fi
+grep GMK_NQS_OTHER $GMKFILEPATH/$FLAVOUR | cut -d"=" -f2- | sed "s/^ //" | grep -v ^$ | tee -a $ICS_SYS $ICS_HUB >> $ICS
+#
+/bin/cat <<SUBMISSION_CARDS | tee -a $ICS_SYS $ICS_HUB >> $ICS
+#
+export GMK_THREADS=${GMK_THREADS:=1}
+#
+type gmkpack >/dev/null 2>&1
+if [ \$? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  export GMKROOT=\$(dirname \$(dirname \$(which gmkpack | awk '{print \$NF}')))
+fi
+. \$GMKROOT/aux/wrkpack.sh
+#
+# ------ Main settings --------------------------------------
+#
+SUBMISSION_CARDS
+#
+if [ ! "$MAINPACK" ] ; then
+  /bin/cat <<COMPILING_OPTIONS | tee -a $ICS_SYS $ICS_HUB  >> $ICS
+# Fortran compiler options :
+declare -A optfrt
+# optfrt[4] = Optimal, as for operations : $OPT_FRTFLAGS
+# optfrt[3] = Debugging                  : $DBG_FRTFLAGS
+# optfrt[2] = Debugging + Bound checking : $DBG_FRTFLAGS $BCD_FRTFLAGS
+# optfrt[1] = Preinitialisations to NaN  : $NAN_FRTFLAGS
+# optfrt[0] = User-defined options
+optfrt[0]=""
+#
+# Choose subscript (0/1/2/3) :
+# --------------------------
+Ofrt=4
+#
+# C compiler options :
+optvcc="$OPT_VCCFLAGS"
+#
+COMPILING_OPTIONS
+  /bin/cat <<CUDA_OPTIONS | tee -a $ICS_SYS $ICS_HUB  >> $ICS
+# CUDA compiler options
+optccu="$OPT_CCUFLAGS"
+CUDA_OPTIONS
+#
+fi
+
+if [ -s $GMKWRKDIR/gmkview ] ; then
+  export NVIEW=$(cat $GMKWRKDIR/gmkview | wc -l)
+else
+  export NVIEW=0
+fi
+
+if [ $NVIEW -eq 1 ] ; then
+# this is a main source-code : the number of updates can be computed from it
+/bin/cat > $ICS_TMP <<ICS_TMP_HEADER
+#
+# ODB Maximum number of updates supported at compile time (undefined means : value found in file cma.h)
+odb_nmxupd=
+ICS_TMP_HEADER
+elif [ ! -s $SOURCE_PACK/$GMKSRC/.odb_nmxupd ] ; then
+# the number of updates cannot be easily retrieved, so it has to be set manually (set 3 for continuity).
+/bin/cat > $ICS_TMP <<ICS_TMP_HEADER
+#
+# ODB Maximum number of updates supported at compile time
+odb_nmxupd=3
+ICS_TMP_HEADER
+else
+# the number of updates is retrieved from source pack
+/bin/cat > $ICS_TMP <<ICS_TMP_HEADER
+#
+# ODB Maximum number of updates supported at compile time
+odb_nmxupd=$(cat $SOURCE_PACK/$GMKSRC/.odb_nmxupd)
+ICS_TMP_HEADER
+fi
+
+/bin/cat >> $ICS_TMP <<ICS_TMP_HEADER
+#
+#
+# Do you want to make any executable ? (yes/no)
+# ----------------------------------
+Load=yes
+#
+# If you want to make any executable, approve the following ones :
+# (libraries should be properly ordered from top to bottom for each binary)
+#
+ICS_TMP_HEADER
+#
+#-----------------------------------------------------------------------
+#
+#     13. Select libraries & potential dependencies for each binary
+#         ---------------------------------------------------------
+#
+if [ -s $GMKWRKDIR/binary_list ] ; then
+  ###############
+  # Special gco :
+  if [ "$GCO" = "gmak" ] ; then
+#   On remplace le numero de version d une branche par son numero d increment de librairie :
+#   Fichier des racines de branches a versions :
+    cat $GMKWRKDIR/gmkview | grep "\.[0-9][0-9]$" | cut -d"." -f1 | sort -u > $GMKWRKDIR/racines
+  fi
+  ###############
+  for binary in $(cat $GMKWRKDIR/binary_list) ; do
+    if [ -d $HOME/.gmkpack/link/$binary ] ; then
+      dir=$HOME/.gmkpack/link/$binary
+    elif [ -d $GMK_SUPPORT/link/$binary ] ; then
+      dir=$GMK_SUPPORT/link/$binary
+    else
+      dir=$GMKROOT/link/$binary
+    fi
+    echo "# Binary \"${binary}\" :" >> $ICS_TMP
+    echo "cat > \$GMKWRKDIR/.${binary}_link <<end_of_${binary}_link" >> $ICS_TMP 
+    if [ -s $dir/name ] ; then
+      echo EXEC=$(echo $(cat $dir/name)) >> $ICS_TMP
+    else
+      echo EXEC=$(echo $binary | tr [a-z] [A-Z]) >> $ICS_TMP
+    fi
+    echo ENTRY=$(cat $dir/entry) >> $ICS_TMP 2>/dev/null
+    echo "end_of_${binary}_link" >> $ICS_TMP
+    echo "# BACKGROUND LIBRARIES (from top to bottom) :" >> $ICS_TMP
+    echo "cat > \$GMKWRKDIR/.${binary}_libs <<end_of_${binary}_libs" >> $ICS_TMP 
+
+#   Branches to be scanned : all but the local one
+    SRCBRANCHES="$(echo $(grep -v ^${GMKLOCAL}$ $GMKWRKDIR/gmkview))"
+#   Projects loop before branch loop for a proper treatment of the "duplicated" subroutines
+    for project in $(cat $dir/projlist 2>/dev/null) ; do
+      ###############
+      # Special gco :
+      if [ "$GCO" = "gmak" ] ; then
+#       On remplace le numero de version d une branche par son numero d increment de librairie (suite) :
+#       Calcul du nombre effectif de librairies pour chaque racine et
+#       (re-)mise du tableau des increments pour chaque racine numerique a cette valeur :
+        irn=0
+        for racine in $(cat $GMKWRKDIR/racines) ; do
+          irn=$(($irn+1))
+          typeset -Z2 inc[$irn]
+          typeset -Z2 nlib[$irn]
+          ibr=0
+          for branch in $(echo $(cat $GMKWRKDIR/gmkview | sed "1 d")) ; do
+            if [ "$(echo $branch | cut -d "." -f1)" = "$racine" ] ; then
+              if [ -d ${SOURCE_PACK}/${GMKSRC}/${branch}/${project} ] ; then
+                ibr=$(($ibr+1))
+              fi
+            fi
+          done
+          inc[$irn]=$ibr
+          nlib[$irn]=$ibr
+        done
+      fi
+      ###############
+      for branch in $(eval echo $SRCBRANCHES) ; do
+        ###############
+        # Special gco :
+        if [ "$GCO" = "gmak" ] ; then
+#         On remplace le numero de version d une branche par son numero d increment de librairie (fin) :
+          irn=0
+          for racine in $(cat $GMKWRKDIR/racines) ; do
+            irn=$(($irn+1))
+            if [ "$(echo $branch | cut -d "." -f1)" = "$racine" ] ; then
+              if [ ${inc[$irn]} -gt 0 ] ; then
+                branch=${racine}.${inc[$irn]}
+                inc[$irn]=$((${inc[$irn]}-1))
+              else
+#               There are no (more) versioned library, that is : no library (I hope)
+                branch=${racine}
+              fi
+            fi
+          done
+        fi
+        ###############
+        \ls -1 $GMKROOT/libs/$project 2> /dev/null | sort -u > $GMKWRKDIR/all_sections
+        if [ -f $dir/excluded_libs/${project} ] ; then
+          sort -u $dir/excluded_libs/${project} > $GMKWRKDIR/excluded_sections
+          comm -23 $GMKWRKDIR/all_sections $GMKWRKDIR/excluded_sections > $GMKWRKDIR/sections 2> /dev/null
+          \rm $GMKWRKDIR/excluded_sections
+        else
+          \mv $GMKWRKDIR/all_sections $GMKWRKDIR/sections
+        fi
+        ###############
+        # Special gco :
+        if [ "$GCO" = "gmak" ] ; then
+#         On a toute une panoplie de sous-librairies devenues obsoletes :
+          \ls -1 $GMKROOT/libs/${project}.gco 2> /dev/null | sort -u > $GMKWRKDIR/all_sections
+          if [ -f $dir/excluded_libs/${project}.gco ] ; then
+            sort -u $dir/excluded_libs/${project}.gco > $GMKWRKDIR/excluded_sections
+            comm -23 $GMKWRKDIR/all_sections $GMKWRKDIR/excluded_sections > $GMKWRKDIR/sections 2> /dev/null
+            \rm $GMKWRKDIR/excluded_sections
+          fi
+        fi
+        ###############
+        for section in . $(cat $GMKWRKDIR/sections) ; do
+          if [ "$section" = "." ] ; then
+            section=""
+          fi
+          LIBRARY=${TARGET_PACK}/${GMKLIB}/lib${section}${project}.${branch}.a
+          ###############
+          # Special gco :
+          if [ "$GCO" = "gmak" ] ; then
+            if [ "$branch" = "main" ] ; then
+#             Pour les librairies de fond,
+              if [ "$section" = "" ] ; then
+#               La lib principale perd son nom de branche (ex : libarp.a)
+                newbranch=""
+              else
+#               Les librairies secondaires prennent le nom de la branche-pack d'origine (ex : libodb.scr-bfmain.a)
+                newbranch=$(\ls -ld ${SOURCE_PACK}/${GMKSRC}/${GMKMAIN} | $AWK '{print $NF}' | cut -d "." -f1 | cut -d"_" -f2)
+#               Cependant - et c'est nouveau ! - le suffix "main" peut disparaitre dns le nom
+#               du pack (pour conformite avec clearcase) ; il faut alors le rajouter pour
+#               la librairie si c'est un pack main :
+                if [ $(echo $newbranch | grep -c "main") -eq 0 ] ; then
+                  newbranch=${newbranch}main
+                fi
+              fi
+            else
+              newbranch=$branch
+            fi
+            if [ "${section}${newbranch}" != "" ] ; then
+#             ajout du separateur entre le projet et la section/branche :
+              separator="."
+            else
+              separator="" 
+            fi
+            LIBRARY=${SOURCE_PACK}/${GMKLIB}/lib${project}${separator}${section}${newbranch}.a
+          fi
+          ###############
+          if [ -f $LIBRARY ] || [ -h $LIBRARY ] ; then
+            echo "${LIBRARY}" >> $ICS_TMP
+          fi
+        done
+        \rm -f $GMKWRKDIR/sections
+      done
+    done
+
+#   Dummies libraries:
+    for project in $(cat $dir/dummylist 2>/dev/null) ; do
+      for branch in $(eval echo $SRCBRANCHES) ; do
+        LIBRARY=${TARGET_PACK}/${GMKLIB}/libdummy${project}.${branch}.a
+        if [ -f $LIBRARY ] || [ -h $LIBRARY ] ; then
+          echo "${LIBRARY}" >> $ICS_TMP
+        fi
+      done
+    done
+
+#   Add unsatisfied external references libraries :
+    for unsx in $GMKUNSX_VERBOOSE $GMKUNSX_QUIET ; do
+      for branch in $(eval echo $SRCBRANCHES) ; do
+        LIBRARY=${TARGET_PACK}/${GMKLIB}/lib${GMKUNSX}-${unsx}.${branch}.a
+        if [ -f $LIBRARY ] ; then
+          echo "${LIBRARY}" >> $ICS_TMP
+        fi
+      done 
+    done
+    echo "end_of_${binary}_libs" >> $ICS_TMP
+
+    echo "# SYSTEM LIBRARIES :" >> $ICS_TMP
+    echo "cat > \$GMKWRKDIR/.${binary}_sys <<end_of_${binary}_sys" >> $ICS_TMP 
+#   Libraries not specified by a well-known extension => considered to be in the hub (or completely unknown)
+    /bin/rm -f $GMKWRKDIR/system_libs.provisional
+    for var in $(cat $dir/system_libs) ; do
+      unset VAR0
+      VAR0=$(grep "^export ${var}=" $GMKWRKDIR/gmkpack_env_variables | cut -d "=" -f2- | cut -d '"' -f2)
+      if [ "$VAR0" ] ; then
+#       strange blank character may be at the end I don't know why ...
+        extension=$(echo $VAR0 | $AWK -F "." '{print $NF}' | cut -d " " -f1)
+        if [ "$extension" != "a" ] && [ "$extension" != "so" ] && [ "$extension" != "dylib" ] ; then
+#         Short named library :
+          echo ":${var}" >> $GMKWRKDIR/system_libs.provisional
+	else
+          echo "${var}" >> $GMKWRKDIR/system_libs.provisional
+        fi
+      fi
+    done
+    unset MyLastLibPath
+    unset MyLibSeq
+    /bin/rm -f $GMKWRKDIR/Myrpath
+#   Libraries specified by a well-known extension => build the library sequence
+    for var in $(cat $GMKWRKDIR/system_libs.provisional) ; do
+      unset VAR0
+      if [ "$(echo $var | cut -c1)" = ":" ] ; then
+#       Purge library sequence first
+        if [ "$MyLibSeq" ] ; then
+          echo "$MyLibSeq" >> $ICS_TMP
+          unset MyLastLibPath
+          unset MyLibSeq
+        fi
+	VAR0=$(grep "^export $(echo "$var" | cut -c2-)=" $GMKWRKDIR/gmkpack_env_variables | cut -d "=" -f2- | cut -d '"' -f2)
+	if [ $(echo "$VAR0" | grep -c "\-Wl,") -eq 0 ] ; then
+#         This is a short-named library (or something I don't recognize) :
+          echo "-l${VAR0}" >> $ICS_TMP
+	else
+#         This is an option to the linker :
+          echo "$VAR0" >> $ICS_TMP
+	fi
+      else
+        VAR0=$(grep "^export ${var}=" $GMKWRKDIR/gmkpack_env_variables | cut -d "=" -f2- | cut -d '"' -f2)
+        if [ "$VAR0" ] ; then
+#         strange blank character may be at the end I don't know why ...
+          extension=$(echo $VAR0 | $AWK -F "." '{print $NF}' | cut -d " " -f1)
+          if [ "$extension" = "a" ] || [ "$extension" = "so" ] || [ "$extension" = "dylib" ] ; then
+            MyLibPath=$(eval echo $(eval echo $(dirname $VAR0)) | sed "s/\"//g")
+            MyLibName=$(echo $(basename $VAR0) | sed "s/^lib//" | sed "s/\.$extension$//")
+            if [ "$extension" = "so" ] || [ "$extension" = "dylib" ] ; then
+              if [ -s $GMKWRKDIR/Myrpath ] ; then
+                if [ $(grep -c "${MyLibPath}" $GMKWRKDIR/Myrpath) -eq 0 ] ; then
+                  echo "-Wl,-rpath,${MyLibPath}" >> $GMKWRKDIR/Myrpath
+                fi
+              else
+                echo "-Wl,-rpath,${MyLibPath}" >> $GMKWRKDIR/Myrpath
+              fi
+            fi
+            if [ "$MyLibPath" = "$MyLastLibPath" ] ; then
+#             Increment libraries sequence
+              MyLibSeq="$MyLibSeq -l${MyLibName}"
+            else
+#             New libraries sequence
+              if [ "$MyLibSeq" ] ; then
+                echo "$MyLibSeq" >> $ICS_TMP
+              fi
+              MyLibSeq="-L${MyLibPath} -l${MyLibName}"
+              MyLastLibPath=$MyLibPath
+            fi
+          else
+#           New sequence of a single library since its path is unknown
+            if [ "$MyLibSeq" ] ; then
+              echo "$MyLibSeq" >> $ICS_TMP
+              unset MyLastLibPath
+              unset MyLibSeq
+            fi
+          fi
+        fi
+      fi
+    done
+#   last library sequence
+    if [ "$MyLibSeq" ] ; then
+      echo "$MyLibSeq" >> $ICS_TMP
+    fi
+    if [ -s $GMKWRKDIR/Myrpath ] ; then
+      cat $GMKWRKDIR/Myrpath >> $ICS_TMP
+    fi
+    ###############
+    # Special gco :
+    if [ "$GCO" = "gmak" ] ; then
+#     On ajoute la librairie de "dummies" (qui est hors des packs) si odb est charge
+#     (situation anormale de la lib odb qui contient justement ces dummies)
+      echo "-L$(dirname $ROOTPACK)/public/lib -ldummy" >> $ICS_TMP
+    fi
+#
+    echo "end_of_${binary}_sys" >> $ICS_TMP
+    echo "# LOADER AND OPTIONS :" >> $ICS_TMP
+    echo "cat > \$GMKWRKDIR/.${binary}_load <<end_of_${binary}_load" >> $ICS_TMP
+    unset flags
+    for var in $(cat $dir/ldflags) ; do
+      unset VAR
+      VAR=$(grep "^export ${var}=" $GMKWRKDIR/gmkpack_env_variables | cut -d "=" -f2- | cut -d '"' -f2)
+      if [ "$VAR" ] ; then
+        flags="$flags $VAR"
+      fi
+    done
+    echo $flags >> $ICS_TMP
+    echo "end_of_${binary}_load" >> $ICS_TMP
+    \echo "#" >> $ICS_TMP
+  done
+  \rm -f $GMKWRKDIR/racines
+fi
+#
+\rm -f $GMKWRKDIR/binary_list
+#
+#
+echo "#" >> $ICS
+echo "# Files in pack to ignore (obsolete/useless) :" >> $ICS
+echo "# ------------------------------------------  " >> $ICS
+echo "cat > \$GMKWRKDIR/.ignored_files <<end_of_ignored_files" >> $ICS 
+echo "end_of_ignored_files" >> $ICS
+echo "#" >> $ICS
+if [ ! "$MAINPACK" ] ; then
+  echo "# Do you want to compile dependencies ? (yes/no)" >> $ICS
+  echo "# -----------------------------------" >> $ICS
+  echo "export DEP=yes" >> $ICS
+  echo "# If you compile dependencies, approve the following projects list :" >> $ICS
+  \ls -1dp $TARGET_PACK/$GMKSRC/$GMKMAIN/* 2>/dev/null | grep /$ | sed "s/\/$//" | $AWK -F "/" '{print $NF}' > $GMKWRKDIR/gmkpack_all_projects
+  \ls -1dp $TARGET_PACK/$GMKSRC/${GMKINTER}*/* 2>/dev/null | grep /$ | sed "s/\/$//" | $AWK -F "/" '{print $NF}' >> $GMKWRKDIR/gmkpack_all_projects
+  echo "export MKPROJECT=\"$(echo $(sort -u $GMKWRKDIR/gmkpack_all_projects))\"" >> $ICS
+  \rm -f $GMKWRKDIR/gmkpack_all_projects
+  echo "#" >> $ICS
+fi
+echo "# Supplementary projects with autogenerated explicit interface blocks :" >> $ICS
+echo "# -------------------------------------------------------------------  " >> $ICS
+echo "export INTFB_PROJLIST=\"\"" >> $ICS
+echo "#" >> $ICS
+echo "# Do you want to enable the recursive update control ? (yes/no) ?" >> $ICS
+echo "# --------------------------------------------------" >> $ICS
+ICS_RECURSIVE_UPDATE=yes
+echo "export ICS_RECURSIVE_UPDATE=$ICS_RECURSIVE_UPDATE" >> $ICS
+echo "#" >> $ICS
+echo "# Do you want to postpone the aborts on compilation errors to the end of the compilation step ? (yes/no) ?" >> $ICS
+echo "# -------------------------------------------------------------------------------------------" >> $ICS
+echo "export ICS_POSTPONE_ABORT=no" >> $ICS
+echo "#" >> $ICS
+echo "# Three compilation modes are possible : " >> $ICS
+echo "# full = full compilation (default value)" >> $ICS
+echo "# incr = incremental compilation (from a starting to an ending level)" >> $ICS
+echo "# off  = No compilation at all" >> $ICS
+echo "# Choose compilation mode (full/incr/off) : " >> $ICS
+echo "# ---------------------------------------" >> $ICS
+echo "export ICS_ICFMODE=full" >> $ICS
+echo "# If you use the incremental compilation facility, select the top and bottom levels :" >> $ICS
+echo "export ICS_START=" >> $ICS
+echo "export ICS_STOP=" >> $ICS
+echo "# Reduced starting list :" >> $ICS
+echo "cat > \$GMKWRKDIR/.reduced_starting_list <<end_of_reduced_starting_list" >> $ICS
+echo "end_of_reduced_starting_list" >> $ICS
+echo "#" >> $ICS
+echo "# Do you want to output the compilation listings ? (yes/no)" | tee -a $ICS_SYS >> $ICS
+echo "# ----------------------------------------------" | tee -a $ICS_SYS >> $ICS
+ICS_LIST_DEFAULT=yes
+echo "export ICS_LIST=$ICS_LIST_DEFAULT" | tee -a $ICS_SYS >> $ICS
+echo "#" >> $ICS
+echo "# Compilation timing report:"                 >> $ICS
+echo "# ------------------------- "                 >> $ICS
+echo "# ICS_TIMING_REPORT = 0 (No report) = N (N most time consuming files)" >> $ICS
+echo "export ICS_TIMING_REPORT=0" >> $ICS
+echo "#" >> $ICS
+if [ $NVIEW -eq 1 ] ; then
+# this is a main source-code : disable the norms checker because its saves times :-) and nobody looks at it :-( 
+  ICS_NC_SEVERITY=0
+else
+  ICS_NC_SEVERITY=$(cat $GMKROOT/norms/arp/severity_level)
+fi
+if [ "$GMK_NORMS_CHECKER" != "2003" ] ; then
+  echo "# Norms checker 2011 severity :"                 >> $ICS
+  echo "# ---------------------------  "                 >> $ICS
+  echo "# ICS_NC_SEVERITY = 0 (No report) or 1 (Severe,Warning) or 2 (+Informative)" >> $ICS
+  echo "# ICS_NC_SUPPRESS = \"section.item:section.item\" : suppressed messages" >> $ICS
+  echo "export ICS_NC_SEVERITY=$ICS_NC_SEVERITY" >> $ICS
+  echo "export ICS_NC_SUPPRESS=\"\"" >> $ICS
+  echo "export WHITELIST=$WHITELIST" >> $ICS
+  echo "export GEN_WHITELIST=0" >> $ICS
+else
+  echo "# Norms checker severity :"                 >> $ICS
+  echo "# ----------------------  "                 >> $ICS
+  echo "# ICS_NC_SEVERITY = 0 (No report) or 1 (Severe,Warning) or 2 (+Informative)" >> $ICS
+  echo "# ICS_NC_SUPPRESS = \"MESS-n:MESS-m\" : suppressed messages" >> $ICS
+  echo "export ICS_NC_SEVERITY=$ICS_NC_SEVERITY" >> $ICS
+  echo "export ICS_NC_SUPPRESS=\"$(cat $GMKROOT/norms/arp/suppress_message)\"" >> $ICS
+fi
+echo "#" | tee -a $ICS_SYS >> $ICS
+echo "# Do you want to output the load map(s) ? (yes/no)" | tee -a $ICS_SYS >> $ICS
+echo "# -------------------------------------" | tee -a $ICS_SYS >> $ICS
+echo "export ICS_MAP=no" | tee -a $ICS_SYS >> $ICS
+echo "#" | tee -a $ICS_SYS >> $ICS
+echo "# Five libraries update are possible : " >> $ICS
+echo "# full  = full update (default value)" >> $ICS
+echo "# user  = update user libraries only, not the dummy ones" >> $ICS
+echo "# dummy = update dummy (user-mirror) libraries only, not the user ones" >> $ICS
+echo "# unsx  = update unsatisfied external libraries only, not the user/dummy ones" >> $ICS
+echo "# off   = no update at all" >> $ICS
+echo "# Choose the libraries update mode (full/user/dummy/unsx/off) : " >> $ICS
+echo "# --------------------------------" >> $ICS
+echo "export ICS_UPDLIBS=full" >> $ICS
+echo "#" >> $ICS
+cat $ICS_TMP >> $ICS
+\rm -f $ICS_TMP
+echo "# Libraries in hub : do you want to re-configure even if the build directory exists ? (ON/OFF) : " | tee -a $ICS_HUB >> $ICS
+echo "# ---------------------------------------------------------------------------------" | tee -a $ICS_HUB >> $ICS
+echo "export GMK_RECONFIGURE=OFF" | tee -a $ICS_HUB >> $ICS
+echo "#" | tee -a $ICS_HUB >> $ICS
+echo "# Libraries in hub : do you want to compile packages ? (ON/OFF) : " | tee -a $ICS_HUB >> $ICS
+echo "# --------------------------------------------------" | tee -a $ICS_HUB >> $ICS
+echo "export GMK_MAKE=ON" | tee -a $ICS_HUB >> $ICS
+echo "#" | tee -a $ICS_HUB >> $ICS
+echo "# Libraries in hub : do you want to test libraries ? (ON/OFF) : " | tee -a $ICS_HUB >> $ICS
+echo "# -----------------------------------------------------------" | tee -a $ICS_HUB >> $ICS
+echo "export GMK_TEST=OFF" | tee -a $ICS_HUB >> $ICS
+echo "# Confirm which libraires to test :" | tee -a $ICS_HUB >> $ICS
+for project in $(eval echo $GMK_HUB_PROJECTS) ; do
+  echo "export GMK_TEST_LIBRARIES_IN_${project}=\"$(eval echo \$GMK_HUB_LIBRARIES_IN_${project})\"" | tee -a $ICS_HUB >> $ICS
+done
+echo "#" | tee -a $ICS_HUB >> $ICS
+echo "# Libraries in hub : do you want to install packages ? (ON/OFF) : " | tee -a $ICS_HUB >> $ICS
+echo "# --------------------------------------------------" | tee -a $ICS_HUB >> $ICS
+echo "export GMK_INSTALL=ON" | tee -a $ICS_HUB >> $ICS
+echo "#" | tee -a $ICS_HUB >> $ICS
+#
+if [ "$MAINPACK" ] || [ ! -d $SOURCE_PACK/$GMKSRC ] ; then
+  ICS_ECHO=2
+else
+  ICS_ECHO=1
+fi
+/bin/cat <<STUFF0 | tee -a $ICS_SYS >> $ICS
+#
+# Blacklist file generator
+# ------------------------
+
+export ICS_BL_GENERATOR=$GMK_BL_GENERATOR
+
+
+# Verboose level (0 or 1 or 2 or 3) :
+# --------------
+
+export ICS_ECHO=$ICS_ECHO
+
+STUFF0
+if [ "$MAINPACK" ] ; then
+  echo "export MAINPACK=$MAINPACK" | tee -a $ICS_SYS >> $ICS
+fi
+/bin/cat <<STUFF0 | tee -a $ICS_SYS >> $ICS
+export GMKVIEW="$(echo $(cat $GMKWRKDIR/gmkview | sed '1!G;h;$!d'))"
+STUFF0
+/bin/cat <<STUFF1 | tee -a $ICS_SYS $ICS_HUB >> $ICS
+export TARGET_PACK=$TARGET_PACK
+# ----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------
+#
+#
+# ------ Environment variables -----------------------------------------------------
+#
+\$GMKROOT/aux/envvarpack.sh > \$GMKWRKDIR/environment_variables
+if [ \$? -eq 0 ] ; then
+  chmod 755 \$GMKWRKDIR/environment_variables
+  . \$GMKWRKDIR/environment_variables
+  \rm \$GMKWRKDIR/environment_variables 
+else
+  echo "Error in envvarpack.sh :"
+  cat \$GMKWRKDIR/environment_variables
+  \rm -rf \$GMKWRKDIR
+  exit 1
+fi
+STUFF1
+/bin/cat <<STUFF2 | tee -a $ICS_SYS $ICS_HUB >> $ICS
+#
+#
+# IF YOU WISH TO CHANGE OR ADD ANY VARIABLE FROM THE CONFIGURATION FILE
+# YOU SHOULD DO IT RIGHT BELOW THIS LINE !
+#
+#
+#
+STUFF2
+/bin/cat <<STUFF3 | tee -a $ICS_SYS $ICS_HUB >> $ICS
+\$GMKROOT/aux/privarpack.sh > \$GMKWRKDIR/environment_variables
+chmod 755 \$GMKWRKDIR/environment_variables
+. \$GMKWRKDIR/environment_variables
+\rm \$GMKWRKDIR/environment_variables
+STUFF3
+
+if [ ! "$MAINPACK" ] ; then
+  /bin/cat <<STUFF2A  | tee -a $ICS_SYS >> $ICS
+optfrt[4]="\$OPT_FRTFLAGS" 
+optfrt[3]="\$DBG_FRTFLAGS"
+optfrt[2]="\$DBG_FRTFLAGS \$BCD_FRTFLAGS"
+optfrt[1]="\$OPT_FRTFLAGS \$NAN_FRTFLAGS"
+export MyF90Flags="\${optfrt[\$Ofrt]}"
+export MyF77Flags="\${optfrt[\$Ofrt]}"
+export MyVccFlags="\$optvcc"
+export MyCcuFlags="\$optccu"
+#
+STUFF2A
+else
+  /bin/cat <<STUFF2B | tee -a $ICS_SYS >> $ICS
+export MyF90Flags="\$OPT_FRTFLAGS"
+export MyF77Flags="\$OPT_FRTFLAGS"
+export MyVccFlags="\$OPT_VCCFLAGS"
+export MyCcuFlags="\$OPT_CCUFLAGS"
+#
+STUFF2B
+fi
+
+/bin/cat >> $ICS <<STUFF
+export ODB_NMXUPD=\$odb_nmxupd
+#
+STUFF
+/bin/cat <<STUFF | tee -a $ICS_HUB >> $ICS
+echo
+echo "This is \$(basename \$(grep ^THIS_GMKPACK \$GMKROOT/util/gmkpack | awk -F"/" '{print \$(NF-2)}')) running on a script made by $(basename $(grep ^THIS_GMKPACK $GMKROOT/util/gmkpack | awk -F/ '{print $(NF-2)}'))"
+
+echo
+\$GMKROOT/aux/catenvpack.sh
+#
+STUFF
+/bin/cat >> $ICS <<STUFF
+# Compilation :
+# -----------
+\$GMKROOT/aux/mkcplpack.sh
+if [ \$? -ne 0 ] ; then
+  echo
+  $EPILOG
+  exit 1
+fi
+#
+# Libraries :
+# ---------
+\$GMKROOT/aux/libspack.sh
+if [ \$? -ne 0 ] ; then
+  echo
+  $EPILOG
+  exit 1
+fi
+#
+# Binaries :
+# --------
+if [ "\$Load" = "yes" ] ; then
+  \$GMKROOT/aux/lnkpack.sh
+  exit_code=\$?
+else
+  exit_code=0
+fi
+echo
+\rm -rf \$GMKWRKDIR
+echo Finished on \$(date)
+exit \$exit_code
+STUFF
+
+for precompiler in $PRECOMPILER_LIST ; do
+  echo \$GMKROOT/aux/syspack.sh $precompiler >> $ICS_SYS
+done
+/bin/cat >> $ICS_HUB <<STUFF4
+# Build
+\$GMKROOT/aux/hubpack.sh
+
+STUFF4
+echo "$EPILOG" | tee -a $ICS_SYS >> $ICS_HUB
+#
+echo
+#
+#-----------------------------------------------------------------------
+#
+#      9. Save script
+#         -----------
+#
+if [ "$PROGSYS" ] && [ ! "$NO_LOCAL_SRC" ] ; then
+  Script=$(basename $ICS_SYS)
+  chmod 755 $ICS_SYS
+  if [ -d ${TARGET_PACK} ] && [ "$MODE" = "normal" ] ; then
+    \echo ">  copy compilation and load script for system programs on ${TARGET_PACK}/${Script} ..." >&2
+    \mv -i $ICS_SYS ${TARGET_PACK}/${Script}
+  else
+    \echo ">  copy compilation and load script for system programs  on ./${Script} ..." >&2
+    \mv -i $ICS_SYS ./${Script}
+  fi
+  \rm -f $ICS_SYS
+fi
+if [ "$LOCAL_HUB" ] ; then
+  PROGHUB="yes"
+fi
+if [ "$PROGSYS" ] || [ "$PROGHUB" ] ; then
+  Script=$(basename $ICS_HUB)
+  chmod 755 $ICS_HUB
+  if [ -d ${TARGET_PACK} ] && [ "$MODE" = "normal" ] ; then
+    \echo ">  copy build script for side libraries on ${TARGET_PACK}/${Script} ..." >&2
+    \mv -i $ICS_HUB ${TARGET_PACK}/${Script}
+  else
+    \echo ">  copy build script for side libraries  on ./${Script} ..." >&2
+    \mv -i $ICS_HUB ./${Script}
+  fi
+  \rm -f $ICS_HUB
+fi
+
+if [ -s $GMKWRKDIR/gmkview ] ; then
+  chmod 755 $ICS
+  Script=$(basename $ICS)
+  if [ -d ${TARGET_PACK} ] && [ "$MODE" = "normal" ] ; then
+    \echo ">  copy compilation and load script on ${TARGET_PACK}/${Script} ..." >&2
+    \mv -i $ICS ${TARGET_PACK}/${Script}
+  else
+    \echo ">  copy compilation and load script on ./${Script} ..." >&2
+    \mv -i $ICS ./${Script}
+  fi
+fi
+#
+\rm -rf $GMKWRKDIR
+echo "$THIS_GMKPACK ends."
+exit $rc

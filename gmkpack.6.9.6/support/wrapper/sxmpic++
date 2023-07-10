@@ -1,0 +1,90 @@
+#!/bin/ksh
+#
+# sxcc_wrapper [sxcc_args] c-file(s)
+# sxmpicc_wrapper [sxcc_args] c-file(s)
+#
+# Note-1: It is recommended *NOT* to use this script for linking the program;
+#         i.e. do *NOT* have in your makefile :
+#
+#           CC=sxcc_wrapper
+#           LDCC=$(CC)
+#
+#         instead you should have the lines :
+#
+#           CC=sxcc_wrapper
+#           LDCC=sxcc
+#
+# Note-2: This scripts' sibling script is called "sxmpicc_wrapper" and is a
+#         symbolic link to "sxcc_wrapper" and meant for MPI/C programs
+#
+# Author: Sami Saarinen, ECMWF, 09-Feb-2007 : Original version
+#                               21-Feb-2007 : Ignore #pragma cdir options -pvctl,nodep for the moment
+#
+
+set -eu
+
+if [[ "$(basename $0)" = "sxmpicc_wrapper" ]] ; then
+  sxcc="sxmpicc++"
+else
+  sxcc="sxmpic++"
+fi
+
+perl=$(whence perl 2>/dev/null || echo "perl")
+libcpp="/lib/cpp -P"
+
+newargs=""
+includes="-I."
+defines=""
+files=""
+for x in $(echo ${*:-} | $perl -pe 's/-(I|D|U)\s+/-$1/g')
+do
+  dash=$(echo $x | cut -c1-1)
+  if [[ "$dash" = "-" ]] ; then
+    incl=$(echo $x | cut -c2-2)
+    if [[ "$incl" = "I" ]] ; then
+      dir=$(echo $x | cut -c3-)
+      if [[ -d $dir ]] ; then
+        includes="$includes -I$dir"
+        newargs="$newargs -I$dir"
+      fi
+    elif [[ "$incl" = @(D|U) ]] ; then
+      def=$(echo $x | cut -c3-)
+      defines="$defines -$incl$def"
+      newargs="$newargs -$incl$def"
+    else
+      newargs="$newargs $x"
+    fi
+   elif [[ -f "$x" ]] ; then
+    files="$files $x"
+   else
+     newargs="$newargs $x"
+  fi
+done
+
+save_opts=""
+last_opts=""
+
+for f in $files
+do
+  if [[ "$(basename $f .c)" = "$f" ]] ; then # not a C-source file
+    opts=""
+  else
+#    opts=$($libcpp $defines $includes $f |\
+#           $perl -ne 'print "$1\n" if (m/^\s*#\s*pragma\s+cdir\s+options\s+(.*)\s*$/ && !m/pvctl,nodep/)')
+    opts=$($libcpp $defines $includes $f |\
+           $perl -ne 'print "$1\n" if (m/^\s*#\s*pragma\s+cdir\s+options\s+(.*)\s*$/)')
+    opts=$(echo "$opts")
+    if [[ "$last_opts" != "$opts" ]] ; then
+      save_opts="$save_opts $opts"
+    fi
+    last_opts="$opts"
+  fi
+done
+
+save_opts=$(echo "$save_opts" | perl -pe 's/\n/ /g')
+
+#echo "$sxcc $save_opts $newargs $files"
+exec  $sxcc $save_opts $newargs $files || exit $?
+
+# Should never end up here
+exit 1

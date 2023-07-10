@@ -1,0 +1,62 @@
+#!/bin/bash
+########################################################################
+#
+#    Script rlspack
+#    --------------
+#
+#    Purpose : to list the existing reference releases
+#    -------   
+#
+#    Usage :  rlspack [ -f rootpack_directory ]
+#    -----
+#
+#    Environment variable :           
+#    --------------------
+#                ROOTPACK : default rootpack directory
+#
+########################################################################
+
+export LC_ALL=C
+
+# Either use -f or have ROOTPACK exported :
+
+ROOTPACK=${ROOTPACK:=$HOME/rootpack}
+FROM=$ROOTPACK
+errflg=0
+while getopts f: option
+do
+  case $option in
+  f)  FROM=$OPTARG;;
+  \?) errflg=1;;
+  esac
+done
+if [ $errflg -eq 0 ] ; then
+  if [ ! "$FROM" ] ; then
+    errflg=2
+  fi
+fi
+if [ $errflg -eq 1 ] ; then
+  USAGE1="Usage : rlspack [-f rootpack-directory ]"
+  echo $USAGE1 >&2
+  \exit 1
+elif [ $errflg -eq 2 ] ; then
+  USAGE2="ROOTPACK is not set."
+  USAGE1="Set it, or usage : rlspack [-f rootpack-directory ]"
+  echo $USAGE2 >&2
+  echo $USAGE1 >&2
+  \exit 1
+fi
+export ROOTPACK=$FROM
+
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+echo Available releases in directory $FROM :
+
+cd $ROOTPACK
+\ls -1  $ROOTPACK  | cut -d"_" -f1 | sed  "s/ //g" | sort -u

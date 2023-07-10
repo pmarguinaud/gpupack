@@ -1,0 +1,6 @@
+mse/programs/sxpost.o
+mse/internals/sxpost.o
+arp/*/yommp.o
+arpifs/*/yommp.o
+arp/*/yomct0.o
+arpifs/*/yomct0.o

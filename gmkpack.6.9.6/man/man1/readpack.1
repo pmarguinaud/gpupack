@@ -1,0 +1,41 @@
+.TH readpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+readpack \- display variables from a configuration file used by
+.B gmkpack.
+.PP
+.SH SYNOPSIS
+.B readpack
+[
+.I variable
+]
+.PP
+.SH DESCRIPTION
+.B readpack
+displays either the whole configuration file used by
+.B gmkpack
+or only the variable given as argument.
+.PP
+.SH ENVIRONNEMENT
+.IP GMKFILE
+The basename of the configuration file used to run
+.B gmkpack\fR.
+.IP GMK_OPT
+The extension name of the configuration file used to run
+.B gmkpack\fR.
+.PP
+.SH DIAGNOSTICS
+The development of the option
+.B -l
+of
+.B gmkpack
+has partly broken this command. For now, to make it work one has to be either in
+the top directory of a pack, or have at least the environment variable GMKFILE 
+exported. The environment variable GMK_OPT should be exported as well, unless 
+the default value (x) is correct.
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR gmkpack(1).

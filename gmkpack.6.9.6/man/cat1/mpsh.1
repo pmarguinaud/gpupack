@@ -1,0 +1,131 @@
+mpsh(1)			    General Commands Manual		       mpsh(1)
+
+
+
+MPSH(1)		      User Contributed Perl Documentation	       MPSH(1)
+
+
+
+1mNNAAMMEE0m
+	 MPSH, MPSH_REGION, MPSH_SINGLE, MPSH_OUTPUT, MPSH_CLEAN
+
+	 message passing shell toolbox
+
+
+1mSSYYNNOOPPSSIISS0m
+	 MPSH_REGION << 'MPSH_END'
+	   echo part 1
+	 MPSH_SECTION
+	   echo another part
+	 MPSH_SECTION
+	   echo number $MPSH_SECTION
+	 MPSH_END
+
+	 ...
+
+	 MPSH_SINGLE echo "oups... forgot this one !"
+
+	 ...
+
+	 MPSH
+
+	 MPSH_OUTPUT
+
+
+1mDDEESSCCRRIIPPTTIIOONN0m
+       The "mpsh" set of commands defines sections of shell scripts to be
+       executed simultaneously by different processors in a 1mbbaattcchh0m
+       1meennvviirroonneemmeenntt22m.  Therefore these chunks of shell must be independent and
+       should not defined environment variables that other parts of the shell
+       could rely on.
+
+       The definition of such sections is done through a 4mhere24m 4mdocument24m given
+       to 1mMMPPSSHH__RREEGGIIOONN 22mor through a 1mMMPPSSHH__SSIINNGGLLEE 22minstruction.
+
+       The parallel execution itself is achived by calling 1mMMPPSSHH22m.
+
+       Ordered outputs could be displayed through the 1mMMPPSSHH__OOUUTTPPUUTT 22mcommand.
+
+       Before calling 1mMMPPSSHH22m, any number of 1mMMPPSSHH__SSIINNGGLLEE 22mor 1mMMPPSSHH__RREEGGIIOONN 22mcould
+       occured, using the 4madd24m mode of the 1mMMPPSSHH__RREEGGIIOONN 22mcommand :
+
+	 MPSH_REGION mode:add << MPSH_END
+	   echo push this part to any existing job sequence if any
+	 MPSH_END
+
+       The 1mMMPPSSHH__SSIINNGGLLEE 22mis always in the 4madd24m mode.
+
+       If some chunks of shell absolutly need to run together (but this
+       information is not available when writing the script for example in
+       automatic shell generation), then one could used the tagging mechanism
+       to achieve such behavior:
+
+	 MPSH_REGION << MPSH_END
+	   echo first part
+	 MPSH_SECTION tag:coolpart
+	   echo here is the cool part
+	 MPSH_SECTION
+	   echo something else to do ?
+	 MPSH_SECTION tag:coolpart
+	   echo pleeeease, I wanna be cool !
+	 MPSH_END
+
+       In that case, only 3 jobs will be created (and not 4).
+
+       Options are cumulative and one could write :
+
+	 MPSH_REGION mode:add tag:fun << MPSH_END
+	 ...
+	 MPSH_END
+
+       Four environment variables are exported in each chunk of shell :
+       1mMMPPSSHH__SSEECCTTIIOONN 22mwhich is the number of the current job, 1mMMPPSSHH__JJOOBBSS 22mwhich is
+       the total number of jobs to proceed, 1mMMPPSSHH__NNPPEESS 22mwhich is the total
+       number of processing elements, 1mMMPPSSHH__PPEEIIDD 22mwhich is the current
+       processing element id (machine dependent).
+
+       Note that if 1mMMPPSSHH__RREEGGIIOONN 22mcommand is used whith a single sequence of
+       code ( no 1mMMPPSSHH__SSEECCTTIIOONN 22minside the here document ), and 4mall24m mode is
+       activated, then this sequence of shell is duplicated for each
+       processor, unless the 4madd24m mode is specified :
+
+	 MPSH_REGION mode:all << 'MPSH_END'
+	   echo each proc should execute my shell task
+	   my_task.sh $MPSH_SECTION
+	 MPSH_END
+
+       Another feature of the 1mMMPPSSHH__RREEGGIIOONN 22mor 1mMMPPSSHH__SSEECCTTIIOONN 22mcommand is the loop
+       mechanism :
+
+	 MPSH_REGION loop:001-008-2,foo,bar << 'MPSH_END'
+	   echo this is loop index $MPSH_INDEX
+	 MPSH_END
+
+       ... will produce 6 iterations, with associated indexes "001", "003",
+       "005", "007", "foo" and "bar".
+
+       MPSH command are self-protected, ie : MPSH_REGION is ignored inside an
+       other MPSH_REGION ( as well as matching MPSH_SECTIONs ).
+
+       The estimate overhead of using mpsh is 2 seconds...
+
+1mEEXXAAMMPPLLEESS0m
+       See 4m/usr/local/mpsh/examples24m directory.
+
+1mFFIILLEESS0m
+       /usr/local/mpsh/bin
+	 Path to add to the PATH variable.
+
+       /usr/local/mpsh/examples
+	 Some examples for each functionality of the toolbox.
+
+1mAAUUTTHHOORR0m
+       eric.sevault@meteo.fr ( CNRM/GMAP/ALGO - 84 71 )
+
+       many thanks to :
+	 pascal.lamboley@meteo.fr ( DP/PREVI/COMPAS )
+	 ryad.elkhatib@meteo.fr( CNRM/GMAP/ALGO ).
+
+
+
+3rd Berkeley Distribution	  perl v5.6.1			       MPSH(1)

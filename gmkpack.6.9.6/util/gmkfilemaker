@@ -1,0 +1,999 @@
+#!/bin/bash
+########################################################################
+#
+#    Script gmkfilemaker
+#    ----------------
+#
+#    Purpose : An assistant to setup a configuration file
+#    -------   
+#
+#    Usage : gmkfilemaker
+#    -----    
+#
+#    Environment variables
+#    ---------------------
+#
+########################################################################
+#
+type gmkpack >/dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo "error : gmkpack could not be found."
+  exit 1
+else 
+  GMKROOT=$(dirname $(dirname $(which gmkpack | awk '{print $NF}')))
+fi
+
+export GMKTMP=${GMKTMP:=/tmp}
+TMPDIR=$GMKTMP/gmkfilemaker.$$
+trap "cd $GMKTMP ; \rm -rf gmkfilemaker.$$ ; echo Working directory removed ; exit 1" 2 6 9 14 15 20
+mkdir -p $TMPDIR
+
+GMK_SUPPORT=${GMK_SUPPORT:=$HOME/gpupack/gmkpack/support}
+
+echo
+echo "                    WELCOME TO GMKFILEMAKER !"
+echo "This assistant will help you setup a configuration file for gmkpack"
+echo
+
+# System name :
+echo
+sysname=$(uname -s)
+if [ $? -ne 0 ] ; then
+  echo "Please type the system name of the platform :"
+  read sysname
+else
+  echo "The system name is $sysname"
+fi
+SYSNAME=$(echo $sysname | tr '[A-Z]' '[a-z]')
+
+# Machine architecture (for linux and darwin) :
+if [ "$SYSNAME" = "linux" ] || [ "$SYSNAME" = "darwin" ] ; then
+  echo
+  MACHINE=$(uname -m)
+  i=$?
+  if [ $i -ne 0 ] ; then
+    echo "Please type the machine architecture of the platform :"
+    read MACHINE
+  else
+    echo "The machine architecture is $MACHINE"
+  fi
+fi
+
+# Addressing :
+if [ "$SYSNAME" = "linux" ] ; then
+  case $MACHINE in
+  *64 )
+      ARCH=IA64
+      ;;
+  * )
+      ARCH=IA32
+      ;;
+  esac
+elif [ "$SYSNAME" = "darwin" ] ; then
+  INSTRUCTION=$(machine)
+  case $MACHINE in
+  "Power Macintosh" )
+      if [ "$INSTRUCTION" = "ppc970" ] ; then
+        ARCH=PPC64
+      else
+        ARCH=PPC
+      fi
+      ;;
+  *64 )
+      ARCH=IA64
+      ;;
+  * )
+      if [ "$INSTRUCTION" = "i486" ] ; then
+        ARCH=IA64
+      else
+        ARCH=IA32
+      fi
+      ;;
+  esac
+fi
+
+# Machine name :
+echo
+name=$(uname -n)
+if [ $? -ne 0 ] ; then
+  echo "Please type the name of the machine :"
+  read name
+else
+  echo "The machine name is $name"
+fi
+NAME=$(echo $name | tr '[a-z]' '[A-Z]')
+
+# Check that yacc exists in PATH
+type yacc > /dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  echo
+  echo yacc compiler is needed and could not be found.
+  exit 1
+fi
+
+# Select the actual fortran 90 compiler :
+echo
+unset MPICH FTN
+if [ "$SYSNAME" = "aix" ] ; then
+  COMPILER=xlf
+  FRT=$(echo $(basename $COMPILER) | tr '[a-z]' '[A-Z]')
+  echo "The fortran 90 compiler used is $COMPILER"
+  GMKFILE=$NAME
+  cd $GMKROOT/arch/$SYSNAME
+  DRAFTFILE=$(\ls -1 | head -1)
+elif [ "$SYSNAME" = "ux_system_v" ] ; then
+  COMPILER=frt
+  FRT=$(echo $(basename $COMPILER) | tr '[a-z]' '[A-Z]')
+  echo "The fortran 90 compiler used is $COMPILER"
+  GMKFILE=$NAME
+  cd $GMKROOT/arch/$SYSNAME
+  DRAFTFILE=$(\ls -1 | head -1)
+elif [ "$SYSNAME" = "super-ux" ] ; then
+  echo "You should better use a cross-compilation platform."
+  exit 1
+else
+  FORTRAN_LIST="mpiifort ifort sxf90 pgf90 pathf95 gfortran g95 ftn"
+  for FORTRAN in $FORTRAN_LIST ; do
+    type $FORTRAN > /dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      FRT_FOUND=$FORTRAN
+      break
+    fi
+  done
+  ierr=1
+  while [ $ierr -ne 0 ] ; do
+    if [ "$MPICH" ] ; then
+      echo "Please type the fortran 90 compiler interfaced with mpif90 :"
+      if [ "$FRT_FOUND" ] ; then
+        echo "(suggestions : $FORTRAN_LIST ; default is $FRT_FOUND)"
+      else
+        echo "(suggestions : $FORTRAN_LIST)"
+      fi
+    elif [ "$FTN" ] ; then
+      echo "Please type the fortran 90 compiler interfaced with ftn :"
+      if [ "$FRT_FOUND" ] ; then
+        echo "(suggestions : $FORTRAN_LIST ; default is $FRT_FOUND)"
+      else
+        echo "(suggestions : $FORTRAN_LIST)"
+      fi
+    else
+      echo "Please type the fortran 90 compiler name you intend to use :"
+      if [ "$FRT_FOUND" ] ; then
+        echo "(suggestions : $FORTRAN_LIST ftn mpif90 ; default is $FRT_FOUND)"
+      else
+        echo "(suggestions : $FORTRAN_LIST ftn mpif90)"
+      fi
+    fi
+    read COMPILER
+    if [ "$COMPILER" ] ; then
+      type $COMPILER > /dev/null 2>&1
+      if [ $? -ne 0 ] ; then
+        echo "This compiler is not in the PATH. Please type its ABSOLUTE name (environment variables allowed) :"
+        read COMPILER
+#       A trick to resolve the exported variables :
+        EXPANDED_COMPILER=$(eval "echo $COMPILER")
+        iecho=$(\ls -1 $EXPANDED_COMPILER 2>/dev/null | wc -l)
+        if [ $iecho -eq 1 ] ; then
+          if [ "$(basename $EXPANDED_COMPILER)" = "mpif90" ] ; then
+            MPICH=$COMPILER
+          elif [ "$(basename $EXPANDED_COMPILER)" = "ftn" ] ; then
+            FTN=$COMPILER
+          else
+            ierr=0
+          fi  
+        else
+          echo "Such file does not exist"
+        fi
+      elif [ "$(basename $COMPILER)" = "mpif90" ] ; then
+        MPICH=$COMPILER
+      elif [ "$(basename $COMPILER)" = "ftn" ] ; then
+        FTN=$COMPILER
+      else
+        ierr=0
+      fi
+    elif [ "$FRT_FOUND" ] ; then
+      COMPILER=$FRT_FOUND
+      ierr=0
+    else
+      echo "No compiler specified. Procedure aborted."
+      exit 1
+    fi
+  done
+# Use gcc if a specific C-compiler wouldn't work (missing or license failing) :
+  unset C_COMPILER
+  if [ "$COMPILER" = "ifort" ] || [ "$COMPILER" = "pgf90" ] || [ "$COMPILER" = "mpiifort" ] ; then
+    echo "void junk() { return; }" > junk.c
+  fi
+  if [ "$COMPILER" = "ifort" ] || [ "$COMPILER" = "mpiifort" ] ; then
+    icc -c junk.c 2>/dev/null 1>/dev/null
+    if [ $? -ne 0 ] ; then
+      C_COMPILER="_gcc"
+    fi
+  elif [ "$COMPILER" = "pgf90" ] ; then
+    pgcc -c junk.c 2>/dev/null 1>/dev/null
+    if [ $? -ne 0 ] ; then
+      C_COMPILER="_gcc"
+    fi
+  fi
+  \rm -rf junk.c junk.o
+# Compiler stamp used to name the guess files :
+  FRT=$(echo $(basename $COMPILER) | tr '[a-z]' '[A-Z]')
+  GMKFILE=${FRT}.${NAME}
+  cd $GMKROOT/arch
+  DRAFTFILE=${FRT}${C_COMPILER}_${ARCH}.in
+  if [ -f $SYSNAME/$DRAFTFILE ] ; then
+    cd $SYSNAME
+  else
+    echo "No guess file to start from for this compiler."
+    cd unknown
+    DRAFTFILE=XXX.in
+  fi
+fi
+
+cp $DRAFTFILE $TMPDIR/$GMKFILE
+cd $TMPDIR
+
+# Compiler stamp :
+echo
+grep ^LIBFRT ${GMKFILE} | cut -d " " -f3- > libfrt
+chmod 755 libfrt
+LIBFRT=$(. ./libfrt)
+echo "The compiler will be stamped \"$LIBFRT\""
+echo
+echo "This stamp is the output of the following command :"
+cat libfrt
+echo "It is important that this stamp tells the compiler name if you wish to"
+echo "handle more than one compiler on your machine."
+echo "For each compiler, it is recommended that it tells the compiler version if"
+echo "you wish to handle more than one version of the compiler on your machine."
+echo "If this stamp is not proper, you can modify at the end of this process,"
+echo "by editing the draft configuration file."
+
+# Start file customisation :
+# ========================
+
+includepathfound=0
+
+# MPI usage :
+echo
+if [ ! "$MPICH" ] ; then
+  if [ "$SYSNAME" = "aix" ] || [ "$SYSNAME" = "ux_system_v" ] ; then
+    MPICH="yes"
+  elif [ "$FRT" = "SXF90" ] || [ "$FRT" = "SXMPIF90" ] || [ "$FTN" = "ftn" ] || [ "$FRT" = "MPIIFORT" ] ; then
+      MPICH="yes"
+  else
+    ierr=1
+    if [ "$DRAFTFILE" = "XXX.in" ] ; then
+      echo "Is the $COMPILER compiler already interfaced with MPI ([y]/n) ?"
+      read answer
+      if [ "$answer" = "y" ] || [ "$answer" = "yes" ] || [ "$answer" = "" ] ; then
+        MPICH="yes"
+        ierr=0
+      else
+        ierr=1
+      fi
+    fi
+    while [ $ierr -ne 0 ] ; do
+      echo "Do you want to setup your configuration file for MPI and I do hope so (y/n) [n] ?"
+      read answer
+      if [ "$answer" = "y" ] || [ "$answer" = "yes" ] ; then
+        type mpif90 > /dev/null 2>&1
+        if [ $? -eq 0 ] ; then
+          MPICH=mpif90
+          ierr=0 
+        else
+          echo "mpif90 is not in the PATH. Please type its ABSOLUTE name (environment variables allowed) :"
+          read COMPILER
+#         A trick to resolve the exported variables :
+          EXPANDED_COMPILER=$(eval "echo $COMPILER")
+          iecho=$(\ls -1 $EXPANDED_COMPILER 2>/dev/null | wc -l)
+          if [ $iecho -eq 1 ] ; then
+            MPICH=$COMPILER
+            ierr=0
+          else
+            echo "Such file does not exist."
+          fi
+        fi
+      else
+        unset MPICH
+        ierr=0
+      fi
+    done
+  fi
+fi
+if [ "$MPICH" = "mpif90" ] ; then
+# Subsitute mpif90 to the compiler name :
+  MPIF90=mpif90
+  MPICC=mpicc
+  MPICXX=mpicxx
+  for VAR in FRTNAME LNK_MPI ; do
+    sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+    echo "$VAR = $MPIF90" > ${GMKFILE}.middle
+    sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+    cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+    \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+  done
+  for VAR in VCCNAME LNK_CC ; do
+    sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+    echo "$VAR = $MPICC" > ${GMKFILE}.middle
+    sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+    cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+    \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+  done
+  for VAR in CXXNAME LNK_CXX ; do
+    sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+    echo "$VAR = $MPICXX" > ${GMKFILE}.middle
+    sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+    cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+    \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+  done
+# Stamp the version (better than an extension I think)
+  sed "s/^LIBFRT = echo /LIBFRT = echo MPI/" ${GMKFILE} > ${GMKFILE}.mpi
+  \mv ${GMKFILE}.mpi  ${GMKFILE}
+fi
+
+# FTN wrapper substitution :
+if [ "$FTN" = "ftn" ] ; then
+# Subsitute mpif90 to the compiler name :
+  FTNF90=ftn
+  for VAR in FRTNAME LNK_MPI ; do
+    sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+    echo "$VAR = $FTNF90" > ${GMKFILE}.middle
+    sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+    cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+    \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+  done
+#  Stamp the version (better than an extension I think)
+   sed "s/^LIBFRT = echo /LIBFRT = echo FTN/" ${GMKFILE} > ${GMKFILE}.ftn
+   \mv ${GMKFILE}.ftn  ${GMKFILE}
+fi
+
+
+# Control other commands :
+# Case of cross-compilers :
+if [ "$FRT" = "SXF90" ] || [ "$FRT" = "SXMPIF90" ] ; then
+  echo
+  CROSS="yes"
+  echo "The compiler is a cross-compiler"
+elif [ "$DRAFTFILE" = "XXX.in" ] ; then
+  echo
+  echo "Is the $COMPILER compiler a cross-compiler (y/[n]) ?"
+  read answer
+  if [ "$answer" != "n" ] && [ "$answer" != "no" ] && [ "$answer" != "" ] ; then
+    CROSS="yes"
+  fi
+fi
+if [ "$CROSS" = "yes" ] ; then
+  ORIGIN="native "
+  TARGET="cross "
+  VAR_LIST="AWK CPP AR ARNATIVE NMOPTS LEX CCNATIVE VCCNAME LNK_CC CXXNAME LNK_CXX"
+else
+  ORIGIN=""
+  TARGET=""
+  VAR_LIST="AWK CPP ARNATIVE NMOPTS LEX CCNATIVE"
+fi
+echo
+for VAR in $VAR_LIST  ; do
+  if [ "$VAR" = "AR" ] || [ "$VAR" = "NMOPTS" ] || [ "$VAR" = "VCCNAME" ] || [ "$VAR" = "LNK_CC" ] || [ "$VAR" = "CXXNAME" ] || [ "$VAR" = "LNK_CXX" ] ; then 
+    NATURE=$TARGET
+  else
+    NATURE=$ORIGIN
+  fi
+  if [ "$VAR" = "VCCNAME" ] ; then 
+    PURPOSE=" for compiling"
+  elif [ "$VAR" = "LNK_CC" ] ; then 
+    PURPOSE=" for linking"
+  elif [ "$VAR" = "CXXNAME" ] ; then 
+    PURPOSE=" for compiling/linking"
+  elif [ "$VAR" = "LNK_CXX" ] ; then 
+    PURPOSE=" for linking"
+  fi
+  RAW_COMMAND=$(grep "^$VAR = " ${GMKFILE} | cut -d " " -f3)
+# A trick to resolve the exported variables :
+  COMMAND=$(eval "echo $RAW_COMMAND")
+  ARGUMENTS=$(grep "^$VAR = " ${GMKFILE} | cut -d " " -f4-)
+  if [ "$COMMAND" ] ; then
+    ORIGINAL_COMMAND=$(basename $COMMAND)
+    ierr=1
+    while [ $ierr -ne 0 ] ; do
+      if [ "$COMMAND" ] ; then
+        type $COMMAND >/dev/null 2>&1
+        if [ $? -ne 0 ] ; then
+          echo "$COMMAND not found in PATH."
+          echo "Please type the ABSOLUTE name of the $COMMAND ${NATURE}command${PURPOSE} (environment variables allowed) :"
+          read answer
+#         A trick to resolve the exported variables :
+          COMMAND=$(eval "echo $answer")
+        else
+          ABS_COMMAND=$(which $COMMAND | awk '{print $NF}')
+          echo "${NATURE}${ORIGINAL_COMMAND}${PURPOSE} is $ABS_COMMAND"
+          sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+          echo "$VAR = $ABS_COMMAND $ARGUMENTS" > ${GMKFILE}.middle
+          sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+          cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+          \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+          ierr=0
+        fi
+      else
+        echo "No command specified. Procedure aborted."
+        exit 1
+      fi
+    done
+  fi
+done
+if [ "$CROSS" != "yes" ] ; then
+  for VAR in VCCNAME LNK_CC ; do
+    sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+    grep "^CCNATIVE = " ${GMKFILE} | sed "s/CCNATIVE/$VAR/" > ${GMKFILE}.middle
+    sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+    cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+    \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+  done
+  VAR=AR
+  sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+  grep "^ARNATIVE = " ${GMKFILE} | sed "s/ARNATIVE/$VAR/" > ${GMKFILE}.middle
+  sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+  cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+  \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+fi
+# Resolve exported variable for the fortran compiler :
+VAR="FRTNAME" 
+RAW_COMMAND=$(grep "^$VAR = " ${GMKFILE} | cut -d " " -f3)
+# A trick to resolve the exported variables :
+COMMAND=$(eval "echo $RAW_COMMAND")
+if [ "$COMMAND" != "$RAW_COMMAND" ] ; then
+  ARGUMENTS=$(grep "^$VAR = " ${GMKFILE} | cut -d " " -f4-)
+  NATURE=$TARGET
+  ORIGINAL_COMMAND=$(basename $COMMAND)
+  ierr=1
+  while [ $ierr -ne 0 ] ; do
+    type $COMMAND >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+      echo "$COMMAND not found in PATH."
+      echo "Please type the ABSOLUTE name of the $COMMAND ${NATURE}command (environment variables allowed) :"
+      read answer
+#     A trick to resolve the exported variables :
+      COMMAND=$(eval "echo $answer")
+    else
+      ABS_COMMAND=$(which $COMMAND | awk '{print $NF}')
+      echo "$ORIGINAL_COMMAND is $ABS_COMMAND"
+      sed "/^$VAR = /,$ d" ${GMKFILE} > ${GMKFILE}.top
+      echo "$VAR = $ABS_COMMAND $ARGUMENTS" > ${GMKFILE}.middle
+      sed "1,/^$VAR = / d" ${GMKFILE} > ${GMKFILE}.bottom
+      cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+      \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+      ierr=0
+    fi
+  done
+fi
+
+# Include path for a dummy mpif.h :
+echo
+if [ ! "$MPICH" ] ; then
+  ierr=1
+  while [ $ierr -ne 0 ] ; do
+    echo "Please type the directory name where to find a dummy file mpif.h or ignore :"
+    read INCPATH
+#   A trick to resolve the exported variables :
+    EXPANDED_INCPATH=$(eval "echo $INCPATH")
+    if [ "$EXPANDED_INCPATH" ] ; then
+      if [ -d $EXPANDED_INCPATH ] ; then
+        if [ -f $EXPANDED_INCPATH/mpif.h ] ; then
+          sed "/^INCLUDEPATH/,$ d" ${GMKFILE} > ${GMKFILE}.top
+          echo "INCLUDEPATH = $INCPATH" | sed "s/\/$//" > ${GMKFILE}.middle
+          sed "1,/^INCLUDEPATH/ d" ${GMKFILE} > ${GMKFILE}.bottom
+          cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+          \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+          ierr=0
+          includepathfound=1
+        else
+          echo "File mpif.h does not exist in the directory $EXPANDED_INCPATH"
+        fi
+      else
+        echo "Such directory does not exist"
+      fi
+    else
+      ierr=0
+    fi
+  done
+fi
+
+# Find ancillary libraries :
+# Make a dummy program to check their presence :
+echo "      program libtest" > libtest.f
+echo "      stop" >> libtest.f
+echo "      end" >> libtest.f
+$COMPILER -c libtest.f
+# Dummy linking test:
+$COMPILER libtest.o >/dev/null 2>&1
+if [ ! -f a.out ] ; then
+# Try to force static linking ?
+  if [ "$FRT" = "G95" ] || [ "$FRT" = "GFORTRAN" ] ; then
+    LDOPT="-static"
+    $COMPILER $LDOPT libtest.o >/dev/null 2>&1
+    if [ ! -f a.out ] ; then
+      echo
+      echo "libtest broken"
+      LIBTEST="BROKEN"
+      unset LDOPT
+    fi
+  fi
+fi
+# Since gribex is the most famous one, and since emos can be provided instead of
+# the pair {gribex,bufr}, the list of libraries is sorted here to move gribex 
+# to the first place and bufr to the second place:
+GRIBEX=$(grep "^LD_USR" $GMKFILE | grep gribex | cut -d " " -f1)
+BUFR=$(grep "^LD_USR" $GMKFILE | grep bufr | cut -d " " -f1)
+JPEG=$(grep "^LD_USR" $GMKFILE | grep jpeg2000 | cut -d " " -f1)
+EECFI=$(grep "^LD_USR" $GMKFILE | grep  eecfi | cut -d " " -f1)
+MFDUMMY=$(grep "^LD_USR" $GMKFILE | grep  mf_dummy | cut -d " " -f1)
+NETCDFF=$(grep "^LD_USR_NETCFD_F" $GMKFILE | grep  netcdff | cut -d " " -f1)
+NETCDF=$(grep "^LD_USR_NETCDF" $GMKFILE | grep -v LD_USR_NETCFD_F | grep  netcdf | cut -d " " -f1)
+HDF5HLFORTRAN=$(grep "^LD_USR_HDF5_HLFORTRAN" $GMKFILE | grep  hdf5hl_fortran | cut -d " " -f1)
+HDF5FORTRAN=$(grep "^LD_USR_HDF5_FORTRAN" $GMKFILE | grep  hdf5_fortran | cut -d " " -f1)
+HDF5=$(grep "^LD_USR_HDF5" $GMKFILE | grep -v LD_USR_HDF5_F | grep  hdf5 | cut -d " " -f1)
+GRIB_API_F90=$(grep "^LD_USR_GRIB_API_F90" $GMKFILE | grep  grib_api_f90 | cut -d " " -f1)
+GRIB_API=$(grep "^LD_USR_GRIB_API" $GMKFILE | grep  grib_api | egrep -v grib_api_f90 | cut -d " " -f1)
+MPI_DUMMY=$(grep "^LD_MPI_DUMMY" $GMKFILE | grep  mpi_dummy | cut -d " " -f1)
+MAGPLUS=$(grep "^LD_USR_MAGPLUS" $GMKFILE | grep MagPlus | grep -v MagPlusSingle | cut -d " " -f1)
+MAGICS=$(grep "^LD_USR_MAGICS" $GMKFILE | grep MagPlusSingle | cut -d " " -f1)
+XML=$(grep "^LD_USR_XML" $GMKFILE | grep xml | cut -d " " -f1)
+BOOST_THREAD=$(grep "^LD_USR_BOOST_THREAD" $GMKFILE | grep boost_thread | cut -d " " -f1)
+BOOST_SYSTEM=$(grep "^LD_USR_BOOST_SYSTEM" $GMKFILE | grep boost_system | cut -d " " -f1)
+BOOST_UNIT_TEST_FRAMEWORK=$(grep "^LD_USR_BOOST_UNIT_TEST_FRAMEWORK" $GMKFILE | grep boost_unit_test_framework | cut -d " " -f1)
+BOOST_MPI=$(grep "^LD_USR_BOOST_MPI" $GMKFILE | grep boost_mpi | cut -d " " -f1)
+BOOST_SERIALIZATION=$(grep "^LD_USR_BOOST_SERIALIZATION" $GMKFILE | grep boost_serialization | cut -d " " -f1)
+FCKIT=$(grep "^LD_USR_FCKIT" $GMKFILE | grep fckit | cut -d " " -f1)
+ECKIT_MPI=$(grep "^LD_USR_ECKIT_MPI" $GMKFILE | grep eckit_mpi | cut -d " " -f1)
+ECKIT=$(grep "^LD_USR_ECKIT" $GMKFILE | grep -v "LD_USR_ECKIT_MPI" | grep eckit | cut -d " " -f1)
+for LIBNUM in $GRIBEX $BUFR $(egrep "(^LD_USR|^LD_LANG|^LD_SYS|^LD_MPI)" $GMKFILE | egrep -v "(gribex|bufr)" | cut -d " " -f1) ; do
+  LIB=$(grep "^$LIBNUM = " $GMKFILE | cut -d " " -f3-)
+  if [ "$LIB" ] ; then
+    echo
+    ierr=1
+    if [ "$LIBTEST" != "BROKEN" ] ; then
+      $COMPILER $LDOPT libtest.o -l$LIB 2>/dev/null
+      ierr=$?
+    fi
+    if [ $ierr -eq 0 ] ; then
+      echo "Library $LIB has been found in the default PATH."
+    else
+#     Search a possible library in the last specified directory:
+      if [ "$EXPANDED_ABSOLUTE_LIB" ] ; then
+        EXPANDED_ABSOLUTE_DIR=$(dirname $EXPANDED_ABSOLUTE_LIB)
+#       First, find a file which matches the exact name, following the links :
+        N_LIBS=$(find $EXPANDED_ABSOLUTE_DIR -follow -name "lib${LIB}.a" -type f -print 2>/dev/null | wc -l)
+        if [ $N_LIBS -eq 1 ] ; then
+          LIB_FOUND=$(find $EXPANDED_ABSOLUTE_DIR -follow -name "lib${LIB}.a" -type f -print 2>/dev/null)
+        else
+#         Find if a symbolic link matches the exact name of the library, following the links :
+          N_LIBS=$(find $EXPANDED_ABSOLUTE_DIR -follow -name "lib${LIB}.a" -type l -print 2>/dev/null | wc -l)
+          if [ $N_LIBS -eq 1 ] ; then
+            LIB_FOUND=$(find $EXPANDED_ABSOLUTE_DIR -follow -name "lib${LIB}.a" -type l -print 2>/dev/null)
+          else
+#           Find if a symbolic link which seems to match the name of the library, locally :
+            N_LIBS=$(find $EXPANDED_ABSOLUTE_DIR -name "lib${LIB}*.a" -type l -print 2>/dev/null | wc -l)
+            if [ $N_LIBS -eq 1 ] ; then
+              LIB_FOUND=$(find $EXPANDED_ABSOLUTE_DIR -name "lib${LIB}*.a" -type l -print 2>/dev/null)
+            else
+#             Find if a file which seems to match the name of the library, locally :
+              N_LIBS=$(find $EXPANDED_ABSOLUTE_DIR -name "lib${LIB}*.a" -type f -print 2>/dev/null | wc -l)
+              if [ $N_LIBS -eq 1 ] ; then
+                LIB_FOUND=$(find $EXPANDED_ABSOLUTE_DIR -name "lib${LIB}*.a" -type f -print 2>/dev/null)
+              fi
+#           else, I give up !
+            fi
+          fi
+        fi
+        if [ $N_LIBS -eq 1 ] ; then
+#         loader test
+          if [ "$LIBTEST" != "BROKEN" ] ; then
+            $COMPILER $LDOPT libtest.o $LIB_FOUND 2>/dev/null
+            itest=$?
+          else
+            itest=0
+          fi
+          if [ $itest -eq 0 ] ; then
+#           Confirm :
+            ABSOLUTE_DIR=$(dirname $LIB_FOUND)
+            RELATIVE_LIB_FOUND=$(basename $LIB_FOUND)
+            if [ "$LIB" = "mpi" ] && [ "MPICH" ] ; then
+              echo "Confirm dummy library mpi (for serial executables) is $ABSOLUTE_DIR/$RELATIVE_LIB_FOUND ([y]/n) ?"
+            else
+              echo "Confirm library $LIB is $ABSOLUTE_DIR/$RELATIVE_LIB_FOUND ([y]/n) ?"
+            fi
+            read answer
+            if [ "$answer" = "y" ] || [ "$answer" = "yes" ] || [ "$answer" = "" ] ; then
+              ierr=0
+            else
+              ierr=1
+            fi
+            if [ $ierr -eq 0 ] ; then
+              sed "/^${LIBNUM} =/,$ d" ${GMKFILE} > ${GMKFILE}.top
+              echo "$LIBNUM = $ABSOLUTE_DIR/$RELATIVE_LIB_FOUND" > ${GMKFILE}.middle
+              sed "1,/^${LIBNUM} =/ d" ${GMKFILE} > ${GMKFILE}.bottom
+              cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+              \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+            fi
+          else
+#           Library not valid
+            ierr=1
+          fi
+        else
+#         No library found, or ambiguous names
+          ierr=1
+        fi
+      fi
+    fi
+    if [ $ierr -ne 0 ] ; then
+      while [ $ierr -ne 0 ] ; do
+        if [ "$LIBNUM" = "$GRIBEX" ] ; then
+          echo "Please type the ABSOLUTE name of the library $LIB or emos, or ignore :"
+          echo "(environment variables allowed) :"
+        elif [ "$LIBNUM" = "$BUFR" ] ; then
+          echo "Please type the ABSOLUTE name of the library $LIB unless gribex is emos, or ignore :"
+          echo "(environment variables allowed) :"
+        elif [ "$LIBNUM" = "$JPEG" ] ; then
+          echo "Please type the ABSOLUTE name of the JPEG auxilary library if enabled by Grib_api, or ignore :"
+          echo "(environment variables allowed) :"
+        elif [ "$LIBNUM" = "$EECFI" ] ; then
+          echo "Please type the ABSOLUTE name of the library $LIB (mainly needed for Aeolus in IFS), or ignore :"
+          echo "(environment variables allowed) :"
+        elif [ "$LIBNUM" = "$MFDUMMY" ] ; then
+          echo "Please type the ABSOLUTE name of the Meteo-France dummies library (IFS only), or ignore :"
+          echo "(environment variables allowed) :"
+        elif [ "$LIBNUM" = "$MPI_DUMMY" ] ; then
+          echo "Please type the ABSOLUTE name of a MPI dummy library for serial executions, or ignore :"
+          echo "(environment variables allowed) :"
+        else
+          echo "Please type the ABSOLUTE name of the library $LIB, or ignore"
+          echo "(environment variables allowed) :"
+        fi
+        read ABSOLUTE_LIB
+        if [ "$ABSOLUTE_LIB" ] ; then
+#         A trick to resolve the exported variables :
+          EXPANDED_ABSOLUTE_LIB=$(eval "echo $ABSOLUTE_LIB")
+          iecho=$(\ls -1 $EXPANDED_ABSOLUTE_LIB 2>/dev/null | wc -l)
+          if [ $iecho -eq 1 ] ; then
+            if [ "$LIBTEST" != "BROKEN" ] ; then
+              $COMPILER $LDOPT libtest.o $EXPANDED_ABSOLUTE_LIB 2>/dev/null
+              ierr=$?
+            else
+              ierr=0
+            fi
+            if [ $ierr -eq 0 ] ; then
+              sed "/^$LIBNUM =/,$ d" ${GMKFILE} > ${GMKFILE}.top
+              echo "$LIBNUM = $ABSOLUTE_LIB" > ${GMKFILE}.middle
+              sed "1,/^$LIBNUM =/ d" ${GMKFILE} > ${GMKFILE}.bottom
+              cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+              \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+            fi
+          else
+            echo "Such file does not exist"
+          fi
+        else
+          echo "$LIB library ignored."
+          sed "s/^$LIBNUM = .*/$LIBNUM =/" $GMKFILE > $GMKFILE.lib
+          \mv $GMKFILE.lib  $GMKFILE
+          ierr=0
+        fi
+      done
+    fi
+  fi
+done
+
+# Include path for external headers :
+echo
+for header in grib_api.h fortint.h netcdf.h netcdf.inc hdf5.h libxml fckit eckit ; do
+  ierr=1
+  while [ $ierr -ne 0 ] ; do
+    if [ "$header" = "fortint.h" ] ; then
+      echo "The header $header from BUFR library is needed if you intend to build Aeolus test programs"
+      echo "Please type the directory name where to find ${header} or ignore :"
+    elif [ "$header" = "netcdf.h" ] ; then
+      echo "Netcdf C headers are needed if you intend to build Obt/Obstat projects"
+      echo "Please type the directory name where to find $(basename $header .h) C headers, or ignore :"
+    elif [ "$header" = "netcdf.inc" ] ; then
+      echo "Netcdf Fortran headers are needed if you intend to build Surfex or Obt/Obstat projects"
+      echo "Please type the directory name where to find $(basename $header .inc) Fortran headers, or ignore :"
+    elif [ "$header" = "hdf5.h" ] ; then
+      echo "HDF5 headers are needed if you intend to build ODB/Bator or satrad"
+      echo "Please type the directory name where to find $(basename $header .h) headers, or ignore :"
+    elif [ "$header" = "libxml" ] ; then
+      echo "libxml headers are needed if you intend to build oops project"
+      echo "Please type the directory name where to find libxml/*.h headers, or ignore :"
+    elif [ "$header" = "fckit" ] ; then
+      echo "fckit headers are needed if you intend to build oops project or if the cpp macro WITH_FCKIT is defined"
+      echo "Please type the directory name where to find fckit headers, or ignore :"
+    elif [ "$header" = "eckit" ] ; then
+      echo "eckit headers are needed if you intend to build oops project or if the cpp macro WITH_FCKIT is defined"
+      echo "Please type the directory name where to find fckit headers, or ignore :"
+    else
+      echo "Please type the directory name where to find $(basename $header .h) headers, or ignore :"
+    fi
+    read INCPATH
+#   A trick to resolve the exported variables :
+    EXPANDED_INCPATH=$(eval "echo $INCPATH")
+    if [ "$EXPANDED_INCPATH" ] ; then
+      if [ -d $EXPANDED_INCPATH ] ; then
+        if [ -f $EXPANDED_INCPATH/$header ] ; then
+	  VALID=1
+	elif [ $(find $EXPANDED_INCPATH -name "*.h" -follow -print 2>/dev/null | wc -l) -ne 0 ] ; then
+	  VALID=1
+	else
+	  VALID=0
+	fi
+        if [ $VALID -eq 1 ] ; then
+          sed "/^INCLUDEPATH/,$ d" ${GMKFILE} > ${GMKFILE}.top
+          if [ $includepathfound -eq 0 ] ; then
+            echo "INCLUDEPATH = $EXPANDED_INCPATH" | sed "s/\/$//" > ${GMKFILE}.middle
+          else
+            echo $(grep "^INCLUDEPATH" ${GMKFILE}):${EXPANDED_INCPATH} | sed -e "s/\/$//" -e "s/ :/:/" > ${GMKFILE}.middle
+          fi 
+          includepathfound=1
+          sed "1,/^INCLUDEPATH/ d" ${GMKFILE} > ${GMKFILE}.bottom
+          cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+          \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+          ierr=0
+        else
+          echo "File $header does not exist in the directory $EXPANDED_INCPATH"
+        fi
+      else
+        echo "Such directory does not exist"
+      fi
+    else
+      ierr=0
+    fi
+  done
+done
+
+# MAGICS macros :
+echo
+echo "Do you want to use MAGICS in ODB (y/n) [n] ?"
+unset answer
+read answer
+if [ "$answer" ] ; then
+  if [ "$answer" = "n" ] || [ "$answer" = "no" ] ; then
+    with_magics=0
+  else
+    with_magics=1
+  fi
+else
+  with_magics=0
+fi
+if [ $with_magics = 1 ] ; then
+# Add magics macros in a specific variable to drive ODB-specific Fortran compilation:
+  sed "/^GMK_CFLAGS_ODB/,$ d" ${GMKFILE} > ${GMKFILE}.top
+  sed "1,/^GMK_CFLAGS_ODB/ d" ${GMKFILE} > ${GMKFILE}.bottom
+  echo "GMK_FCFLAGS_ODB = -DHAS_MAGICS -DNEW_MAGICS" > ${GMKFILE}.added
+  grep "^GMK_CFLAGS_ODB" ${GMKFILE} > ${GMKFILE}.middle
+  cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.added ${GMKFILE}.bottom > ${GMKFILE}
+  \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.added ${GMKFILE}.bottom
+fi
+
+
+
+# Macro "CANARI":
+echo
+echo "The cpp macro CANARI is needed if you intend to build ODB with CANARI surface observations."
+echo "Do you want to define CANARI (y/n) [y] ?"
+unset answer
+read answer
+if [ "$answer" ] ; then
+  if [ "$answer" = "n" ] || [ "$answer" = "no" ] ; then
+    canari=0
+  else
+    canari=1
+  fi
+else
+  canari=1
+fi
+if [ $canari = 0 ] ; then
+# Remove macro CANARI from old variable driving C compilation:
+  sed "/^MACROS_CC/,$ d" ${GMKFILE} > ${GMKFILE}.top
+  sed "1,/^MACROS_CC/ d" ${GMKFILE} > ${GMKFILE}.bottom
+  grep "^MACROS_CC" ${GMKFILE} | sed "s/ -DCANARI//" > ${GMKFILE}.middle
+  cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+  \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+# Remove macro CANARI from new variable driving ODB-specific C compilation:
+  sed "/^GMK_CFLAGS_ODB/,$ d" ${GMKFILE} > ${GMKFILE}.top
+  sed "1,/^GMK_CFLAGS_ODB/ d" ${GMKFILE} > ${GMKFILE}.bottom
+  grep "^GMK_CFLAGS_ODB" ${GMKFILE} | sed "s/ -DCANARI//" > ${GMKFILE}.middle
+  cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+  \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+fi
+
+# Macro NO_CURSES :
+if [ "$LIBTEST" != "BROKEN" ] ; then
+  $COMPILER $LDOPT libtest.o -lncurses  2>/dev/null
+  itest=$?
+else
+  itest=1
+fi
+if [ $itest -ne 0 ] ; then
+  echo "Define -DNO_CURSES"
+  sed "/^GMK_CFLAGS_ODB/,$ d" ${GMKFILE} > ${GMKFILE}.top
+  sed "1,/^GMK_CFLAGS_ODB/ d" ${GMKFILE} > ${GMKFILE}.bottom
+  grep "^GMK_CFLAGS_ODB" ${GMKFILE} | sed "s/$/ -DNO_CURSES/" > ${GMKFILE}.middle
+  cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+  \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+else
+  echo "libncurses has been found"
+fi
+
+
+# External scripts:
+# ----------------
+echo
+ierr=1
+while [ $ierr -ne 0 ] ; do
+  echo "Please type the name of the script file used to generate a preprocessed blacklist file, or ignore :"
+  read SCRIPT
+# A trick to resolve the exported variables :
+  EXPANDED_SCRIPT=$(eval "echo $SCRIPT")
+  if [ "$EXPANDED_SCRIPT" ] ; then
+    if [ "$(uname)" = "Darwin" ] ; then
+      \type $EXPANDED_SCRIPT >/dev/null 2>&1
+      ierr=$?
+    else
+      \which $EXPANDED_SCRIPT >/dev/null 2>&1
+      ierr=$?
+    fi
+    if [ $ierr -eq 0 ] ; then
+      sed "/^GMK_BL_GENERATOR =/,$ d" ${GMKFILE} > ${GMKFILE}.top
+      sed "1,/^GMK_BL_GENERATOR =/ d" ${GMKFILE} > ${GMKFILE}.bottom
+      echo "GMK_BL_GENERATOR = $EXPANDED_SCRIPT" > ${GMKFILE}.middle
+      cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+      \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+    else
+      echo "File $EXPANDED_SCRIPT not found."
+    fi
+  else
+    ierr=0
+  fi
+done
+echo
+ierr=1
+while [ $ierr -ne 0 ] ; do
+  echo "Please type the name of the script file used to recover local libraries (gget), or ignore :"
+  read SCRIPT
+# A trick to resolve the exported variables :
+  EXPANDED_SCRIPT=$(eval "echo $SCRIPT")
+  if [ "$EXPANDED_SCRIPT" ] ; then
+    if [ "$(uname)" = "Darwin" ] ; then
+      \type $EXPANDED_SCRIPT >/dev/null 2>&1
+      ierr=$?
+    else
+      \which $EXPANDED_SCRIPT >/dev/null 2>&1
+      ierr=$?
+    fi
+    if [ $ierr -eq 0 ] ; then
+      sed "/^GGET =/,$ d" ${GMKFILE} > ${GMKFILE}.top
+      sed "1,/^GGET =/ d" ${GMKFILE} > ${GMKFILE}.bottom
+      echo "GGET = $EXPANDED_SCRIPT" > ${GMKFILE}.middle
+      cat ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom > ${GMKFILE}
+      \rm ${GMKFILE}.top ${GMKFILE}.middle ${GMKFILE}.bottom
+    else
+      echo "File $EXPANDED_SCRIPT not found."
+    fi
+  else
+    ierr=0
+  fi
+done
+
+
+# Tune the compilation option for a specific cpu :
+echo
+echo "You can add specific options to the compilers in order to optimise"
+echo "the performance, according to the hardware of your platform."
+echo "Refer to the manuals of the compilers for more."
+if [ "$FRT" = "XLF" ] ; then
+  echo "Please type the options to tune the compilers, or ignore :"
+  echo "(suggestions : \"-qarch=pwr3\" ; \"-qarch=pwr4\" ; \"-qarch=pwr5\")"
+  read F_OPTIONS
+  C_OPTIONS="$F_OPTIONS"
+elif [ "$FRT" = "SXF90" ] || [ "$FRT" = "SXMPIF90" ] ; then
+  echo "Please type the options to tune the fortran compiler, or ignore :"
+  echo "(suggestions : \"-sx6\" ; \"-sx8\" ; \"-sx8r\" ; \"-sx9\" )"
+  read F_OPTIONS
+# The C compiler is tuned by default, says the documentation
+elif [ "$FRT" = "GFORTRAN" ] || [ "$FRT" = "G95" ] ; then
+  echo "Please type the options to tune the gnu compilers, or ignore :"
+  if [ "$SYSNAME" = "darwin" ] ; then
+    if [ "$INSTRUCTION" = "ppc" ] ; then
+      DEFAULT_OPTIONS="-mcpu=G4 -mtune=G4"
+    elif [ "$INSTRUCTION" = "ppc970" ] ; then
+      DEFAULT_OPTIONS="-mcpu=G5 -mtune=G5"
+    elif [ "$INSTRUCTION" = "i486" ] ; then
+#     Though x86, most machines of today are core 2, understood by gcc/gfortran :
+      if [ "$FRT" = "G95" ] ; then
+        DEFAULT_OPTIONS="-mtune=$INSTRUCTION"
+      else
+        DEFAULT_OPTIONS="-mtune=core2"
+      fi
+    else
+      DEFAULT_OPTIONS=""
+    fi
+    C_DEFAULT_OPTIONS=
+    echo "(default is : $DEFAULT_OPTIONS)"
+    read F_OPTIONS
+  else
+    read F_OPTIONS
+    C_OPTIONS="$F_OPTIONS"
+  fi
+elif [ "$FRT" = "PGF90" ] ; then
+  echo "Please type the options to tune the compilers, or ignore :"
+  if [ "$ARCH" = "IA32" ] ; then
+    DEFAULT_OPTIONS="-tp px"
+  else
+    DEFAULT_OPTIONS="-tp x64"
+  fi
+  if [ ! "$C_COMPILER" ] ; then
+    C_DEFAULT_OPTIONS=$DEFAULT_OPTIONS
+  fi
+  echo "(default is generic : \"${DEFAULT_OPTIONS}\")"
+  read F_OPTIONS
+  if [ ! "$C_COMPILER" ] ; then
+    C_OPTIONS="$F_OPTIONS"
+  fi
+fi
+if [ "$F_OPTIONS" ] ; then
+  sed "/^FRTFLAGS = / s/$/ $F_OPTIONS/" $GMKFILE > $GMKFILE.cpu
+  \mv $GMKFILE.cpu $GMKFILE
+elif [ "$DEFAULT_OPTIONS" ] ; then
+  sed "/^FRTFLAGS = / s/$/ $DEFAULT_OPTIONS/" $GMKFILE > $GMKFILE.cpu
+  \mv $GMKFILE.cpu $GMKFILE
+fi
+if [ "$C_OPTIONS" ] ; then
+  sed "/^VCCFLAGS = / s/$/ $C_OPTIONS/" $GMKFILE > $GMKFILE.cpu
+  \mv $GMKFILE.cpu $GMKFILE
+elif [ "$C_DEFAULT_OPTIONS" ] ; then
+  sed "/^VCCFLAGS = / s/$/ $C_DEFAULT_OPTIONS/" $GMKFILE > $GMKFILE.cpu
+  \mv $GMKFILE.cpu $GMKFILE
+fi
+
+
+if [ "$DRAFTFILE" = "XXX.in" ] ; then
+  echo
+  echo " STILL UNDER CONSTRUCTION ... SORRY !"
+fi
+
+echo
+echo "gmkfilemaker job is finished."
+echo
+FILENAME=${GMKFILE}.x
+echo "Please type a filename with an extension to save this draft configuration file :"
+echo "(default is $FILENAME)"
+ierr=1
+while [ $ierr -ne 0 ] ; do
+  read answer
+  if [ "$answer" ] ; then
+    FILENAME=$answer
+  fi
+  if [ $(echo $FILENAME | grep -c "\.") -eq 0 ] ; then
+    echo "$FILENAME has no extension. Please choose another one (default : now ${FILENAME}.x) :"
+    FILENAME=${FILENAME}.x
+  elif [ -f $GMK_SUPPORT/arch/$FILENAME ] ; then
+    echo "$FILENAME already exists in the target directory $GMK_SUPPORT/arch"
+    echo "Please choose another one :"
+  else
+    \cp $GMKFILE $GMK_SUPPORT/arch/$FILENAME
+    ierr=0
+  fi
+done
+echo "The draft configuration file has been saved at the following place :"
+echo "$GMK_SUPPORT/arch/$FILENAME"
+echo "You can edit it to control its content or customize it more."
+echo "For instance you can replace the absolute path of a command if you trust it."
+echo
+echo "To make this configuration file the default one, you should export in your"
+echo "profile the environment variable GMKFILE as its name without its extension"
+EXT=$(echo $FILENAME | awk -F"." '{print $NF}')
+BASE=$(echo $FILENAME | sed "s/\.${EXT}$//")
+echo "(ie : export GMKFILE=$BASE)"
+echo
+echo "You can also create various flavours of the same configuration file, choosing "
+echo "another extension for the file, and changing the compilation options inside."
+
+cd $GMKTMP
+\rm -rf $TMPDIR

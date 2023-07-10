@@ -1,0 +1,34 @@
+.TH logpack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+logpack \- display the logfile of a pack.
+.PP
+.SH SYNOPSIS
+.B logpack
+.PP
+.SH DESCRIPTION
+.B logpack
+displays on the standard output the logfile of a pack creation. The working
+directory must be the pack main directory.
+.br
+This command is helpful to control that the pack has been properly created.
+.PP
+.SH DIAGNOSTICS
+If the working directory is not a pack main directory or if the pack has been
+created with a version of 
+.B gmkpack
+older than the version 5.1 then the following message is displayed :
+.br
+"No gmkpack logfile in this directory."
+.PP
+.B logpack
+does not work for packs created with a version of
+.B gmkpack
+older than the version 5.1
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR genpack(1),
+.BR gmkpack(1).

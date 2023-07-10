@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Wrapper for Intel ifort compiler when the short Vector Math Library is used
+# (by the mean of the option -fast-transcendentals) :
+# Identify the presence of the symbols __svml_sincos4* n the object file
+# after compilation.
+# If present, then recompile without the option -fast-transcendentals
+# in order to escape the compiler bug causing non-bitwise reproducibility
+# when sine and cosine are invoked in the same vector loop.
+# R. El Khatib - 10-May-2016
+
+$*
+if [ $(\ls -1 *.o | wc -l) -ne 0 ] ; then
+  if [ $(nm -p *.o | fgrep -c __svml_sincos4) -ne 0 ] ; then
+    echo "__svml_sincos4 detected in $(\ls -1 *.o) --> recompile without -fast-transcendentals" 2>&1
+    $(echo $* | sed "s/-fast-transcendentals//")
+  fi
+fi

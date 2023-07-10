@@ -1,0 +1,441 @@
+gmkpack(1)		    General Commands Manual		    gmkpack(1)
+
+
+
+1mNAME0m
+       gmkpack - Maker of packs and scripts for compilation
+
+1mSYNOPSIS0m
+       1mgmkpack -r 4m22mrelease24m [ 1m-a 22m] [ 1m-b 4m22mbranch24m ] 1m-u 4m22mtarget-pack24m ]
+       [ 1m-v 4m22mreference-pack-version24m ] [ 1m-n 4m22mlocal-pack-version24m ]
+       [ 1m-l 4m22mcompiler-label24m ] [ 1m-o 4m22mcompiling-flag24m ] [ 1m-V 22m] [ 1m-m 22m]
+       [ 1m-f 4m22mrootpack24m ] [ 1m-h 4m22mhomepack24m ] [ 1m-s 22m] [ 1m-K 22m] [ 1m-k 22m]
+       [ 1m-p 4m22mprogram1[,program2]...[,programN]24m 4m|24m 4mlistname24m 4m|24m 4m?24m  ]
+
+1mDESCRIPTION0m
+       1mgmkpack 22mis a procedure to create an environment and to compile binaries
+       like Arpege, Aladin, ODB, etc.
+       While it is similar to a 1mmake, 22mit has been written in order to  support
+       specific	 features  of  the  arpege/aladin  system  (like the so-called
+       "duplicated routines") that a 1mmake 22mcould not handle.
+       1mgmkpack 22maims to be a  user-friendly	 arpege/aladin-oriented	 procedure,
+       providing  the  user  with all the links to object libraries and source
+       codes needed to build an executable in a consistent way.
+
+       Prior to using 1mgmkpack 22mone should be aware of a few definitions:
+
+       Pack
+	      To compile one should copy the compilable source files and  pos‐
+	      sibly other various files in a directory.
+	      This directory is named a "pack".
+	      A	 pack  is  a  directory containing specific subdirectories and
+	      files that will all be created by running 1mgmkpack22m.	Below  this
+	      directory, source code can be compiled, object libraries result‐
+	      ing from the compilation are built and executables can  be  made
+	      from this libraries and others.
+	      The use of arpege/aladin is made complicated by the need of var‐
+	      ious "include" files, modules, libraries and  sometimes  a  pre-
+	      compiler (for odb) to achieve an executable.  1mgmkpack 22mtakes care
+	      and provides all this environment in  a  consistent  way.	  This
+	      consistency  is  ensured	by  the	 definition  of	 the reference
+	      release, the reference branch name and its version, the compila‐
+	      tion  mode  and  the  compiler version (these parameters will be
+	      described below).	 More generally, we can try to define  a  pack
+	      as follows:
+	      A	 pack  is a consistent ensemble of source files, libraries and
+	      executables related to arpege/aladin.
+	      1mgmkpack 22mis used for two operations:
+	      + First  : to create a "pack".
+	      + Second :  to  generate	a  script  to  compile,	 build	object
+	      libraries andor make binaries, using the corresponding pack.
+	      Note that both operations can be performed at once.
+
+       gmkpack administrator
+	      A	 gmkpack  administrator is a user who has installed 1mgmkpack 22min
+	      his home directory for a private use or a shared use with	 other
+	      users.
+	      Anyone  can  be his own gmkpack manager, but usually the gmkpack
+	      manager is a an administrator user.
+
+       Pack administrator
+	      A pack administrator is a user who has created packs to be  used
+	      by other users as bases for developments.
+	      Anyone  can  be his own pack administrator, but usually the pack
+	      administrator is the user in charge with the code management.
+
+       Main pack
+	      A pack which does not lay upon any  existing  pack.  Such	 packs
+	      could be made by pack administrators only.
+
+       Reference pack
+	      A	 pack  upon  which  one	 can make another pack. Main packs are
+	      obviously reference packs.
+
+       Target pack
+	      A pack laying upon an existing reference pack.
+
+1mOPTIONS0m
+	1m-r 4m22mrelease0m
+	      Reference release. This option is mandatory.
+	      For user packs, the already existing releases made by  the  pack
+	      administrator can be obtained by the command 1mrlspack22m.
+	      For main packs, it should be a string of digits.
+
+	1m-a	22mTo build a main pack and/or a script for a main pack. The mecha‐
+	      nism of 1mgmkpack 22mis slightly different for main  packs  since	 it
+	      has no pack to refer to.
+	      Note that the options 1m-a 22mand (1m-u22m,1m-v22m) are exclusive.
+
+	1m-b 4m22mbranch0m
+	      The branch name of the reference pack. It can be a string of any
+	      characters except dot (".") and slash ("/"). Default  is	"main"
+	      (for main pack).
+
+	1m-u 4m22mtarget-pack0m
+	      For a user pack, it is the name of the target pack. Since such a
+	      target pack can be a subdirectory of a directory of  packs,  the
+	      target pack name may contain a slash ("/").
+	      If  not supplied the default name will be the same as the refer‐
+	      ence pack.
+	      For a reference pack (when the user is administrator), it is the
+	      branch  name  of	the  target  pack. In this case this option is
+	      mandatory.
+	      Note that options 1m-u 22mand 1m-a 22mare exclusive.
+
+	1m-v 4m22mreference-pack-version0m
+	      Version number of the reference pack. It should be a  string  of
+	      exactly  two digits. If omitted, it will be self-computed as the
+	      highest existing version number  for  the	 selected  branch  and
+	      release.
+	      Note that options 1m-v 22mand 1m-a 22mare exclusive.
+
+	1m-n 4m22mlocal-pack-version0m
+	      Version  number  of  the target pack. This option works only for
+	      reference packs (when the user is administrator). It  should  be
+	      either  a	 string of exactly two digits, or the string '++' ; in
+	      this case it will be self-computed as the highest existing  ver‐
+	      sion  number  for	 the  selected branch and release, incremented
+	      with 1. If omitted, it will  be  self-computed  as  the  highest
+	      existing version number for the selected branch and release.
+
+
+	1m-K	22mUse	this  option  to  create  a  local hub. A hub is a separate
+	      directory where third-party packages can be built and  installed
+	      with   their  own	 scripts  (configure/make,  cmake).  Then  the
+	      installed packages can be used to build the current source code.
+	      This  option should be mostly used for main packs. Should a user
+	      create a pack containing a hub, then this subsequent  pack  will
+	      naturally inherit of that hub and the installed packages inside.
+	      This  version of 1mgmkpack 22msupports cmake-built packages, but more
+	      methods can be implemented.
+
+	1m-k	22mUse this option to disable the creation  of	source	code.  This
+	      option can be used together with 1m-K 22mto create a hub only. From a
+	      hub-only main pack, on can derive a  user	 pack  with  a	source
+	      code.
+
+	1m-l 4m22mcompiler-label0m
+	      Reference	 compiler  version.  More  exactly, it is the internal
+	      stamp of the configuration file used.  The possible  values  are
+	      given  by	 the  command  1moptionspack22m.  There is no default value
+	      unless the environment variable GMKFILE is set.
+
+	1m-o 4m22mcompiling-flag0m
+	      Compiler options family. More exactly, it is  the	 extension  of
+	      the  configuration  file	used. The possible values are given by
+	      the command 1moptionspack22m. The default value is 'x'.
+
+	1m-V	22mDisplays the version of 1mgmkpack22m. This option is exclusive.
+
+	1m-m	22mQuiet mode. Enables to make a compilation script without  making
+	      a pack. This option as been used for debugging only.
+
+	1m-f 4m22mrootpack0m
+	      Rootpack	directory  (absolute path). The default value is ROOT‐
+	      PACK, or 4m$HOME/rootpack24m if ROOTPACK is not set.
+
+	1m-h 4m22mhomepack0m
+	      Homepack directory (absolute path). The default value  is	 HOME‐
+	      PACK, or 4m$HOME/pack24m if HOMEPACK is not set.
+
+	1m-s	22mTo make a separate script for building the precompilers provided
+	      as source code.
+	      This option is rather used for debugging purpose, since the cur‐
+	      rent  compilation	 script is able to handle as well the compila‐
+	      tion of the precompilers prior to the actual source code	compi‐
+	      lation.
+	      As  the  precompilers  are  built	 only  inside main packs, this
+	      option can be used only with the option  1m-a 22m.
+
+	1m-p 4m22mprogram1[,program2]...[,programN]24m 4m|24m 4mlistname24m 4m|24m 4m?0m
+	      The list of program to be built, or the name of a list  of  pro‐
+	      grams, or the character "?" to build as many executables as pos‐
+	      sible.
+	      The list of the possible programs, and the  possible  lists  and
+	      what  programs they contain can be obtain with the command 4mprog‐0m
+	      4mpack24m.
+
+1mENVIRONNEMENT0m
+       ROOTPACK
+	      The directory of packs made by the packs administrator (absolute
+	      path).  Its value should be given by the pack administrator. The
+	      default value is 4m$HOME/rootpack0m
+
+       HOMEPACK
+	      The directory of packs made by the  user	(absolute  path).  The
+	      default value is 4m$HOME/pack0m
+
+       ROOTBIN
+	      The  root	 directory  for executables of all reference packs. It
+	      enables to store executables in another file system (larger  and
+	      possibly semi-permanent).
+	      More  exactly  the  directory 4m$ROOTPACK/<packname>/bin24m where the
+	      executables are stored is	 a  symbolic  link  to	the  directory
+	      4m$ROOTBIN/<packname>/bin0m
+
+       HOMEBIN
+	      The root directory for executables of all user packs. It enables
+	      to store executables in another file system (larger and possibly
+	      semi-permanent).
+	      More  exactly  the  directory 4m$HOMEPACK/<packname>/bin24m where the
+	      executables are stored is	 a  symbolic  link  to	the  directory
+	      4m$HOMEBIN/<packname>/bin0m
+
+       ROOTLIB
+	      The  root	 directory  for	 libraries  of all reference packs. It
+	      enables to store libraries in another file  system  (larger  and
+	      permanent).
+	      More  exactly  the  directory 4m$ROOTPACK/<packname>/lib24m where the
+	      libraries are  stored  is	 a  symbolic  link  to	the  directory
+	      4m$ROOTLIB/<packname>/lib0m
+
+       HOMELIB
+	      The  root	 directory for libraries of all user packs. It enables
+	      to store libraries in another file  system  (larger  and	perma‐
+	      nent).
+	      More  exactly  the  directory 4m$HOMEPACK/<packname>/lib24m where the
+	      libraries are stored is a symbolic link to the directory	4m$HOME‐0m
+	      4mLIB/<packname>/lib0m
+
+       GMKTMP
+	      A	 temporary  directory.	For  optimal performance, it is recom‐
+	      mended to use a local disk space.
+
+       GMKFILE
+	      The basename of the configuration file used to run  1mgmkpack22m.	 It
+	      contains all the variables needed to configure the usage of this
+	      command.
+	      For developers, its value should	be  provided  by  the  1mgmkpack0m
+	      administrator.  If not defined, the use of the option 1m-l 22mof 1mgmk‐0m
+	      1mpack 22mis mandatory. Use the command 4moptionspack24m to get  the  list
+	      of existing configurations.
+
+       GMK_OPT
+	      The  extension  name  of the configuration file used to run 1mgmk‐0m
+	      1mpack22m. The default value is 'x'. Use the command  4moptionspack24m  to
+	      get the list of existing options.
+
+       GMK_ALIASES
+	      If  set  to any string, whenever a user creates a new pack, 1mgmk‐0m
+	      1mpack 22mwill add the name of this new pack as an alias in the shell
+	      4mrc24m  file to change directory to this new pack directory at once.
+	      Symetrically, 1mrmpack 22mwill remove this alias.
+
+       GMK_ENABLE_OBJ_RENAME
+	      If set to any string, at linking time 1mgmkpack 22mwill rename object
+	      files  containing	 a unique symbol so that they will reflect the
+	      name of the symbol inside. In certain cases it  could  be	 worth
+	      setting  this  variable, but it will slow down the linking step.
+	      If this variable can solve a linking problem, you should	better
+	      try and change the source code !
+
+       GMK_IMPORT_PLUGIN
+	      The  external  script  (plug-in) run by 1mgmkpack 22mto import source
+	      code while creating a main pack.
+	      Such a script can be written by packs administrators.  It	 works
+	      only with reference packs.
+
+       GMK_SUPPORT
+	      The directory of support files to run 1mgmkpack 22m(wrappers, config‐
+	      uration files, external scripts).
+
+
+       PACK_PREFIX
+	      The prefix of pack names.
+
+       PACK_EXT
+	      The suffix of pack names.
+
+
+       GMK_IGNORE_MULTINAME
+	      export this variable to any non-empty string to prevent  1mgmkpack0m
+	      from  aborting  when  more  than	one symbol of the same name is
+	      found inside a library (main entries are ignored anyway).
+
+
+       GMK_INTFBMODULE_LIB
+	      export this variable to any non-empty  string  to	 make  1mgmkpack0m
+	      fill  the	 "unsatisfied  reference"  archive library with object
+	      files resulting from the compilation of autogenerated interfaces
+	      encapsulated  inside  a  module.	 This may be needed to achieve
+	      linking edition with certain compilers.
+
+
+       GMK_TIMER
+	      The command used to count the compile time of each file. Default
+	      is /usr/bin/time
+
+
+       GMK_USER_PACKNAME_STYLE
+	      Style used to construct the user pack names.
+	      If not set, the default is equivalent to :
+		"GMK_USER_PACKNAME_STYLE=\${RELATIVE_TARGET_PACK}"
+	      (NB : The backslashes are important !)
+	      The following variables can be used to build a more complex name
+	      :
+		 RELEASE_NUMBER	      : reference release number
+		 RELEASE	      : reference release, including the  pre‐
+	      fix if any
+		 BRANCH		      : reference branch name
+		 LATEST		      : reference branch version
+		 RELATIVE_TARGET_PACK : user pack short name
+		 LIBFRT		      : compiler stamp
+		 LIBOPT		      : compiler options stamp
+		 PACK_EXT	      : suffix
+	      Examples :
+		 - Sort packs in one directory per release :
+	      GMK_USER_PACKNAME_STYLE=
+		\${RELEASE_NUMBER}/\${RELATIVE_TARGET_PACK}
+		 - Extensive information on name :
+	      GMK_USER_PACKNAME_STYLE=
+		\${RELEASE}_\${BRANCH}.\${LATEST}%\${RELATIVE_TAR‐
+	      GET_PACK}.\${LIBFRT}.\${LIBOPT}\${PACK_EXT}
+		 - Paste the root pack name after the user pack name :
+	      GMK_USER_PACKNAME_STYLE=
+		\${RELATIVE_TARGET_PACK}@\${RELEASE}_\${BRANCH}.\${LAT‐
+	      EST}.\${LIBFRT}.\${LIBOPT}\${PACK_EXT}
+
+
+       GMKROOT
+	      The directory where 1mgmkpack 22mis installed.
+
+
+
+1mEXAMPLES0m
+       The  following  command	builds an empty reference pack (hub and source
+       code) from scratch, where the release number is 12 and with a script to
+       compile, build archive object libraries, but without making executables
+       :
+
+
+	      (. berootpack)
+	      gmkpack -a -K -r 12
+
+       The following command builds an empty reference pack named 'bugfix'  on
+       top  of	the main pack defined above, together with a script to compile
+       and make the executables ARPEGE, ALADIN and AROME (note that this oper‐
+       ation  cannot be perfomed before the total achievement of the reference
+       pack above) :
+
+
+	      (. berootpack)
+	      gmkpack -r 12 -u bugfix -p arpege,aladin,arome
+
+       The following command builds a user pack named 'mymods' on top  of  the
+       pack 'bugfix' defined above, together with a script to compile and make
+       all possible executables :
+
+
+	      (. behomepack)
+	      gmkpack -r 12 -u mymods -b bugfix -p ?
+
+1mFILES0m
+       $GMK_SUPPORT/arch/
+	      Directory containing the configuration files which can  be  used
+	      by 1mgmkpack 22m(compilers, compilers options mainly).
+
+       $HOME/.gmkpack/arch/
+	      The user-private directory where to add more configuration files
+	      for 1mgmkpack0m
+
+       $GMK_SUPPORT/wrapper/
+	      Directory containing wrappers to compilers or such commands,  to
+	      be developped or customized be the administrator.
+
+       $GMK_SUPPORT/bin/
+	      Directory	 containing miscellaneous scripts, like plugins, to be
+	      developped or customized be the administrator.
+
+       $GMKROOT/link/*
+	      The directory of configuration files specific for each  possible
+	      executable.
+
+       $GMKROOT/link/*/entry
+	      File  containing the name of the entry point. It can be a single
+	      object filename, or a list of object  filename  (which  will  be
+	      loaded  ahead). Wild characters are allowed. Non-existent object
+	      filenames are allowed.
+
+       $GMKROOT/link/*/projlist
+	      File containing the list of projects (and thus  user  libraries)
+	      needed  to link the executable. The projects are sorted from top
+	      to bottom like the subsequent user libraries  should  be	linked
+	      (from  first to last), before the system libraries. Non-existent
+	      projects are allowed.
+
+       $GMKROOT/link/*/dummylist
+	      File containing the list of dummy projects (and thus dummy  user
+	      libraries) needed to link the executable. The dummy projects are
+	      sorted from top to bottom like  the  subsequent  user  libraries
+	      should  be  linked  (from	 first	to  last),  before  the system
+	      libraries. Non-existent projects are allowed.
+
+       $GMKROOT/link/*/ldflags
+	      File containing on the first line the name of the loader	(as  a
+	      configuration variable name), and on the second line the loading
+	      flags sequence (as a configuration variable name).
+
+       $GMKROOT/link/*/system_libs
+	      File containing the list of system libraries  (as	 configuration
+	      variables	 names)	 needed	 to link the executable. The libraries
+	      are sorted from top to bottom like they should be	 linked	 (from
+	      first to last), after the user libraries.
+
+       $GMKROOT/link/*/excluded_libs/*
+	      For  each project if present: the list of the stamps correspond‐
+	      ing to the sub-libraries to be excluded while linking.
+
+       $GMKROOT/link/*/blacklist
+	      File containing the name of the blacklist file used  at  linking
+	      time. If no blacklist file is needed, it can be an empty file.
+
+       $HOME/.gmkpack/link/*
+	      The  user-private directory where to add configuration files for
+	      new executables.
+
+       $GMKROOT/intfb/*
+	      For each project if present: the release since  when  the	 auto-
+	      generated interface blocks have been used.
+
+       $GMKROOT/libs/*/*
+	      For each project if present ($GMKROOT/libs/*): the sub-libraries
+	      stamps as files containing the list of the sub-directories serv‐
+	      ing each sub-library.
+
+       $GMKROOT/home/exenames
+	      The file containing the name of each executable. To be used as a
+	      starting point for customization.
+
+1mAUTHOR0m
+       Ryad El Khatib	<ryad.elkhatib@meteo.fr>
+
+1mSEE ALSO0m
+       1madmpack(1),  behomepack(1),  berootpack(1),  brushpack(1),  envpack(1),0m
+       1mcleanpack(1),	genpack(1),  gmkfilemaker(1),  idotpack(1), lockpack(1),0m
+       1mlogpack(1),  lspack(1),  mpsh(1),  optionspack(1),  progpack(1),  read‐0m
+       1mpack(1), resetpack(1), rlspack(1), rmpack(1), scanpack(1), showpack(1),0m
+       1musrpack(1), vimpack(1).0m
+
+
+
+								    gmkpack(1)

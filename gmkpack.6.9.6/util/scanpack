@@ -1,0 +1,32 @@
+#!/bin/bash
+########################################################################
+#
+#    Script scanpack
+#    -------------
+#
+#    Purpose : In the framework of a pack : to recursively list all files 
+#    -------   with extensions .F90 .F .f90 .f .h .sql .c .ddl .inc .py .b
+#              .yaml .[hf]ypp
+#              preprocessed files from NEC compilers (i.$file) are filtered.
+#
+#    Usage :  scanpack
+#    -----
+#
+########################################################################
+#
+# No use of projectlist : slower, but we can use this command in an external environment and store
+# files in the current directory (a vary unsafe manner but external software can do so).
+
+export LC_ALL=C
+if [ "$ZSH_NAME" = "zsh" ] ; then
+  setopt +o nomatch
+fi
+
+if [ "$CCUNAME" ]; then
+  CCUOPT="-o -name *.cu"
+else
+  CCUOPT=""
+fi
+
+find * \( -name "*.F90" -o -name "*.F" -o -name "*.f90" -o -name "*.f" -o -name "*.h" -o -name "*.inc" -o -name "*.sql" -o -name "*.c" -o -name "*.y" -o -name "*.l" -o -name "*.cc" $CCUOPT -o -name "*.cpp" -o -name "*.ddl" -o -name "*.py" -o -name "*.[hf]ypp" -o -name "*.yaml" -o -name "*.b" \) \( ! -type d \) -follow -depth -print 2> /dev/null | egrep -v "(^i\..*\.|/i\..*\.)"
+

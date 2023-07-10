@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Definition of a ''pack''</TITLE>
+<META NAME="description" CONTENT="Definition of a ''pack''">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="node4.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html214"
+  HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html208"
+  HREF="node4.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html202"
+  HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html210"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html212"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html215"
+  HREF="node6.html">Structure of a pack</A>
+<B> Up:</B> <A NAME="tex2html209"
+  HREF="node4.html">Bundling source code, libraries</A>
+<B> Previous:</B> <A NAME="tex2html203"
+  HREF="node4.html">Bundling source code, libraries</A>
+ &nbsp; <B>  <A NAME="tex2html211"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html213"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00221000000000000000">
+Definition of a ''pack''</A>
+</H2>
+
+<P>
+When you want to compile source codes, you have to copy your modified source codes ''somewhere'' : usually : a directory. Somewhere
+ inside or nearby this directory you will put your compilation script or <code>Makefile</code>, and later your objects libraries and
+ executables.
+
+<P>
+This bundle of source codes, scripts, object files or libraries and executables is what we call here a ''pack'' : 
+
+<P>
+a ''pack'' is a directory containing specific subdirectories and files, which will be all created running <I>GmkPack </I>.
+
+<P>
+Below this directory, you will compile your modifications and make your libraries and executables thanks to a script made by <I>GmkPack </I>. 
+All the necessary external files (source codes, libraries) will be accessible inside this pack via symbolic links.
+
+<P>
+ 
+<P>
+There are two kinds of packs : the ''main'' ones, and the ordinary ones.
+
+<P>
+A ''main'' pack is what you need to make when you have to compile your whole source code from scratch.
+
+<P>
+A normal pack is what you need to make when you want to re-compile only a few modifications of a whole source code. 
+In this case you will need to use an existing pack, and your pack will be an increment from this referencing pack. 
+This reference pack may have been made by yourself before the ''ordinary'' one, or or by somebody else.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html214"
+  HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html208"
+  HREF="node4.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html202"
+  HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html210"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html212"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html215"
+  HREF="node6.html">Structure of a pack</A>
+<B> Up:</B> <A NAME="tex2html209"
+  HREF="node4.html">Bundling source code, libraries</A>
+<B> Previous:</B> <A NAME="tex2html203"
+  HREF="node4.html">Bundling source code, libraries</A>
+ &nbsp; <B>  <A NAME="tex2html211"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html213"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

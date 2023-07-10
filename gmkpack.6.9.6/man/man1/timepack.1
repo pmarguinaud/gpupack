@@ -1,0 +1,34 @@
+.TH timepack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+timepack \- display the most time consumming files of a pack at compile time
+.PP
+.SH SYNOPSIS
+.B timepack
+[
+.BI "-n " "number-of-files"
+]
+.PP
+.SH DESCRIPTION
+.B timepack
+displays the most time consumming files of a pack at compile time.
+It supposes that the compilation as been performed with the variable ICS_TIMING_REPORT > 0
+.PP
+.SH OPTIONS
+.IP "\fB -f \fInumber-of-files\fR"
+How many of the most consumming files to display.
+.br
+The default is to display the 20 most time consumming files
+.PP
+.SH ENVIRONNEMENT
+.IP ROOTPACK
+The default directory where to look for packs as an alternative to 
+.I $HOME/rootpack
+.PP
+.IP GMK_TIMEFILE_EXTENSION
+The extension of the files containing the timing report. The default value is
+.I time
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP

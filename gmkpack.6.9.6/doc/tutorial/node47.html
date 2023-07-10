@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Verbosity</TITLE>
+<META NAME="description" CONTENT="Verbosity">
+<META NAME="keywords" CONTENT="tutorial">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="tutorial.css">
+
+<LINK REL="previous" HREF="node46.html">
+<LINK REL="up" HREF="node35.html">
+<LINK REL="next" HREF="node48.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html831"
+  HREF="node48.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html825"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html821"
+  HREF="node46.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html827"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html829"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html832"
+  HREF="node48.html">Working tools</A>
+<B> Up:</B> <A NAME="tex2html826"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html822"
+  HREF="node46.html">Executables</A>
+ &nbsp; <B>  <A NAME="tex2html828"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html830"
+  HREF="node64.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION005120000000000000000">
+Verbosity</A>
+</H1>
+<P>
+<FONT SIZE="-2">The verbosity of <I>GmkPack </I>can be tuned :
+</FONT><PRE>
+# Verboose level (0 or 1 or 2 or 3) :
+# --------------
+
+export ICS_ECHO=1
+</PRE><DL><DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ECHO=0</code> displays the configuration file options, a digest of the compilation command for each file, the content of
+ local libraries, the actual and ordered list of libraries loaded from packs, the multiplied symbols removed before linking and the
+ loading command.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ECHO=1</code> displays in addition the list of source files that will be (re)compiled.
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ECHO=2</code> displays in addition the the include files pathes and the source files pathes
+<DT><IMG WIDTH="14" HEIGHT="14" SRC="file:/usr/lib/latex2html/icons/redball.png" ALT="*">
+<DD> <code>ICS_ECHO=3</code> displays in addition for each <I>compilation step</I> the modules and include files used
+ (''<code>previousmodules</code>'') and the recompiled ones among them (''<code>intersection</code>'') ; and the actual echo of the compilation
+ command for each (re)compiled file.
+</DL><FONT SIZE="-2">
+Notice :
+</FONT>
+<UL>
+<LI>The default value is <code>2</code> for main packs and <code>1</code> for ordinary packs.
+</LI>
+<LI>Changing the verbosity can be helpful to better understand the behavior of <I>GmkPack </I>. 
+</LI>
+</UL><FONT SIZE="-2">
+</FONT>
+<P>
+<FONT SIZE="-2"></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html831"
+  HREF="node48.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html825"
+  HREF="node35.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html821"
+  HREF="node46.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html827"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/lib/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html829"
+  HREF="node64.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/lib/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html832"
+  HREF="node48.html">Working tools</A>
+<B> Up:</B> <A NAME="tex2html826"
+  HREF="node35.html">Compilation scripts in details</A>
+<B> Previous:</B> <A NAME="tex2html822"
+  HREF="node46.html">Executables</A>
+ &nbsp; <B>  <A NAME="tex2html828"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html830"
+  HREF="node64.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+EL KHATIB Ryad
+2008-05-23
+</ADDRESS>
+</BODY>
+</HTML>

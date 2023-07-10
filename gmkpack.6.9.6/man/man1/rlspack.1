@@ -1,0 +1,33 @@
+.TH rlspack 1
+.ds )H METEO-FRANCE - CNRM/GMAP
+.SH NAME
+rlspack \- display the administrator's existing releases
+.PP
+.SH SYNOPSIS
+.B rlspack
+[
+.BI "-f " "rootpack"
+]
+.PP
+.SH DESCRIPTION
+.B rlspack
+displays the administrator existing releases
+.PP
+.SH OPTIONS
+.IP "\fB -f \fIrootpack\fR"
+Directory where to look for packs.
+.br
+The default is to consider the directory
+.I $HOME/rootpack
+.PP
+.SH ENVIRONNEMENT
+.IP ROOTPACK
+The default directory where to look for packs as an alternative to 
+.I $HOME/rootpack
+.PP
+.SH AUTHOR
+Ryad El Khatib   <ryad.elkhatib@meteo.fr>
+.PP
+.SH SEE ALSO
+.BR admpack(1),
+.BR usrpack(1).
