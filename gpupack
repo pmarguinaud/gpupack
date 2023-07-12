@@ -572,13 +572,15 @@ then
 
 for ARCH in INTEL1805
 do
-  for OPT in 2d 
+  for OPT in 2s
   do
     pack_compile 
   done
 done
 
 fi
+
+exit
 
 for ARCH in NVHPC2305
 do
