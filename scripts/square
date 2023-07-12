@@ -1,0 +1,38 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my ($NPROC, $ratio, $swap) = @ARGV;
+
+$ratio ||= 1;
+
+my @X;
+
+for my $x (1 .. $NPROC)
+  {
+    if ($NPROC % $x == 0)
+      {
+        push @X, $x;
+      }
+  }
+
+my %X = map { ($_, abs ($NPROC / $_**2 - $ratio)) } @X;
+
+@X = sort { $X{$a} <=> $X{$b} } @X;
+
+my $X = shift (@X);
+
+my $Y = $NPROC / $X;
+
+if ($swap)
+  {
+    ($X, $Y) = ($Y, $X);
+  }
+
+print "
+NPRGPNS=$X,
+NPRGPEW=$Y,
+NPRTRW=$X,
+NPRTRV=$Y,
+
+";

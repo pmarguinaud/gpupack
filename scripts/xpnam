@@ -1,0 +1,264 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Getopt::Long;
+
+# xpnam
+#   Namelist inline editor
+#   (copyleft) eric.sevault@meteo.fr
+
+# default output is 'filename'.new
+
+
+my $usage = join "\n", (
+  "xpnam [-i]                        # in place substitution (out=in)",
+  "      [--delta='namelist delta']  # fortran synthax namelist delta",
+  "      [--dfile=deltafilename]     # select this file as input delta",
+  "      [--remove=var1[,...]]       # list of variables to remove",
+  "      [--rmblock=block[,...]]     # list of blocks to remove",
+  "      [--empty=block[,...]]       # list of blocks to set empty",
+  "      [outfile=]namelistfile"     # list of output=input namelist files"
+);
+
+my ($inplace, $delta, $dfile, $remove, $rmb, $empty,  @inputfiles);
+
+GetOptions(
+  'inplace'                  => \$inplace,
+  'delta|substitute=s'       => \$delta,
+  'deltafile|dfile=s'        => \$dfile,
+  'empty|flush=s'            => \$empty,
+  'delete|clean|rm|remove=s' => \$remove,
+  'rmblock=s'                => \$rmb,
+  '<>' => sub { push @inputfiles, @_ },
+) or print STDERR "$usage\n";;
+
+my @rm    = defined $remove ? split /[;,\s]+/, $remove : ();
+my @rmb   = defined $rmb    ? split /[;,\s]+/, $rmb : ();
+my @empty = defined $empty  ? split /[;,\s]+/, $empty : ();
+
+local $/ = undef;
+
+$delta ||= '';
+
+if ( defined $dfile and -f $dfile ) {
+  
+  open DELTA, "<$dfile" or die "xpnam: unable to open delta file $dfile";
+  $delta = <DELTA> . $delta;
+  close NAM;
+}
+
+my $nd = new xp::nam;
+my $apply = $nd->parse( $nd->source( $delta ) );
+
+for my $file ( @inputfiles ) {
+
+  my ( $namout, $namsrc ) = ( "", $file );
+  ( $namout, $namsrc ) = split /=/, $namsrc if ( my $target = $namsrc =~ /=/ ); 
+  $namout = ( split /\//, $namsrc )[-1] . ".new" if ( $namout eq "" );
+
+  my $nam = new xp::nam();
+  open NAM, "<$namsrc"
+    or die "xpnam: unable to open file $namsrc";
+  $nam->source( <NAM> );
+  close NAM;
+
+  $nam->empty( @empty );
+  $nam->rmblock( @rmb );
+  $nam->remove( @rm, $nd->reset_vars() );
+  $nam->substitute( $apply );
+
+  $namout = $namsrc if ( $inplace and ! $target );
+  open OUT, ">$namout" or die "xpnam: unable to create file $namsrc";
+  print OUT $nam->nice_source();
+  close OUT;
+
+}
+
+package xp::nam;
+
+use strict;
+
+
+sub new {
+  my $class = shift;
+  return bless {
+    source => [],
+    parsed => undef,
+    rmvars => [],
+    @_
+  }, $class;
+}
+
+sub clean {
+  my ( $self, $dirtynam ) = @_;
+
+  $dirtynam =~ s/,\s*([a-z])/,\n$1/gimos;
+  $dirtynam =~ s/(\&[a-z]\w*)\s+(?=\w+)/$1\n/gimos;
+  $dirtynam =~ s/(?<=[\w\.,'\/])\s*(\&[a-z]\w*)/\n$1/gimos;
+  $dirtynam =~ s/(?<=[\w\.,'])\s*\/(?![\w,'])/\n\//gimos;
+  $dirtynam =~ s/,\s*\n\s*([\d\.])/,$1/gimos;
+  $dirtynam =~ s/\.f\./.FALSE./gimos;
+  $dirtynam =~ s/\.t\./.TRUE./gimos;
+  $dirtynam =~ s/\s*[,]?\s*$//gimos;
+  $dirtynam =~ s/\(\s+/\(/gimos;
+  $dirtynam =~ s/\s+\)/\)/gimos;
+
+  return ( split /\n/, $dirtynam );
+}
+
+sub source {
+  my ( $self, $source ) = @_;
+  $self->{source} = [ $self->clean($source) ] if defined $source;
+  return $self->{source};
+}
+
+sub reset_vars {
+  ( my $self ) = @_;
+  return @{ $self->{rmvars} };
+}
+
+sub parse {
+  my ( $self, $source, $force ) = @_;
+
+  return $self->{parsed} if ( defined $self->{parsed} and ! $force );
+
+  $source ||= $self->source();
+
+  my $match_header = '^\s*[&](\w+)\s*(?:!.*)?$';
+  my $match_key    = '^\s*(\w[\w,:()\s\%]*)\s*=([^!\n]+)(?:!.*)?$';
+  my $match_reset  = '^\s*(\w[\w,:()\s\%]*)\s*=[-\s]*(?:!.*)?$';
+  my $match_bottom = '^\s*\/\s*(?:!.*)?$';
+
+  my %nam = ();
+  my $namelist = undef;
+
+  for ( @{$source} ) {
+    /$match_reset/o and do {
+      push @{ $self->{rmvars} }, $namelist . '::' . $1;
+      next;
+    };
+    /$match_header/o and do {
+      $nam{$namelist = $1}{_INDEX} = [];
+      next;
+    };
+    /$match_key/o and defined $namelist and do {
+      push @{$nam{$namelist}{_INDEX}}, $1;
+      $nam{$namelist}{$1} = $2;
+      next;
+    };
+    /$match_bottom/o and do {
+      $namelist = undef;
+      next;
+    };
+  }
+
+  $self->{parsed} = \%nam;
+
+  return $self->{parsed};
+}
+
+sub nice_source {
+  my ( $self, $source ) = @_;
+
+  my %pnam = %{ $self->parse( $self->source( $source ) ) };
+
+  $source = join '', map {
+    my $b = $_;
+    ( " \&$_\n",
+    map( { sprintf "   %s=%s,\n", $_, $pnam{$b}{$_} } @{$pnam{$b}{_INDEX}} ),
+    " /\n" )
+  } sort keys %pnam;
+
+  return $source;
+}
+
+sub function_abs {
+  my ( $self, $x ) = @_;
+  return abs($x);
+}
+
+sub function_max {
+  my ( $self, $max, @a ) = @_;
+  for ( @a ) {
+    $max = $_ if ( $_ > $max );
+  }
+  return $max;
+}
+
+sub function_min {
+  my ( $self, $min, @a ) = @_;
+  for ( @a ) {
+    $min = $_ if ( $_ < $min );
+  }
+  return $min;
+}
+
+sub substitute {
+  my ( $self, $delta ) = @_;
+
+  my $pnam = $self->parse();
+  my %pmod = %$delta;
+
+  for my $b ( keys %pmod ) {
+    $pnam->{$b}{_INDEX} = [] unless exists $pnam->{$b};
+    for my $k ( @{$pmod{$b}{_INDEX}} ) {
+      push @{$pnam->{$b}{_INDEX}}, $k
+      	unless exists $pnam->{$b}{$k};
+      if ( $pmod{$b}{$k} =~ /\b_[a-z]+\(.*\)/o ) {
+        my $seen = 0;
+        my $eval = $pmod{$b}{$k};
+        while ( $eval =~ s{
+          _([a-z]+)\(\s*([^\(\)]+)\s*\)
+        }{
+          my $f = "function_$1";
+          my @a = grep /\S/o, split /\s*,\s*/o, $2;
+          $seen =  grep { $_ eq '_' } @a unless $seen;
+          push @a, '_' unless $seen;
+          @a = map { ( $_ eq '_' ) ? $pnam->{$b}{$k} : $_ } @a;
+          $self->$f(@a);
+        }egox ) {};
+        $pnam->{$b}{$k} = $eval;
+      } else {
+        $pnam->{$b}{$k} = $pmod{$b}{$k};
+      }
+    }
+  }
+
+  return $pnam;
+}
+
+sub empty {
+  my ( $self, @blocks ) = @_;
+  my $pnam = $self->parse();
+  $pnam->{$_}{_INDEX} = [] for @blocks;
+}
+
+sub rmblock {
+  my ( $self, @blocks ) = @_;
+  my $pnam = $self->parse();
+  delete $pnam->{$_} for @blocks;
+}
+
+sub remove {
+  my ( $self, @rm ) = @_;
+
+  my $pnam = $self->parse();
+  my @bl   = keys %$pnam;
+
+  for my $select ( @rm ) {
+    my ( $b, $k ) = split /::/o, $select;
+    unless ( defined $k ) {
+      $k = $b;
+      $b = '.*';
+    }
+    $k =~ s/([\(\)])/\\$1/go;
+    for my $ab ( grep /$b/, @bl ) {
+      delete $pnam->{$ab}{$_}
+        for ( grep /^$k(?:\(.*?\))?$/, keys %{ $pnam->{$ab} } );
+      $pnam->{$ab}{_INDEX} = [
+        grep { exists $pnam->{$ab}{$_} } @{ $pnam->{$ab}{_INDEX} }
+      ];
+    }
+  }
+}
+
