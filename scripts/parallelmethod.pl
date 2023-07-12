@@ -13,6 +13,9 @@ sub slurp
 }
 
 my ($pack) = @ARGV;
+$pack ||= '.';
+
+die unless (-f "$pack/.gmkview");
 
 $pack = 'File::Spec'->rel2abs ($pack);
 

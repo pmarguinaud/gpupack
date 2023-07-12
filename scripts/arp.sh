@@ -10,32 +10,46 @@ function submit ()
   N=$1
   p=$2
   script=$3
-  arch=$4
-  opt=$5
-  grid=$6
+  pack=$4
+  grid=$5
 
-  out="$PREFIX/cy49/arp/$grid/ref/$arch.$opt/slurm.out"
-  
+
+  arch=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $1 ' $pack)
+  opt=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $2 ' $pack)
+
+  out="$GPUPACK_PREFIX/cy49/arp/$grid/ref/$arch.$opt/slurm.out"
+
   if [ -f "$out" ]
   then
-  sbatch -N$N -p $p  cy49/arp/arp.sh $arch $opt $grid
+  sbatch -N$N -p $p  cy49/arp/arp.sh $pack $grid
   else
   mkdir -p $(dirname $out)
-  sbatch -o $out -N$N -p $p  cy49/arp/arp.sh $arch $opt $grid
+  sbatch -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
   fi
 }
 
 
-submit 1 ndl       cy49/arp/arp.sh NVHPC2303 1s t0031
-submit 1 ndl       cy49/arp/arp.sh NVHPC2303 1d t0031
+CYCLE=49t0
+BRANCH=compile_with_pgi_2303-field_api
 
-submit 3 ndl       cy49/arp/arp.sh NVHPC2303 1s t0798
-submit 3 ndl       cy49/arp/arp.sh NVHPC2303 1d t0798
+submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0031
+submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0031
 
-submit 1 normal256 cy49/arp/arp.sh INTEL1805 3s t0031
-submit 1 normal256 cy49/arp/arp.sh INTEL1805 3d t0031
+submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0798
+submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0798
 
-submit 3 normal256 cy49/arp/arp.sh INTEL1805 3s t0798
-submit 3 normal256 cy49/arp/arp.sh INTEL1805 3d t0798
+exit
+
+submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1s t0031
+submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1d t0031
+
+submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1s t0798
+submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1d t0798
+
+submit 1 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2s t0031
+submit 1 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2d t0031
+
+submit 3 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2s t0798
+submit 3 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2d t0798
 
 

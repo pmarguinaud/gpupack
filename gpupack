@@ -3,7 +3,7 @@
 set -x
 set -e
 
-PREFIX=$HOME/gpupack
+export GPUPACK_PREFIX=$HOME/gpupack
 
 function eccodes_install ()
 {
@@ -402,18 +402,18 @@ function FieldAPI_clone ()
 
 function libraries_install ()
 {
-  INSTALL=$PREFIX/install/$ARCH
-  SOURCES=$PREFIX/sources
-  TMP=$PREFIX/tmp/$ARCH
+  INSTALL=$GPUPACK_PREFIX/install/$ARCH
+  SOURCES=$GPUPACK_PREFIX/sources
+  TMP=$GPUPACK_PREFIX/tmp/$ARCH
 
   mkdir -p $INSTALL
   mkdir -p $TMP
   
-  export CC=$PREFIX/support/wrap/$ARCH/cc
-  export FC=$PREFIX/support/wrap/$ARCH/f90
-  export CXX=$PREFIX/support/wrap/$ARCH/cxx
-  export F90=$PREFIX/support/wrap/$ARCH/f90
-  export F77=$PREFIX/support/wrap/$ARCH/f90
+  export CC=$GPUPACK_PREFIX/support/wrap/$ARCH/cc
+  export FC=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
+  export CXX=$GPUPACK_PREFIX/support/wrap/$ARCH/cxx
+  export F90=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
+  export F77=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
     
   for lib in \
     eccodes hdf5 netcdf netcdf_fortran lapack eigen oasisdummy mpidummy \
@@ -425,7 +425,7 @@ function libraries_install ()
 
 function pack_compile ()
 {
-  PACK=$PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
+  PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
   
   if [ ! -d "$PACK" ]
   then
@@ -439,15 +439,23 @@ function pack_compile ()
     s/GMK_MAKE=ON/GMK_MAKE=OFF/go;
     s/GMK_INSTALL=ON/GMK_INSTALL=OFF/go;
   " ics_masterodb
+
+  cp ics_masterodb ld_masterodb
+  
+  perl -i -pe "
+    s/ICS_RECURSIVE_UPDATE=yes/ICS_RECURSIVE_UPDATE=no/go;
+    s/ICS_ICFMODE=full/ICS_ICFMODE=off/go;
+    s/ICS_UPDLIBS=full/ICS_UPDLIBS=off/go;
+  " ld_masterodb
+
   perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
   perl -i -pe "
-    s,\\\$PREFIX\b,$PREFIX,go; 
+    s,\\\$GPUPACK_PREFIX\b,$GPUPACK_PREFIX,go; 
     s/\\\$ARCH\b/$ARCH/go; 
     s/\\\$HOME\b/\$ENV{HOME}/go;
   " .gmkfile/$ARCH
-  
+
   gitpack --init --repo $REPO --branch $BRANCH
-  
 
   for lib in ecSDK Fiat Ectrans OOPS FieldAPI 
   do
@@ -461,10 +469,15 @@ function pack_compile ()
     ./$prog > $prog.eo 2>&1
   done
 
-  lockpack -y*
+  if [ ! -f "bin/MASTERODB" ]
+  then
+    exit 1
+  fi
+
+  lockpack -f
   \rm -rf hub/local/build/
 
-  $PREFIX/scripts/parallelmethod.pl .
+  $GPUPACK_PREFIX/scripts/parallelmethod.pl .
     
   fi
 }
@@ -503,8 +516,8 @@ function cmake_install ()
 
 function vimpack_install ()
 {
-  cd $PREFIX
-  if [ ! -d "$PREFIX/vimpack" ]
+  cd $GPUPACK_PREFIX
+  if [ ! -d "$GPUPACK_PREFIX/vimpack" ]
   then
   git clone https://github.com/pmarguinaud/vimpack.git
   fi
@@ -512,9 +525,9 @@ function vimpack_install ()
 
 function common_install ()
 {
-  INSTALL=$PREFIX/install/common
-  SOURCES=$PREFIX/sources
-  TMP=$PREFIX/tmp/$ARCH
+  INSTALL=$GPUPACK_PREFIX/install/common
+  SOURCES=$GPUPACK_PREFIX/sources
+  TMP=$GPUPACK_PREFIX/tmp/$ARCH
   
   mkdir -p $INSTALL
   mkdir -p $TMP
@@ -526,20 +539,23 @@ function common_install ()
 }
   
 
-: common_install
-
-export PATH=$PREFIX/install/common/fypp/bin:$PREFIX/install/common/cmake/bin:$PREFIX/vimpack:$PREFIX/gmkpack/util:$PATH
-
 if [ ! -f "gpupack.sh" ]
 then
-  cd $PREFIX
-  echo "export PREFIX=$PREFIX" > gpupack.sh
-  for prog in gmkpack cmake gitpack
-  do
-    path=$(dirname $(which $prog))
-    echo "export PATH=$path:\$PATH" >> gpupack.sh
-  done
+  cd $GPUPACK_PREFIX
+  cat -> gpupack.sh << EOF
+export GPUPACK_PREFIX=$GPUPACK_PREFIX
+export PATH=\$GPUPACK_PREFIX/install/common/fypp/bin:\$GPUPACK_PREFIX/install/common/cmake/bin:\$GPUPACK_PREFIX/vimpack:\$GPUPACK_PREFIX/gmkpack/util:\$PATH
+export ROOTPACK=\$GPUPACK_PREFIX/pack
+export HOMEPACK=\$GPUPACK_PREFIX/pack
+export GMK_SUPPORT=\$GPUPACK_PREFIX/support
+
+EOF
 fi
+
+
+. ./gpupack.sh
+
+: common_install
 
 #for ARCH in NVHPC2303 INTEL1805
 for ARCH in NVHPC2305 
@@ -547,20 +563,16 @@ do
 : libraries_install  
 done
 
-export ROOTPACK=$PREFIX/pack
-export HOMEPACK=$PREFIX/pack
-export GMK_SUPPORT=$PREFIX/support
-
 CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api
 REPO=https://github.com/pmarguinaud/IAL.git
 
-if [ 0 -eq 1 ]
+if [ 1 -eq 1 ]
 then
 
 for ARCH in INTEL1805
 do
-  for OPT in 3s 3d
+  for OPT in 2d 
   do
     pack_compile 
   done
@@ -568,9 +580,9 @@ done
 
 fi
 
-for ARCH in NVHPC2303
+for ARCH in NVHPC2305
 do
-  for OPT in 1s 
+  for OPT in 1s
   do
     pack_compile 
   done

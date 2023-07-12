@@ -40,12 +40,11 @@ export LC_ALL=C
 if [ "$ZSH_NAME" = "zsh" ] ; then
   setopt +o nomatch
 fi
-
 #     0. Get this version of gmkpack
 #        ---------------------------
 #
 THESE_OPTIONS="$*"
-THIS_GMKPACK=$0
+THIS_GMKPACK=$(perl -e ' use File::Spec; print "File::Spec"->rel2abs ($ARGV[0]) ' $0)
 THIS_COMMAND="$THIS_GMKPACK $THESE_OPTIONS"
 #
 GMK_SUPPORT=${GMK_SUPPORT:=$PREFIX/gmkpack/support}
@@ -520,7 +519,7 @@ if [ ! "$MAINPACK" ] ; then
             LATEST="0$LATEST"
           fi
           RELATIVE_SOURCE_PACK=${PREFIX}.${LATEST}.${SUFFIX}
-          SOURCE_PACK=${ROOTPACK}/${RELATIVE_SOURCE_PACK}
+          export SOURCE_PACK=${ROOTPACK}/${RELATIVE_SOURCE_PACK}
 #         Control that LIBFRT still fits the configuration file inside the source pack :
           grep "^LIBFRT = " $SOURCE_PACK/.gmkfile/* | cut -d " " -f3- > $GMKWRKDIR/libfrt_test
           chmod 755 $GMKWRKDIR/libfrt_test

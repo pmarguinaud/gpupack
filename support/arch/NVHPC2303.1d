@@ -7,22 +7,22 @@ ARCH = NVHPC2303
 # Fortran (cross-)compiler
 # ------------------------
 
-FRTNAME = $PREFIX/support/wrap/$ARCH/mpif90
+FRTNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/mpif90
 
 # C (cross-)compiler
 # ------------------
 
-VCCNAME = $PREFIX/support/wrap/$ARCH/mpicc
+VCCNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicc
 
 # C++ (cross-)compiler
 # ------------------
 
-CXXNAME = $PREFIX/support/wrap/$ARCH/mpicxx
+CXXNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicxx
 
 # Native C compiler
 # -----------------
 
-CCNATIVE = $PREFIX/support/wrap/$ARCH/mpicc
+CCNATIVE = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicc
 
 # Native C linker flags
 # ---------------------
@@ -32,12 +32,12 @@ LNK_MPCCNATIVE =
 # fypp preprocessor
 # -----------------
 
-GMK_FYPP = $PREFIX/install/common/fypp/bin/fypp
+GMK_FYPP = $GPUPACK_PREFIX/install/common/fypp/bin/fypp
 
 # fypp preprocessor background flags
 # ----------------------------------
 
-GMK_FYPP_FLAGS = -M $PREFIX/install/common/pyyaml/lib -m os -m yaml
+GMK_FYPP_FLAGS = -M $GPUPACK_PREFIX/install/common/pyyaml/lib -m os -m yaml
 
 # Fortran compiler default version (stamp)
 # ----------------------------------------
@@ -131,17 +131,17 @@ GMK_FCFLAGS_ETRANS =
 # Fortran (cross-)linker
 # ----------------------
 
-LNK_STD = $PREFIX/support/wrap/$ARCH/f90
+LNK_STD = $GPUPACK_PREFIX/support/wrap/$ARCH/f90
 
 # Message Passing Fortran (cross-)linker
 # --------------------------------------
 
-LNK_MPI = $PREFIX/support/wrap/$ARCH/mpif90
+LNK_MPI = $GPUPACK_PREFIX/support/wrap/$ARCH/mpif90
 
 # Cc (cross-)linker
 # -----------------
 
-LNK_CC = $PREFIX/support/wrap/$ARCH/cc -lrt -lstdc++
+LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -lrt -lstdc++
 
 # Fortran linking flags
 # ----------------------
@@ -219,11 +219,11 @@ GMK_HUB_METHOD_FOR_FieldAPI = cmake
 
 GMK_CMAKE_ecbuild = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME}
 
-GMK_CMAKE_eckit = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_BUILD_TYPE=NONE -DENABLE_ECKIT_CMD=OFF -DENABLE_ECKIT_SQL=OFF -DENABLE_BZIP2=OFF -DENABLE_SNAPPY=OFF -DENABLE_LAPACK=OFF -DENABLE_CURL=OFF -DENABLE_DOCS=OFF -DENABLE_SSL=OFF -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -Deigen_ROOT=$PREFIX/install/$ARCH
+GMK_CMAKE_eckit = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$GPUPACK_PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_BUILD_TYPE=NONE -DENABLE_ECKIT_CMD=OFF -DENABLE_ECKIT_SQL=OFF -DENABLE_BZIP2=OFF -DENABLE_SNAPPY=OFF -DENABLE_LAPACK=OFF -DENABLE_CURL=OFF -DENABLE_DOCS=OFF -DENABLE_SSL=OFF -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -Deigen_ROOT=$GPUPACK_PREFIX/install/$ARCH
 
 GMK_CMAKE_fckit = -Wno-deprecated -Wno-dev -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_FINAL=OFF -DENABLE_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\"
 
-GMK_CMAKE_oops_src = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_MODULE_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMKLOCAL}/\${GMKSRC}/ecSDK/ecbuild/cmake -DECKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DFCKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DEIGEN3_INCLUDE_DIR=$PREFIX/install/$ARCH/include/eigen3 -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\"
+GMK_CMAKE_oops_src = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$GPUPACK_PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_MODULE_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMKLOCAL}/\${GMKSRC}/ecSDK/ecbuild/cmake -DECKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DFCKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DEIGEN3_INCLUDE_DIR=$GPUPACK_PREFIX/install/$ARCH/include/eigen3 -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\"
 
 GMK_CMAKE_atlas = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DATLAS_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\"
 
@@ -237,35 +237,35 @@ GMK_CMAKE_field_api = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -D
 # ------------------------------------------------
 
 # "Read Grib from BDAP":
-LD_USR01 = $PREFIX/install/$ARCH/lib/librgb.a
+LD_USR01 = $GPUPACK_PREFIX/install/$ARCH/lib/librgb.a
 # "Bufr decoding":
-LD_USR02 = $PREFIX/install/$ARCH/lib/libbufr.a
+LD_USR02 = $GPUPACK_PREFIX/install/$ARCH/lib/libbufr.a
 # "Gribex (or emos)":
-LD_USR04 = $PREFIX/install/$ARCH/lib/libgribex.a
+LD_USR04 = $GPUPACK_PREFIX/install/$ARCH/lib/libgribex.a
 # "ecmwf field database":
-LD_USR05 = $PREFIX/install/$ARCH/lib/libfdbdummy.a
+LD_USR05 = $GPUPACK_PREFIX/install/$ARCH/lib/libfdbdummy.a
 # "ecmwf wave model":
-LD_USR06 = $PREFIX/install/$ARCH/lib/libwamdummy.a
+LD_USR06 = $GPUPACK_PREFIX/install/$ARCH/lib/libwamdummy.a
 # "C code generated by blacklist":
 LD_USR07 =
 # "Nag":
-LD_USR08 = $PREFIX/install/$ARCH/lib/libnaglitedummy.a
+LD_USR08 = $GPUPACK_PREFIX/install/$ARCH/lib/libnaglitedummy.a
 # "OASIS":
-LD_USR09 = $PREFIX/install/$ARCH/lib/liboasisdummy.a
+LD_USR09 = $GPUPACK_PREFIX/install/$ARCH/lib/liboasisdummy.a
 # "Grib_api":
-LD_USR_GRIB_API_F90 = $PREFIX/install/$ARCH/lib64/libeccodes_f90.so
-LD_USR_GRIB_API = $PREFIX/install/$ARCH/lib64/libeccodes.so
+LD_USR_GRIB_API_F90 = $GPUPACK_PREFIX/install/$ARCH/lib64/libeccodes_f90.so
+LD_USR_GRIB_API = $GPUPACK_PREFIX/install/$ARCH/lib64/libeccodes.so
 # "JPEG library":
 LD_USR_JPEG =
 # "EECFI" for aeolus:
 LD_USR_EECFI =
 # "Netcdf :"
-LD_USR_NETCDF_F = $PREFIX/install/$ARCH/lib64/libnetcdff.so
-LD_USR_NETCDF = $PREFIX/install/$ARCH/lib64/libnetcdf.so
+LD_USR_NETCDF_F = $GPUPACK_PREFIX/install/$ARCH/lib64/libnetcdff.so
+LD_USR_NETCDF = $GPUPACK_PREFIX/install/$ARCH/lib64/libnetcdf.so
 # "HDF5 :"
-LD_USR_HDF5_HLFORTRAN = $PREFIX/install/$ARCH/lib/libhdf5_hl_fortran.so
-LD_USR_HDF5_FORTRAN = $PREFIX/install/$ARCH/lib/libhdf5_fortran.so
-LD_USR_HDF5 = $PREFIX/install/$ARCH/lib/libhdf5.so
+LD_USR_HDF5_HLFORTRAN = $GPUPACK_PREFIX/install/$ARCH/lib/libhdf5_hl_fortran.so
+LD_USR_HDF5_FORTRAN = $GPUPACK_PREFIX/install/$ARCH/lib/libhdf5_fortran.so
+LD_USR_HDF5 = $GPUPACK_PREFIX/install/$ARCH/lib/libhdf5.so
 # "Meteo-France dummies library (IFS only):"
 LD_USR_MF_DUMMY =
 # "Magics :"
@@ -295,14 +295,14 @@ LD_USR_FIELD_API = field_api
 # ----------------------------------------------------
 
 # Lapack:
-LD_LANG01 = $PREFIX/install/$ARCH/lib64/liblapack.a
+LD_LANG01 = $GPUPACK_PREFIX/install/$ARCH/lib64/liblapack.a
 # Blas:
-LD_LANG02 = $PREFIX/install/$ARCH/lib64/libblas.a
+LD_LANG02 = $GPUPACK_PREFIX/install/$ARCH/lib64/libblas.a
 
 # System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
 # ------------------------------------------------------------------------------
 
-LD_SYS01 = $PREFIX/install/$ARCH/lib/libibmdummy.so
+LD_SYS01 = $GPUPACK_PREFIX/install/$ARCH/lib/libibmdummy.so
 LD_SYS02 =
 LD_SYS03 =
 LD_SYS04 =
@@ -317,7 +317,7 @@ LD_MPI01 =
 LD_MPI02 =
 LD_MPI03 =
 
-LD_MPI_DUMMY = $PREFIX/install/$ARCH/lib/libmpidummy.so
+LD_MPI_DUMMY = $GPUPACK_PREFIX/install/$ARCH/lib/libmpidummy.so
 
 # Precompiler libraries
 # ----------------------
@@ -329,7 +329,7 @@ LD_LIBVFL =
 # External include pathes (path1:path2:...)
 # ------------------------------------------
 
-INCLUDEPATH = $PREFIX/install/$ARCH/include:$PREFIX/install/$ARCH/include:$PREFIX/install/$ARCH/include:$PREFIX/install/$ARCH/include/shared
+INCLUDEPATH = $GPUPACK_PREFIX/install/$ARCH/include:$GPUPACK_PREFIX/install/$ARCH/include:$GPUPACK_PREFIX/install/$ARCH/include:$GPUPACK_PREFIX/install/$ARCH/include/shared
 
 # (Cross-) nm command & options for BSD format
 # --------------------------------------------
@@ -517,7 +517,7 @@ GMK_NQS_JOBID =
  
 GMK_NQS_OTHER = #SBATCH --export=NONE
 GMK_NQS_OTHER = #SBATCH --exclusive
-GMK_NQS_OTHER = . $PREFIX/gpupack.sh
+GMK_NQS_OTHER = . $GPUPACK_PREFIX/gpupack.sh
 GMK_NQS_OTHER = 
 GMK_NQS_OTHER = 
 GMK_NQS_OTHER = 

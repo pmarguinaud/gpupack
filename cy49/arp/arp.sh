@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --export=PREFIX
+#SBATCH --export=GPUPACK_PREFIX
 #SBATCH --job-name=arp
 #SBATCH --nodes=1
 #SBATCH --time=00:45:00
@@ -90,7 +90,15 @@ export MKL_CBWR=AUTO,STRICT
 export MKL_DEBUG_CPU_TYPE=5
 export MKL_NUM_THREADS=1
 
-export PATH=$PREFIX/scripts:$PATH
+cat /proc/cpuinfo
+
+if [ -f /usr/bin/nvidia-smi ]
+then
+/usr/bin/nvidia-smi
+fi
+
+
+export PATH=$GPUPACK_PREFIX/scripts:$PATH
 
 # Change to a temporary directory
 
@@ -107,28 +115,15 @@ mkdir -p $TMPDIR
 
 cd $TMPDIR
 
-ARCH=$1
-OPT=$2
-GRID=$3
+PACK=$1
+GRID=$2
 
-if [ "x$ARCH" = "x" ]
-then
-  ARCH=NVHPC2303
-fi
+ARCH=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $1 ' $PACK)
+OPT=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $2 ' $PACK)
 
-if [ "x$OPT" = "x" ]
-then
-  OPT=1d
-fi
-
-if [ "x$GRID" = "x" ]
-then
-  GRID=t0031
-fi
-
-export PACK=$PREFIX/pack/49t0_compile_with_pgi_2303-field_api.01.$ARCH.$OPT
+export PACK
 export GRID
-export DATADIR=$PREFIX/cy49
+export DATADIR=$GPUPACK_PREFIX/cy49
 
 for method in nominal openmp openmpsinglecolumn openaccsinglecolumn
 do
@@ -225,7 +220,7 @@ do
   
   ls -lrt
 
-  ref="$PREFIX/cy49/arp/$GRID/ref/$ARCH.$OPT/$method/NODE.001_01"
+  ref="$GPUPACK_PREFIX/cy49/arp/$GRID/ref/$ARCH.$OPT/$method/NODE.001_01"
   if [ ! -f "$ref" ]
   then
     dir=$(dirname $ref)
