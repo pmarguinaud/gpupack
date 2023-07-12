@@ -567,7 +567,7 @@ CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api
 REPO=https://github.com/pmarguinaud/IAL.git
 
-if [ 1 -eq 1 ]
+if [ 0 -eq 1 ]
 then
 
 for ARCH in INTEL1805
@@ -580,11 +580,9 @@ done
 
 fi
 
-exit
-
 for ARCH in NVHPC2305
 do
-  for OPT in 1s
+  for OPT in 1d
   do
     pack_compile 
   done

@@ -37,7 +37,7 @@ GMK_FYPP = $GPUPACK_PREFIX/install/common/fypp/bin/fypp
 # fypp preprocessor background flags
 # ----------------------------------
 
-GMK_FYPP_FLAGS = -M $GPUPACK_PREFIX/install/common/pyyaml/lib -m os -m yaml
+GMK_FYPP_FLAGS = -M $GPUPACK_PREFIX/install/common/yaml/lib -m os -m yaml
 
 # Fortran compiler default version (stamp)
 # ----------------------------------------
