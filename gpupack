@@ -539,10 +539,8 @@ function common_install ()
 }
   
 
-if [ ! -f "gpupack.sh" ]
-then
-  cd $GPUPACK_PREFIX
-  cat -> gpupack.sh << EOF
+cd $GPUPACK_PREFIX
+cat -> gpupack.sh << EOF
 export GPUPACK_PREFIX=$GPUPACK_PREFIX
 export PATH=\$GPUPACK_PREFIX/install/common/fypp/bin:\$GPUPACK_PREFIX/install/common/cmake/bin:\$GPUPACK_PREFIX/vimpack:\$GPUPACK_PREFIX/gmkpack/util:\$PATH
 export ROOTPACK=\$GPUPACK_PREFIX/pack
@@ -550,7 +548,6 @@ export HOMEPACK=\$GPUPACK_PREFIX/pack
 export GMK_SUPPORT=\$GPUPACK_PREFIX/support
 
 EOF
-fi
 
 
 . ./gpupack.sh
