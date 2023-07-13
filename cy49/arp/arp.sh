@@ -102,7 +102,7 @@ export PATH=$GPUPACK_PREFIX/scripts:$PATH
 
 # Change to a temporary directory
 
-export workdir=/scratch/work/marguina
+export workdir=/scratch/work/$USER
 
 if [ "x$SLURM_JOBID" != "x" ]
 then
