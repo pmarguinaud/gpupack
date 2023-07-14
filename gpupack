@@ -96,7 +96,7 @@ function lapack_install ()
   mkdir -p "$LAPACK-Build"
   cd "$LAPACK-Build"
 
-  cmake ../$LAPACK -DCMAKE_INSTALL_PREFIX=$INSTALL
+  cmake ../$LAPACK -DCMAKE_INSTALL_PREFIX=$INSTALL -DBUILD_SHARED_LIBS=ON
   make -j4 install
 }
 
@@ -408,13 +408,15 @@ function libraries_install ()
 
   mkdir -p $INSTALL
   mkdir -p $TMP
+  mkdir -p $INSTALL/lib64
+  ln -s lib64 $INSTALL/lib
   
   export CC=$GPUPACK_PREFIX/support/wrap/$ARCH/cc
   export FC=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
   export CXX=$GPUPACK_PREFIX/support/wrap/$ARCH/cxx
   export F90=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
   export F77=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
-    
+
   for lib in \
     eccodes hdf5 netcdf netcdf_fortran lapack eigen oasisdummy mpidummy \
     ibmdummy naglitedummy wamdummy fdbdummy gribex bufr rgb
@@ -557,8 +559,10 @@ EOF
 #for ARCH in NVHPC2303 INTEL1805
 for ARCH in NVHPC2305 
 do
-: libraries_install  
+  libraries_install  
 done
+
+exit
 
 CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api

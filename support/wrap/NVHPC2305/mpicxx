@@ -2,7 +2,7 @@
 
 use strict;
 
-my $NVHPC_PREFIX = "/opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.5";
+my $NVHPC_PREFIX = "/ec/res4/hpcperm/sor/install/nvidia/hpc_sdk/Linux_x86_64/23.5";
 my $OMPI_PREFIX = "comm_libs/11.8/hpcx/hpcx-2.14/ompi";
 my $CUDA_PREFIX= "cuda/11.8";
 
