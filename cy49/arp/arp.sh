@@ -3,11 +3,8 @@
 #SBATCH --job-name=arp
 #SBATCH --nodes=1
 #SBATCH --time=00:45:00
-#SBATCH --exclusive
 #SBATCH --verbose
 #SBATCH --no-requeue
-#SBATCH -p ndl
-#SBATCH --switches=3
 
 set -x
 set -e
@@ -94,22 +91,15 @@ cat /proc/cpuinfo
 
 if [ -f /usr/bin/nvidia-smi ]
 then
+set +e
 /usr/bin/nvidia-smi
+set -e
 fi
 
 
 export PATH=$GPUPACK_PREFIX/scripts:$PATH
 
 # Change to a temporary directory
-
-export workdir=/scratch/work/$USER
-
-if [ "x$SLURM_JOBID" != "x" ]
-then
-export TMPDIR=$workdir/tmp/arp.$SLURM_JOBID
-else
-export TMPDIR=$workdir/tmp/arp.$$
-fi
 
 mkdir -p $TMPDIR
 
@@ -209,14 +199,29 @@ do
   
   grib_api_setup $BIN
   
-  # Run the model; use your mpirun
+  # Run the model
   
+  if [ -f /opt/softs/mpiauto/mpiauto ]
+  then
+    MPIAUTO=/opt/softs/mpiauto/mpiauto
+  elif [ -f $HOME/install/mpiauto/mpiauto ]
+  then
+    MPIAUTO=$HOME/install/mpiauto/mpiauto
+  fi
+
+  if [ "x$MPIAUTO" != "x" ]
+  then
   export MPIAUTOCONFIG=mpiauto.PGI.conf
   openacc-bind --nn $NNODE_FC --nnp $NTASK_FC ; cat openacc_bind.txt
-  /opt/softs/mpiauto/mpiauto \
+  $MPIAUTO \
    --verbose --wrap --wrap-stdeo --nouse-slurm-mpi \
       --nnp $NTASK_FC --nn $NNODE_FC --openmp $NOPMP_FC -- $BIN \
    -- --nnp $NTASK_IO --nn $NNODE_IO --openmp $NOPMP_IO -- $BIN 
+  else
+    echo "Use your own mpirun"
+    exit
+  fi
+ 
   
   ls -lrt
 

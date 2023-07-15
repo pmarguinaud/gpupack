@@ -2,6 +2,9 @@
 
 use strict;
 
+my @u = qw (CC CXX F77 F90 FC I_MPI_CC I_MPI_CXX I_MPI_F90 I_MPI_FC OMPI_CC OMPI_CXX OMPI_FC);
+delete $ENV{$_} for (@u);
+
 sub prefix
 {
   use Sys::Hostname;

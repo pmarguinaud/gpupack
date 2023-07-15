@@ -3,6 +3,7 @@
 # =====================================================================
 
 ARCH = NVHPC2303
+GPU = cc70
 
 # Fortran (cross-)compiler
 # ------------------------
@@ -73,8 +74,8 @@ FIXED_FRTFLAG =
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -acc=gpu -O1 -gopt -gpu=cc70 -Minfo=accel,all,intensity,ccff
-OPT_VCCFLAGS = -acc=gpu -O0 -gopt -gpu=cc70 -Minfo=accel,all,intensity,ccff
+OPT_FRTFLAGS = -acc=gpu -O1 -gopt -gpu=$GPU -Minfo=accel,all,intensity,ccff
+OPT_VCCFLAGS = -acc=gpu -O0 -gopt -gpu=$GPU -Minfo=accel,all,intensity,ccff
 
 # Debugging compilation flag
 # --------------------------
@@ -146,7 +147,7 @@ LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -lrt -lstdc++
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -acc=gpu -O1 -gopt -gpu=cc70 -v -lrt -lstdc++ -Wl,-rpath,/home/gmap/mrpm/marguina/gpupack/install/$ARCH/lib
+LNK_FLAGS = -acc=gpu -O1 -gopt -gpu=$GPU -v -lrt -lstdc++ -Wl,-rpath,/home/gmap/mrpm/marguina/gpupack/install/$ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------

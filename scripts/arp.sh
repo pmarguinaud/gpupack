@@ -21,10 +21,10 @@ function submit ()
 
   if [ -f "$out" ]
   then
-  sbatch -N$N -p $p  cy49/arp/arp.sh $pack $grid
+  sbatch --switches=3 -N$N -p $p  cy49/arp/arp.sh $pack $grid
   else
   mkdir -p $(dirname $out)
-  sbatch -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+  sbatch --switches=3 -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
   fi
 }
 
