@@ -1,0 +1,113 @@
+#!/bin/bash
+
+function ecSDK_clone ()
+{
+  pack=$1
+  mkdir -p $pack/hub/local/src/ecSDK
+  cd $pack/hub/local/src/ecSDK
+  git clone --branch  3.7.0 https://github.com/ecmwf/ecbuild
+  git clone --branch 1.19.0 https://github.com/ACCORD-NWP/eckit.git
+  git clone --branch 0.9.5  https://github.com/ecmwf/fckit
+}
+
+function Fiat_clone ()
+{
+  pack=$1
+  mkdir -p $pack/hub/local/src/Fiat
+  cd $pack/hub/local/src/Fiat
+  git clone --branch nvtx+single_prec https://github.com/pmarguinaud/fiat.git
+}
+
+function Ectrans_clone ()
+{
+  pack=$1
+  mkdir -p $pack/hub/local/src/Ectrans
+  cd $pack/hub/local/src/Ectrans
+  git clone --branch mirror-CY48T3_mrg48R1.02 https://github.com/ACCORD-NWP/ectrans
+}
+
+function OOPS_clone ()
+{
+  pack=$1
+  mkdir -p $pack/hub/local/src/OOPS
+  cd $pack/hub/local/src/OOPS
+  git clone --branch workaround_for_pgi_2303 https://github.com/pmarguinaud/oops.git oops_src
+}
+
+function FieldAPI_clone ()
+{
+  pack=$1
+  mkdir -p $pack/hub/local/src/FieldAPI
+  cd $pack/hub/local/src/FieldAPI
+  git clone --branch master https://github.com/pmarguinaud/field_api.git
+}
+
+function pack_create ()
+{
+  PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
+  
+  if [ ! -d "$PACK" ]
+  then
+  
+  gmkpack -r $CYCLE -b $BRANCH -a -n 01 -l $ARCH -o $OPT -p masterodb -K
+  
+  cd $PACK
+  
+  GPU=$(perl -e ' local $/ = undef; my $gmkfile = <>; $gmkfile =~ m/GPU\s+=\s+(\w+)/goms; print $1' .gmkfile/*)
+
+  perl -i -pe "
+    s/GMK_THREADS=\d+/GMK_THREADS=16; export ARCH=$ARCH/go;
+    s/GMK_MAKE=ON/GMK_MAKE=OFF/go;
+    s/GMK_INSTALL=ON/GMK_INSTALL=OFF/go;
+    s/\\\$GPU\b/$GPU/go; 
+  " ics_masterodb
+
+  cp ics_masterodb ld_masterodb
+  
+  perl -i -pe "
+    s/ICS_RECURSIVE_UPDATE=yes/ICS_RECURSIVE_UPDATE=no/go;
+    s/ICS_ICFMODE=full/ICS_ICFMODE=off/go;
+    s/ICS_UPDLIBS=full/ICS_UPDLIBS=off/go;
+  " ld_masterodb
+
+
+  perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
+  perl -i -pe "
+    s,\\\$GPUPACK_PREFIX\b,$GPUPACK_PREFIX,go; 
+    s/\\\$ARCH\b/$ARCH/go; 
+    s/\\\$HOME\b/\$ENV{HOME}/go;
+    s/\\\$GPU\b/$GPU/go; 
+  " .gmkfile/$ARCH
+
+  gitpack --init --repo $REPO --branch $BRANCH
+
+  for lib in ecSDK Fiat Ectrans OOPS FieldAPI 
+  do
+    ${lib}_clone $PACK
+  done
+
+  fi
+}
+
+function pack_compile ()
+{
+  PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
+  
+  cd $PACK
+  
+  for prog in ics_packages ics_masterodb
+  do
+    ./$prog > $prog.eo 2>&1
+  done
+
+  if [ ! -f "bin/MASTERODB" ]
+  then
+    exit 1
+  fi
+
+  lockpack -f
+  \rm -rf hub/local/build/
+
+  $GPUPACK_PREFIX/scripts/parallelmethod.pl .
+}
+

@@ -1,0 +1,59 @@
+#!/bin/bash
+
+function fypp_install ()
+{
+  if [ ! -f "$INSTALL/fypp" ] 
+  then
+    git clone https://github.com/aradi/fypp.git $INSTALL/fypp
+  fi
+}
+
+function yaml_install ()
+{
+  if [ ! -f "$INSTALL/yaml" ]
+  then
+    git clone https://github.com/yaml/pyyaml.git $INSTALL/yaml
+  fi
+}
+
+function cmake_install ()
+{
+  CMAKE=cmake-3.26.0-rc4
+  TAR=$CMAKE.tar.gz
+  cd $TMP
+
+  if [ ! -d "$CMAKE" ]
+  then
+  tar xvf "$SOURCES/$TAR"
+  fi
+
+  cd $CMAKE
+  ./configure --prefix=$INSTALL/cmake
+  make -j8 install
+}
+
+function vimpack_install ()
+{
+  cd $GPUPACK_PREFIX
+  if [ ! -d "$GPUPACK_PREFIX/vimpack" ]
+  then
+  git clone https://github.com/pmarguinaud/vimpack.git
+  fi
+}
+
+function common_install ()
+{
+  INSTALL=$GPUPACK_PREFIX/install/common
+  SOURCES=$GPUPACK_PREFIX/sources
+  TMP=$GPUPACK_PREFIX/tmp/$ARCH
+  
+  mkdir -p $INSTALL
+  mkdir -p $TMP
+
+  fypp_install
+  yaml_install
+  cmake_install
+  vimpack_install
+}
+
+
