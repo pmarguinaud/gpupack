@@ -425,7 +425,7 @@ function libraries_install ()
   done
 }
 
-function pack_compile ()
+function pack_create ()
 {
   PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
   
@@ -464,8 +464,15 @@ function pack_compile ()
     ${lib}_clone $PACK
   done
 
-  cd $PACK
+  fi
+}
 
+function pack_compile ()
+{
+  PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
+  
+  cd $PACK
+  
   for prog in ics_packages ics_masterodb
   do
     ./$prog > $prog.eo 2>&1
@@ -480,8 +487,6 @@ function pack_compile ()
   \rm -rf hub/local/build/
 
   $GPUPACK_PREFIX/scripts/parallelmethod.pl .
-    
-  fi
 }
 
 function fypp_install ()
@@ -559,10 +564,9 @@ EOF
 #for ARCH in NVHPC2303 INTEL1805
 for ARCH in NVHPC2305 
 do
-  libraries_install  
+: libraries_install  
 done
 
-exit
 
 CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api
@@ -570,21 +574,21 @@ REPO=https://github.com/pmarguinaud/IAL.git
 
 if [ 0 -eq 1 ]
 then
-
-for ARCH in INTEL1805
+for ARCH in NVHPC2305
 do
-  for OPT in 2s
+  for OPT in 1s
   do
-    pack_compile 
+    pack_create 
   done
 done
-
 fi
+
 
 for ARCH in NVHPC2305
 do
-  for OPT in 1d
+  for OPT in 1s
   do
-    pack_compile 
+    pack_compile
   done
 done
+

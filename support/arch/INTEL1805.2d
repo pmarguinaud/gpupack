@@ -146,7 +146,7 @@ LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -qopenmp -shared-intel -lrt -lstd
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,/home/gmap/mrpm/marguina/gpupack/install/$ARCH/lib64 -Wl,-rpath,/home/gmap/mrpm/marguina/gpupack/install/$ARCH/lib
+LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,/home/gmap/mrpm/marguina/gpupack/install/$ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
@@ -253,15 +253,15 @@ LD_USR08 = $GPUPACK_PREFIX/install/$ARCH/lib/libnaglitedummy.a
 # "OASIS":
 LD_USR09 = $GPUPACK_PREFIX/install/$ARCH/lib/liboasisdummy.a
 # "Grib_api":
-LD_USR_GRIB_API_F90 = $GPUPACK_PREFIX/install/$ARCH/lib64/libeccodes_f90.so
-LD_USR_GRIB_API = $GPUPACK_PREFIX/install/$ARCH/lib64/libeccodes.so
+LD_USR_GRIB_API_F90 = $GPUPACK_PREFIX/install/$ARCH/lib/libeccodes_f90.so
+LD_USR_GRIB_API = $GPUPACK_PREFIX/install/$ARCH/lib/libeccodes.so
 # "JPEG library":
 LD_USR_JPEG =
 # "EECFI" for aeolus:
 LD_USR_EECFI =
 # "Netcdf :"
-LD_USR_NETCDF_F = $GPUPACK_PREFIX/install/$ARCH/lib64/libnetcdff.so
-LD_USR_NETCDF = $GPUPACK_PREFIX/install/$ARCH/lib64/libnetcdf.so
+LD_USR_NETCDF_F = $GPUPACK_PREFIX/install/$ARCH/lib/libnetcdff.so
+LD_USR_NETCDF = $GPUPACK_PREFIX/install/$ARCH/lib/libnetcdf.so
 # "HDF5 :"
 LD_USR_HDF5_HLFORTRAN = $GPUPACK_PREFIX/install/$ARCH/lib/libhdf5_hl_fortran.so
 LD_USR_HDF5_FORTRAN = $GPUPACK_PREFIX/install/$ARCH/lib/libhdf5_fortran.so

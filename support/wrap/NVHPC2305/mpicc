@@ -4,7 +4,16 @@ use strict;
 use FileHandle;
 use File::Basename;
 
-my $NVHPC_PREFIX = "/ec/res4/hpcperm/sor/install/nvidia/hpc_sdk/Linux_x86_64/23.5";
+sub prefix
+{
+  use Sys::Hostname;
+  my $host  = &hostname ();
+  return '/ec/res4/hpcperm/sor/install' if ($host =~ m/^ac\d+-\d+\.bullx$/o);
+  return '/opt/softs' if ($host =~ m/^(?:belenos|taranis)/o);
+  die ("Unexpected host : $host");
+}
+
+my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/23.5';
 my $OMPI_PREFIX = "comm_libs/11.8/hpcx/hpcx-2.14/ompi";
 my $CUDA_PREFIX= "cuda/11.8";
 
