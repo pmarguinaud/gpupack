@@ -108,6 +108,22 @@ cd $TMPDIR
 PACK=$1
 GRID=$2
 
+if [ "x$PACK" = "x" ]
+then
+  exit
+fi
+
+if [ "x$GRID" = "x" ]
+then
+  exit
+fi
+
+if [ "x$GPUPACK_PREFIX" = "x" ]
+then
+  exit
+fi
+
+
 ARCH=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $1 ' $PACK)
 OPT=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $2 ' $PACK)
 

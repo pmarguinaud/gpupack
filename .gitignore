@@ -6,3 +6,5 @@ slurm-*.out
 49t0*
 gpupack.sh
 .nfs*
+.mpiauto.machinefile*
+.mpiautotimeout.*.lock
