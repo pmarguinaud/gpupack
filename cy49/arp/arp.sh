@@ -1,13 +1,32 @@
 #!/bin/bash
 #SBATCH --export=GPUPACK_PREFIX
 #SBATCH --job-name=arp
-#SBATCH --nodes=1
 #SBATCH --time=00:45:00
 #SBATCH --verbose
 #SBATCH --no-requeue
 
 set -x
 set -e
+
+function ecmwf_mpirun ()
+{
+  set +x
+  if [ "x$NVHPC_ROOT" = "x" ]
+  then
+    export MODULEPATH=$HPCPERM/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
+    module purge
+    module load nvhpc-hpcx/23.5
+    source $NVHPC_ROOT/comm_libs/11.8/hpcx/hpcx-2.14/hpcx-mt-init.sh hpcx_load
+  fi
+  set -x
+  ~sor/install/mpiauto/mpiauto --nouse-slurm-mpi $*
+}
+
+function meteofrance_mpirun ()
+{
+  export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
+  /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
+}
 
 function grib_api_setup ()
 {
@@ -97,9 +116,36 @@ set -e
 fi
 
 
+SITE=$(perl -e '
+  use Sys::Hostname;
+  my $host  = &hostname ();
+  if ($host =~ m/^ac\d+-\d+\.bullx$/o)
+    {
+      print "ecmwf";
+      exit (0);
+    }
+  elsif ($host =~ m/^(?:belenos|taranis)/o)
+    {
+      print "meteofrance";
+      exit (0);
+    }
+  die ("Unexpected host : $host");
+')
+
+
 export PATH=$GPUPACK_PREFIX/scripts:$PATH
 
 # Change to a temporary directory
+
+if [ "x$workdir" != "x" ]
+then
+  TMPDIR=$workdir/tmp/arp.$SLURM_JOBID
+elif [ "x$SCRATCH" != "x" ]
+then
+  TMPDIR=$SCRATCH/tmp/arp.$SLURM_JOBID
+else
+  exit
+fi
 
 mkdir -p $TMPDIR
 
@@ -217,23 +263,15 @@ do
   
   # Run the model
   
-  if [ -f /opt/softs/mpiauto/mpiauto ]
-  then
-    MPIAUTO=/opt/softs/mpiauto/mpiauto
-  elif [ -f $HOME/install/mpiauto/mpiauto ]
-  then
-    MPIAUTO=$HOME/install/mpiauto/mpiauto
-  fi
+  openacc-bind --nn $NNODE_FC --nnp $NTASK_FC --np $NPROC_FC ; cat openacc_bind.txt
 
-  if [ "x$MPIAUTO" != "x" ]
-  then
-  export MPIAUTOCONFIG=mpiauto.PGI.conf
-  openacc-bind --nn $NNODE_FC --nnp $NTASK_FC ; cat openacc_bind.txt
-  $MPIAUTO \
-   --verbose --wrap --wrap-stdeo --nouse-slurm-mpi \
+  ${SITE}_mpirun \
+   --verbose --wrap --wrap-stdeo \
       --nnp $NTASK_FC --nn $NNODE_FC --openmp $NOPMP_FC -- $BIN \
    -- --nnp $NTASK_IO --nn $NNODE_IO --openmp $NOPMP_IO -- $BIN 
-  else
+
+  if [ "x$SITE" = "x" ]
+  then
     echo "Use your own mpirun"
     exit
   fi
