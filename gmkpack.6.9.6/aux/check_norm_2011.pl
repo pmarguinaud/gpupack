@@ -1,4 +1,4 @@
-#!/usr/bin/perl  
+#!/usr/bin/env perl  
 #RJ #!/usr/local/apps/perl/current/bin/perl
 #RJ-time 0m 39.1s (do while)
 #RJ-tim0 0m 0.0s (xargs)

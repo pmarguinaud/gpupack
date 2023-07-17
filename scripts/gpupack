@@ -7,7 +7,7 @@ function create_gpupack_sh ()
 
   cat -> $GPUPACK_PREFIX/gpupack.sh << EOF
 export GPUPACK_PREFIX=$GPUPACK_PREFIX
-export PATH=\$GPUPACK_PREFIX/install/common/fypp/bin:\$GPUPACK_PREFIX/install/common/cmake/bin:\$GPUPACK_PREFIX/vimpack:\$GPUPACK_PREFIX/gmkpack/util:\$PATH
+export PATH=\$GPUPACK_PREFIX/install/common/fypp/bin:\$GPUPACK_PREFIX/install/common/perl/bin:\$GPUPACK_PREFIX/install/common/cmake/bin:\$GPUPACK_PREFIX/vimpack:\$GPUPACK_PREFIX/gmkpack/util:\$PATH
 export ROOTPACK=\$GPUPACK_PREFIX/pack
 export HOMEPACK=\$GPUPACK_PREFIX/pack
 export GMK_SUPPORT=\$GPUPACK_PREFIX/support

@@ -15,7 +15,7 @@ $opts{nnp} = $opts{np} / $opts{nn} unless ($opts{nnp});
 $opts{np} = $opts{nn} * $opts{nnp} unless ($opts{np});
 $opts{nn} = $opts{np} / $opts{nnp} unless ($opts{nn});
 
-die unless ($opts{nn} * $opts{nnp} == $opts{np});
+die &Dumper (\%opts) unless ($opts{nn} * $opts{nnp} == $opts{np});
 
 my $fh = 'FileHandle'->new (">openacc_bind.txt");
 

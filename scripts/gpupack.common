@@ -1,5 +1,21 @@
 #!/bin/bash
 
+
+function perl_install ()
+{
+  PERL=perl-5.38.0
+  TAR=$PERL.tar.gz
+  cd $TMP
+  if [ ! -d "$PERL" ]
+  then
+  tar xvf "$SOURCES/$TAR"
+  fi
+  
+  cd $PERL
+  ./Configure -des -Dusethreads -Dprefix=$INSTALL/perl 
+  make -j8 install 
+}
+
 function fypp_install ()
 {
   if [ ! -f "$INSTALL/fypp" ] 
@@ -50,6 +66,7 @@ function common_install ()
   mkdir -p $INSTALL
   mkdir -p $TMP
 
+  perl_install
   fypp_install
   yaml_install
   cmake_install
