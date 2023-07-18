@@ -23,7 +23,7 @@ function ecmwf_mpirun ()
   ~sor/install/mpiauto/mpiauto --nouse-slurm-mpi $*
 }
 
-function meteofrance_mpirun ()
+function meteo_mpirun ()
 {
   export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
   /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
@@ -127,7 +127,7 @@ SITE=$(perl -e '
     }
   elsif ($host =~ m/^(?:belenos|taranis)/o)
     {
-      print "meteofrance";
+      print "meteo";
       exit (0);
     }
   die ("Unexpected host : $host");
