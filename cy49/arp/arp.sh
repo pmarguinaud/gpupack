@@ -19,6 +19,7 @@ function ecmwf_mpirun ()
     source $NVHPC_ROOT/comm_libs/11.8/hpcx/hpcx-2.14/hpcx-mt-init.sh hpcx_load
   fi
   set -x
+  export SLURM_EXPORT_ENV=ALL
   ~sor/install/mpiauto/mpiauto --nouse-slurm-mpi $*
 }
 
