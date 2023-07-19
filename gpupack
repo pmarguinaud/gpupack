@@ -41,7 +41,7 @@ REPO=https://github.com/pmarguinaud/IAL.git
 
 OPT=2d
 
-# Create the pack
+# Create a pack
 
 pack_create 
 
