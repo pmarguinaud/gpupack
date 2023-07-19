@@ -1,5 +1,5 @@
 
-Compile & validate ARPEGE with physics on NVIDIA accelerators.
+Compile, run & validate ARPEGE with physics on NVIDIA accelerators.
 
 This repository contains :
 
