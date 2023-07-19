@@ -7,7 +7,7 @@ export GPUPACK_PREFIX=$HOME/gpupack
 
 cd $GPUPACK_PREFIX
 
-. $GPUPACK/scripts/gpupack
+. $GPUPACK_PREFIX/scripts/gpupack
 
 create_gpupack_sh
 
@@ -15,12 +15,16 @@ create_gpupack_sh
 
 : common_install
 
+if [ 0 -eq 1 ]
+then
+
 #for ARCH in NVHPC2303 INTEL1805
-for ARCH in NVHPC2305 
+for ARCH in INTEL1805
 do
-: libraries_install  
+  libraries_install  
 done
 
+fi
 
 CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api
@@ -28,9 +32,9 @@ REPO=https://github.com/pmarguinaud/IAL.git
 
 if [ 0 -eq 1 ]
 then
-for ARCH in NVHPC2305
+for ARCH in INTEL1805
 do
-  for OPT in 1d
+  for OPT in 2d
   do
     pack_create 
 exit
@@ -40,9 +44,9 @@ fi
 
 
 
-for ARCH in NVHPC2305
+for ARCH in INTEL1805
 do
-  for OPT in 1d
+  for OPT in 2d
   do
     pack_compile
   done

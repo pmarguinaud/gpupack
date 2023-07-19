@@ -32,10 +32,10 @@ function submit ()
 CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api
 
-#ubmit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0031
-#ubmit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0031
+submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0031
+submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0031
 
-#ubmit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0798
+submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0798
 submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0798
 
 exit
