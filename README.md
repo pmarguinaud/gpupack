@@ -5,10 +5,11 @@ This repository contains :
 
 - a frozen version of gmkpack (in the gmkpack directory)
 - configuration files for gmkpack (in the support directory)
-- test cases at various resolutions for ARPEGE (cy49 directory), with references
-- scripts to run the test cases (scripts/sbatch-meteo.sh & scripts/sbatch-ecmwf.sh)
+- source code for various ancillary libraries
 - scripts to compile ancillary libraries (hdf, netcdf, eccodes, lapack, eigen3, dummies for other unused libraries)
 - scripts to prepare & compile packs with different compilers
+- test cases at various resolutions for ARPEGE (`cy49` directory), with references
+- sample scripts to run the test cases (`scripts/sbatch-meteo.sh` & `scripts/sbatch-ecmwf.sh`)
 
 # Requirements
 
@@ -164,14 +165,19 @@ flavors (mostly compilation options or floating point precision); for example, I
 Look at the contents of INTEL1805.2d for instance. If your architecture does not exist, you need to 
 copy INTEL1805.2d into ARCH.OPT, and adapt the contents of ARCH.OPT.
 
+Please note that the NVIDIA target architecture has to be selected in NVHPC2305.1d and NVHPC2305.1s (GPU = cc70 or GPU = cc80).
+
 # Create a pack 
 
 The `pack_create` function (defined in `scripts/gpupack.pack`) creates a pack; this involves the following
 steps :
-- invoking `gmkpack`
+- invoking `gmkpack` with the appropriate options
 - download source code, for ARPEGE and other differents components (ecbuild, eckit, oops, fiat, ectrans, field_api)
 
-The pack will be created in pack. Its name is `${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}`.
+The pack will be created in pack. Its name is `${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}`. It should contain the following scripts :
+- `ics_packages`; for compiling libraries in `hub/local`
+- `ics_masterodb`; for compiling ARPEGE source code
+- `ld_masterodb`; does not compile ARPEGE source code, only create ARPEGE executable
 
 # Compile the pack
 
@@ -186,12 +192,17 @@ It is possible to invoke directory `ics_packages` and `ics_masterodb` from withi
 `ics_packages` will use a single thread (because of dependencies not correctly detected by cmake), which `ics_masterodb`
 will run with 16 threads (it is possible to change this values in `ics_masterodb`).
 
+If the compilation is successful, then the `bin/MASTERODB` file should exist and be executable.
+
 Please note that compiling the code on ECMWF cluster is not possible on login nodes, because of cgroups limitations; it
 is necessary to turn `ics_masterodb` into a batch job and submit it in the `par` queue.
 
 # Run the code
 
 A script and different initial condition files are provided in the `cy49` directory; we provide different resolutions : t0031l15, t0107l70, t0538l60, t0798l90.
+
+The t0031l15 runs in about 20s on an dual socket AMD Rome node. The t0798l90 requires at least three dual socket AMD nodes; it has also been tested on 
+three dual socket AMD nodes, each equipped with 4 NVIDIA V100 cards.
 
 Please look at the script `cy49/arp/arp.sh` and see how you can adapt it to your environment. The following scripts :
 - `scripts/sbatch-ecmwf.sh`
