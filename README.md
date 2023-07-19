@@ -184,6 +184,70 @@ with `lockpack` in `src/local`.
 
 It is possible to invoke directory `ics_packages` and `ics_masterodb` from within the pack.
 
+# Run the code
+
+A script and different initial condition files are provided in the `cy49` directory; we provide different resolutions : t0031l15, t0107l70, t0538l60, t0798l90.
+
+Please look at the script `cy49/arp/arp.sh` and see how you can adapt it to your environment. The following scripts :
+- `scripts/sbatch-ecmwf.sh`
+- `scripts/sbatch-meteo.sh`
+
+provides examples of how `cy49/arp/arp.sh` is submitted to ECMWF & M√t√o-France batch systems.
+
+# OpenMP & OpenACC
+
+The script `cy49/arp/arp.sh` run the code in four different modes :
+- nominal : ARPEGE physics is managed by a very large OpenMP section; this is the optimal mode on traditionnal CPUs.
+- openmp : ARPEGE physics is managed by a succession of small OpenMP sections
+- openmpsinglecolumn : ARPEGE physics is managed by a succession of small OpenMP sections, **without vectorisation** with 
+column processed independently.  This is meant for validation.
+- openaccsinglecolumn : ARPEGE physics is managed by a succession of small OpenACC sections (with possibly a few OpenMP
+section in between). This is supposed to be the optimal mode on GPUs.
+
+Some comparison are made when references are available (in `cy49/arp/*/ref` directories). We also make the following
+comparisons : 
+
+- nominal - openmp
+- nominal - openmpsinglecolumn
+- nominal - openaccsinglecolumn
+- openmpsinglecolumn - openaccsinglecolumn
+
+We consider that these comparison should lead to identical results in the following cases :
+
+- INTEL **with vectorisation** :
+
+```
++---------------------+----------+---------+---------------------+-----------------------+
+|                     |  nominal |  openmp |  openmpsinglecolumn |  openaccsinglecolumn  |
++---------------------+----------+---------+---------------------+-----------------------+
+| nominal             |    =     |    =    |                     |                       |
++---------------------+----------+---------+---------------------+-----------------------+
+| openmp              |    =     |    =    |                     |                       |
++---------------------+----------+---------+---------------------+-----------------------+
+| openmpsinglecolumn  |          |         |          =          |           =           |
++---------------------+----------+---------+---------------------+-----------------------+
+| openaccsinglecolumn |          |         |          =          |           =           |
++---------------------+----------+---------+---------------------+-----------------------+
+```
+
+- NVHPC **without vectorisation** :
+
+```
++---------------------+----------+---------+---------------------+-----------------------+
+|                     |  nominal |  openmp |  openmpsinglecolumn |  openaccsinglecolumn  |
++---------------------+----------+---------+---------------------+-----------------------+
+| nominal             |    =     |    =    |          =          |                       |
++---------------------+----------+---------+---------------------+-----------------------+
+| openmp              |    =     |    =    |          =          |                       |
++---------------------+----------+---------+---------------------+-----------------------+
+| openmpsinglecolumn  |    =     |    =    |          =          |                       |
++---------------------+----------+---------+---------------------+-----------------------+
+| openaccsinglecolumn |          |         |                     |           =           |
++---------------------+----------+---------+---------------------+-----------------------+
+```
+
+
+
 
 
 

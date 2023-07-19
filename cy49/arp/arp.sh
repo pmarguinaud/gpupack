@@ -300,7 +300,7 @@ done
 
 for method in openmp openmpsinglecolumn openaccsinglecolumn
 do
-  echo "==> openmp - $method <=="
+  echo "==> nominal - $method <=="
   diffNODE nominal/NODE.001_01 $method/NODE.001_01
 done
 
