@@ -42,7 +42,9 @@ $ cd $HOME
 $ ln -s $SCRATCH/gpupack
 ```
 
-Then cd to `$HOME/gpupack`, and inspect the content of the script `gpupack` :
+# Compiling & testing with gpupack
+
+cd to `$HOME/gpupack`, and inspect the content of the script `gpupack` :
 
 ```
 export GPUPACK_PREFIX=$HOME/gpupack
