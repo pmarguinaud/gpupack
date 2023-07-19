@@ -7,48 +7,45 @@ export GPUPACK_PREFIX=$HOME/gpupack
 
 cd $GPUPACK_PREFIX
 
+# Load gpupack shell functions
+
 . $GPUPACK_PREFIX/scripts/gpupack
+
+# Create gpupack profile
 
 create_gpupack_sh
 
+# Load gpupack profile
+
 . ./gpupack.sh
 
-: common_install
+# Install common libraries (architecture independent)
 
-if [ 0 -eq 1 ]
-then
+common_install
 
-#for ARCH in NVHPC2303 INTEL1805
-for ARCH in INTEL1805
-do
-  libraries_install  
-done
+# Choose a compiler
 
-fi
+ARCH=INTEL1805
+
+# Install architecture dependent libraries
+
+libraries_install  
+
+# Pick a cycle & a branch
 
 CYCLE=49t0
 BRANCH=compile_with_pgi_2303-field_api
 REPO=https://github.com/pmarguinaud/IAL.git
 
-if [ 0 -eq 1 ]
-then
-for ARCH in INTEL1805
-do
-  for OPT in 2d
-  do
-    pack_create 
-exit
-  done
-done
-fi
+# Choose architecture flavor
 
+OPT=2d
 
+# Create the pack
 
-for ARCH in INTEL1805
-do
-  for OPT in 2d
-  do
-    pack_compile
-  done
-done
+pack_create 
+
+# Compile the pack
+
+pack_compile
 
