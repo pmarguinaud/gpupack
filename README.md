@@ -10,6 +10,18 @@ This repository contains :
 - scripts to compile ancillary libraries (hdf, netcdf, eccodes, lapack, eigen3, dummies for other unused libraries)
 - scripts to prepare & compile packs with different compilers
 
+# Requirements
+
+Compilers :
+
+- nvhpc/23.03 or nvhpc/23.5
+- Intel 18.05
+- Any other C/C++/FORTRAN with MPI support
+
+Python 3
+
+At least 100Gb of free disk space.
+
 # Fetch gpupack
 
 Install gpupack in your HOME directory :
@@ -80,16 +92,18 @@ pack_compile
 
 ```
 
-Each step is detailled in the following sections.
+Each step is detailled in the following sections. When you have understood these different steps, you 
+will be able to combine them to automate building and testing in your own script, taking into account
+the constraints if your environment.
 
 # Create gpupack profile
 
 The shell function `create_gpupack_sh` will create gpupack.sh. You will have to manually source this file
 before working with gpupack
 
-# Install ancillary libraries
+# Install common ancillary libraries & utilities
 
-## Architectire independant utilities
+These are architecture independant libraries.
 
 Perl version 5.26 has a bug; it is therefore required to install a more recent version. gpupack is shipped with 
 the source code of Perl 5.38. 
@@ -97,6 +111,19 @@ the source code of Perl 5.38.
 fypp a Fortran pre-processor is mandatory to compile ARPEGE source code. gpupack can fetch and install fypp.
 
 A recent version of cmake is required to compile ARPEGE libraries. gpupack can install cmake 3.26.
+
+The yaml Python module can also be installed by gpupack.
+
+Please look at scripts/gpupack.common and see how to adapt it to your environment.
+
+# Install architecture dependent libraries
+
+Before doing that, you need to setup wrappers for your compiler suite. Please look in the support/wrap/ directory and 
+see if one existing architecture (let us call it ARCH) fits your needs. If so, please edit the scripts in 
+support/wrap/ARCH, so that these scripts can compile actual code (you will probably need to fix some paths which are
+different on your system), ** with all library references resolved by the linker ** (that is, do not forger to add 
+`-Wl,-rpath,/path/to/libraries` as needed).
+
 
 
 
