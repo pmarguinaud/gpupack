@@ -92,29 +92,29 @@ pack_compile
 
 ```
 
-Each step is detailled in the following sections. When you have understood these different steps, you 
+Each step is detailed in the following sections. When you have understood these different steps, you 
 will be able to combine them to automate building and testing in your own script, taking into account
 the constraints if your environment.
 
 # Create gpupack profile
 
-The shell function `create_gpupack_sh` will create gpupack.sh. You will have to manually source this file
+The shell function `create_gpupack_sh` (from `scripts/gpupack`) will create gpupack.sh. You will have to manually source this file
 before working with gpupack
 
 # Install common ancillary libraries & utilities
 
 These are architecture independant libraries.
 
-Perl version 5.26 has a bug; it is therefore required to install a more recent version. gpupack is shipped with 
-the source code of Perl 5.38. 
+Perl version 5.26 has a bug which affects strongly the performance of gmkpack; it is therefore required to install a more recent version. 
+gpupack is shipped with the source code of Perl 5.38. 
 
-fypp a Fortran pre-processor is mandatory to compile ARPEGE source code. gpupack can fetch and install fypp.
+fypp (a Fortran pre-processor) is mandatory to compile ARPEGE source code. gpupack can fetch and install fypp.
 
 A recent version of cmake is required to compile ARPEGE libraries. gpupack can install cmake 3.26.
 
 The yaml Python module can also be installed by gpupack.
 
-The utilities from the vimpack repository are required (gitpack & vimpack).
+The utilities from the vimpack repository are required (gitpack & vimpack) and are installed by gpupack.
 
 Please look at `scripts/gpupack.common` and see how to adapt it to your environment. 
 
@@ -123,15 +123,15 @@ Please look at `scripts/gpupack.common` and see how to adapt it to your environm
 Before doing that, you need to setup wrappers for your compiler suite. Please look in the support/wrap/ directory and 
 see if one existing architecture (let us call it ARCH) fits your needs. If so, please edit the scripts in 
 support/wrap/ARCH, so that these scripts can compile actual code (you will probably need to fix some paths which are
-different on your system), **with all library references resolved by the linker** (that is, do not forger to add 
-`-Wl,-rpath,/path/to/libraries` as needed).
+different on your system), **with all library references resolved by the linker** (that is, do not forget to add 
+`-Wl,-rpath,/path/to/libraries` as needed, so that references to dynamic libraries be resolved using RPATH).
 
-If you architecture does not exist, then try to pick something similar from what already exists, and make a copy, 
+If your architecture does not exist, then try to pick something similar from what already exists, and make a copy, 
 in a different directory. Then edit the compiler wrappers.
 
 # Install architecture dependent libraries
 
-gpupack is shipped and can install the following libraries :
+gpupack is shipped with the following libraries, and can install them :
 
 - eccodes
 - hdf5
@@ -140,7 +140,7 @@ gpupack is shipped and can install the following libraries :
 - lapack
 - eigen
 
-It can also create dummies for these libraries :
+It can also create dummies for these libraries (which are not required to make an ARPEGE forecast) :
 
 - rgb
 - bufr
@@ -152,16 +152,16 @@ It can also create dummies for these libraries :
 - ibmdummy
 - mpidummy
 
-Look at `scripts/gpupack.libraries` and see how to adapt it to fit your needs and you constraints.
+Look at `scripts/gpupack.libraries` and see how to adapt it to fit your needs and your constraints.
 
 # Choose & configure your architecture flavor
 
 Please look at the content of the support/arch directory. Each architecture (ARCH) might exist with different
-flavors (mostly compilation options); for example, INTEL1805 exists with two suffixes :
+flavors (mostly compilation options or floating point precision); for example, INTEL1805 exists with two suffixes :
 - 2d : -O2, double precision
 - 2s : -O2, single precision
 
-Look at the contents of INTEL1805.2d for instance. If your architecture does not exist you need to 
+Look at the contents of INTEL1805.2d for instance. If your architecture does not exist, you need to 
 copy INTEL1805.2d into ARCH.OPT, and adapt the contents of ARCH.OPT.
 
 # Create a pack 
@@ -182,7 +182,12 @@ The `pack_compile` function (defined in `scripts/gpupack.pack`) compiles the pac
 If the compilation is successful, then unnecessary files are removed (directory `hub/local/build`), but also 
 with `lockpack` in `src/local`.
 
-It is possible to invoke directory `ics_packages` and `ics_masterodb` from within the pack.
+It is possible to invoke directory `ics_packages` and `ics_masterodb` from within the pack. Please note that by default
+`ics_packages` will use a single thread (because of dependencies not correctly detected by cmake), which `ics_masterodb`
+will run with 16 threads (it is possible to change this values in `ics_masterodb`).
+
+Please note that compiling the code on ECMWF cluster is not possible on login nodes, because of cgroups limitations; it
+is necessary to turn `ics_masterodb` into a batch job and submit it in the `par` queue.
 
 # Run the code
 
