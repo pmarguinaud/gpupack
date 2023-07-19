@@ -157,16 +157,19 @@ GRID=$2
 
 if [ "x$PACK" = "x" ]
 then
+  echo "PACK is not set"
   exit
 fi
 
 if [ "x$GRID" = "x" ]
 then
+  echo "GRID is not set"
   exit
 fi
 
 if [ "x$GPUPACK_PREFIX" = "x" ]
 then
+  echo "GPUPACK_PREFIX is not set"
   exit
 fi
 
