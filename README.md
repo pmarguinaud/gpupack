@@ -121,7 +121,7 @@ Please look at scripts/gpupack.common and see how to adapt it to your environmen
 Before doing that, you need to setup wrappers for your compiler suite. Please look in the support/wrap/ directory and 
 see if one existing architecture (let us call it ARCH) fits your needs. If so, please edit the scripts in 
 support/wrap/ARCH, so that these scripts can compile actual code (you will probably need to fix some paths which are
-different on your system), ** with all library references resolved by the linker ** (that is, do not forger to add 
+different on your system), **with all library references resolved by the linker** (that is, do not forger to add 
 `-Wl,-rpath,/path/to/libraries` as needed).
 
 
