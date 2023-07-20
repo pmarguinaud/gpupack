@@ -1889,8 +1889,6 @@ export ODB_NMXUPD=\$odb_nmxupd
 #
 STUFF
 /bin/cat <<STUFF | tee -a $ICS_HUB >> $ICS
-echo
-echo "This is \$(basename \$(grep ^THIS_GMKPACK \$GMKROOT/util/gmkpack | awk -F"/" '{print \$(NF-2)}')) running on a script made by $(basename $(grep ^THIS_GMKPACK $GMKROOT/util/gmkpack | awk -F/ '{print $(NF-2)}'))"
 
 echo
 \$GMKROOT/aux/catenvpack.sh

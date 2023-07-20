@@ -25,7 +25,7 @@ common_install
 
 # Choose a compiler
 
-ARCH=INTEL1805
+ARCH=NVHPC2305
 
 # Install architecture dependent libraries
 
@@ -39,7 +39,7 @@ REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor
 
-OPT=2d
+OPT=1d
 
 # Create a pack
 
