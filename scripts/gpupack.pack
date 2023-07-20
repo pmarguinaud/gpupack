@@ -53,7 +53,7 @@ function pack_create ()
   
   cd $PACK
   
-  GPU=$(perl -e ' local $/ = undef; my $gmkfile = <>; $gmkfile =~ m/GPU\s+=\s+(\w+)/goms; print $1' .gmkfile/*)
+  GPU=$(perl -e ' local $/ = undef; my $gmkfile = <>; $gmkfile =~ m/GPU\s+=\s+(\S+)/goms; print $1' .gmkfile/*)
 
   perl -i -pe "
     s/GMK_THREADS=\d+/GMK_THREADS=16; export ARCH=$ARCH/go;
