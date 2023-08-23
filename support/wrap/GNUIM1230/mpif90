@@ -1,0 +1,9 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my $prefix = '/home/gmap/mrpm/marguina/install/gnu/12.3.0';
+
+local $ENV{PATH} = "$prefix/bin:$ENV{PATH}";
+
+exec ('/opt/softs/intel/2018.04/impi/2018.5.274/intel64/bin/mpifc', @ARGV, '-mt_mpi', "-Wl,-rpath,$prefix/lib64");
