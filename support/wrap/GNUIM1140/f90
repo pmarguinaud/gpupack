@@ -1,0 +1,7 @@
+#!/bin/bash
+
+prefix=/home/gmap/mrpm/marguina/install/gnu/11.4.0
+
+export PATH=$prefix/bin:$PATH
+
+exec gfortran $* -Wl,-rpath,$prefix/lib64

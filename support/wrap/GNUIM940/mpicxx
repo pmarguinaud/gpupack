@@ -1,0 +1,14 @@
+#!/bin/bash
+
+prefix=/home/gmap/mrpm/marguina/install/gnu/9.4.0
+
+module () 
+{ 
+    eval `/usr/bin/modulecmd bash $*`
+}
+
+module purge 2>/dev/null
+module load intelmpi/2018.5.274 2>/dev/null
+export PATH=$prefix/bin:$PATH
+
+exec mpigxx $* -mt_mpi -Wl,-rpath,$prefix/lib64

@@ -71,7 +71,7 @@ function netcdf_fortran_install ()
   \rm -rf "$NETCDF_FORTRAN-Build"
   mkdir -p "$NETCDF_FORTRAN-Build"
   cd "$NETCDF_FORTRAN-Build"
-
+  
   cmake ../$NETCDF_FORTRAN -DCMAKE_INSTALL_PREFIX=$INSTALL
   make -j4 install
 }
@@ -355,14 +355,18 @@ for my $dummy (@{ $opts{dummy} })
 
 function libraries_install ()
 {
-  INSTALL=$GPUPACK_PREFIX/install/$ARCH
-  SOURCES=$GPUPACK_PREFIX/sources
-  TMP=$GPUPACK_PREFIX/tmp/$ARCH
+  export INSTALL=$GPUPACK_PREFIX/install/$ARCH
+  export SOURCES=$GPUPACK_PREFIX/sources
+  export TMP=$GPUPACK_PREFIX/tmp/$ARCH
 
   mkdir -p $INSTALL
   mkdir -p $TMP
   mkdir -p $INSTALL/lib64
+
+  if [ ! -d "$INSTALL/lib" ]
+  then
   ln -s lib64 $INSTALL/lib
+  fi
   
   export CC=$GPUPACK_PREFIX/support/wrap/$ARCH/cc
   export FC=$GPUPACK_PREFIX/support/wrap/$ARCH/f90
@@ -374,7 +378,16 @@ function libraries_install ()
     eccodes hdf5 netcdf netcdf_fortran lapack eigen oasisdummy mpidummy \
     ibmdummy naglitedummy wamdummy fdbdummy gribex bufr rgb
   do
-    ${lib}_install
+    (
+      # Load some specific environment variables 
+
+      if [ -f "$GPUPACK_PREFIX/scripts/$ARCH/$lib.sh" ]
+      then
+        source "$GPUPACK_PREFIX/scripts/$ARCH/$lib.sh"
+      fi
+
+      ${lib}_install
+    )
   done
 }
 

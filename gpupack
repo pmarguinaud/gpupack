@@ -13,7 +13,7 @@ cd $GPUPACK_PREFIX
 
 # Create gpupack profile
 
-create_gpupack_sh
+# create_gpupack_sh
 
 # Load gpupack profile
 
@@ -21,11 +21,11 @@ create_gpupack_sh
 
 # Install common libraries (architecture independent)
 
-common_install
+# common_install
 
 # Choose a compiler
 
-ARCH=NVHPC2305
+ARCH=GNUIM1230
 
 # Install architecture dependent libraries
 
@@ -34,12 +34,12 @@ libraries_install
 # Pick a cycle & a branch
 
 CYCLE=49t0
-BRANCH=compile_with_pgi_2303-field_api
+BRANCH=compile_with_pgi_2303-field_api+gfortran
 REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor
 
-OPT=1d
+OPT=0d
 
 # Create a pack
 
