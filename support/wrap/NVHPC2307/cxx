@@ -1,0 +1,26 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+my @u = qw (CC CXX F77 F90 FC I_MPI_CC I_MPI_CXX I_MPI_F90 I_MPI_FC OMPI_CC OMPI_CXX OMPI_FC);
+delete $ENV{$_} for (@u);
+
+sub prefix
+{
+  use Sys::Hostname;
+  my $host  = &hostname ();
+  return '/ec/res4/hpcperm/sor/install' if ($host =~ m/^ac\d+-\d+\.bullx$/o);
+  return '/opt/softs' if ($host =~ m/^(?:belenos|taranis)/o);
+  die ("Unexpected host : $host");
+}
+
+my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/23.7';
+my $CUDA_PREFIX= "cuda/11.8";
+
+local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX/comm_libs/nccl/lib:$NVHPC_PREFIX/math_libs/lib64:$NVHPC_PREFIX/compilers/lib:$NVHPC_PREFIX/cuda/lib64";
+local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
+local $ENV{NVHPC_CUDA_HOME} = "$NVHPC_PREFIX/$CUDA_PREFIX";
+
+exec ("$NVHPC_PREFIX/compilers/bin/pgc++", @ARGV, 
+      "-L$NVHPC_PREFIX/compilers/lib", '-lnvf', '-lnvhpcatm', "-Wl,-rpath,$NVHPC_PREFIX/compilers/lib", 
+      "-L$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt');
