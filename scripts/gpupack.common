@@ -12,8 +12,10 @@ function perl_install ()
   fi
   
   cd $PERL
+  set +e
   ./Configure -des -Dusethreads -Dprefix=$INSTALL/perl 
   make -j8 install 
+  set -e
 }
 
 function fypp_install ()
