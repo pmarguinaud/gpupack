@@ -13,7 +13,7 @@ cd $GPUPACK_PREFIX
 
 # Create gpupack profile
 
-# create_gpupack_sh
+create_gpupack_sh
 
 # Load gpupack profile
 
@@ -21,11 +21,11 @@ cd $GPUPACK_PREFIX
 
 # Install common libraries (architecture independent)
 
-# common_install
+common_install
 
 # Choose a compiler
 
-ARCH=GNUIM1230
+ARCH=GNUUB2004
 
 # Install architecture dependent libraries
 
