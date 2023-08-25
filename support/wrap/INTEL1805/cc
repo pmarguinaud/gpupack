@@ -13,4 +13,4 @@ module load gcc/5.3.0 2>/dev/null
 
 export TMP=/tmp
 # Command
-icc $* -mkl=sequential -lirc $(echo $LD_LIBRARY_PATH | sed -e "s/:/ -Wl,-rpath,/g" -e "s/^/-Wl,-rpath,/")
+exec icc $* -mkl=sequential -lirc $(echo $LD_LIBRARY_PATH | sed -e "s/:/ -Wl,-rpath,/g" -e "s/^/-Wl,-rpath,/")
