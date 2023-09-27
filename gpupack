@@ -13,7 +13,7 @@ cd $GPUPACK_PREFIX
 
 # Create gpupack profile
 
-# create_gpupack_sh
+create_gpupack_sh
 
 # Load gpupack profile
 
@@ -34,12 +34,12 @@ ARCH=NVHPC2307
 # Pick a cycle & a branch
 
 CYCLE=49t0
-BRANCH=rapsgpu+openacc+updateview
+BRANCH=rapsgpu+openacc+pb11
 REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor
 
-OPT=1s
+OPT=1d
 
 # Create a pack
 
