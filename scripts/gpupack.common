@@ -75,4 +75,27 @@ function common_install ()
   vimpack_install
 }
 
+function check_cmake_version ()
+{
+  local res=$(cmake --version | head -n1 | awk '{split($3,a,".");print(a[1]==2 && a[2]<16);}')
+  if [ $res -eq 1 ]; then
+    echo "Your cmake is too old"
+    exit 1
+  fi
+}
+
+function check_perl_version ()
+{
+  local res=$(perl -e 'print $] <= 5.026?"1\n":"0\n";')
+  if [ $res -eq 1 ]; then
+    echo "Your perl is too old"
+    exit 1
+  fi
+}
+
+function common_check_versions ()
+{
+  check_cmake_version
+  check_perl_version
+}
 
