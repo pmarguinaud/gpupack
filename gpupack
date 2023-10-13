@@ -21,7 +21,10 @@ create_gpupack_sh
 
 # Install common libraries (architecture independent)
 
-# common_install
+common_install
+
+# Check versions of Perl & cmake
+
 common_check_versions
 
 # Choose a compiler
@@ -30,12 +33,12 @@ ARCH=NVHPC2309
 
 # Install architecture dependent libraries
 
-# libraries_install  
+libraries_install  
 
 # Pick a cycle & a branch
 
 CYCLE=49t0
-BRANCH=rapsgpu+openacc+pb11
+BRANCH=rapsgpu+openacc+cpglag
 REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor

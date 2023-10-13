@@ -210,7 +210,7 @@ Please look at the script `cy49/arp/arp.sh` and see how you can adapt it to your
 - `scripts/sbatch-ecmwf.sh`
 - `scripts/sbatch-meteo.sh`
 
-provides examples of how `cy49/arp/arp.sh` is submitted to ECMWF & MÃtÃo-France batch systems.
+provides examples of how `cy49/arp/arp.sh` is submitted to ECMWF & Meteo-France batch systems.
 
 # OpenMP & OpenACC
 
