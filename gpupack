@@ -25,7 +25,7 @@ create_gpupack_sh
 
 # Choose a compiler
 
-ARCH=NVHPC2307
+ARCH=NVHPC2309
 
 # Install architecture dependent libraries
 

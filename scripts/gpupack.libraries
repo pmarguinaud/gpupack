@@ -21,7 +21,7 @@ function eccodes_install ()
 
 function hdf5_install ()
 {
-  HDF5=hdf5-1.10.5
+  HDF5=hdf5-1.10.11
   TAR=$HDF5.tar.bz2
   cd $TMP
 

@@ -15,7 +15,7 @@ This repository contains :
 
 Compilers :
 
-- nvhpc/23.03 or nvhpc/23.5
+- NVHPC 23.3, 23.5, 23.7 or 23.9
 - Intel 18.05
 - Any other C/C++/FORTRAN with MPI support
 
@@ -210,7 +210,7 @@ Please look at the script `cy49/arp/arp.sh` and see how you can adapt it to your
 - `scripts/sbatch-ecmwf.sh`
 - `scripts/sbatch-meteo.sh`
 
-provides examples of how `cy49/arp/arp.sh` is submitted to ECMWF & M√t√o-France batch systems.
+provides examples of how `cy49/arp/arp.sh` is submitted to ECMWF & M√Ét√Éo-France batch systems.
 
 # OpenMP & OpenACC
 
