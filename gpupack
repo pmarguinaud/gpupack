@@ -22,6 +22,7 @@ create_gpupack_sh
 # Install common libraries (architecture independent)
 
 # common_install
+common_check_versions
 
 # Choose a compiler
 
