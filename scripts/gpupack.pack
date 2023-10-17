@@ -39,7 +39,7 @@ function FieldAPI_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/FieldAPI
   cd $pack/hub/local/src/FieldAPI
-  git clone --branch field_array_util https://github.com/ACCORD-NWP/field_api.git
+  git clone --branch master https://github.com/pmarguinaud/field_api
 }
 
 function pack_create ()
