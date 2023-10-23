@@ -13,43 +13,44 @@ function submit ()
   pack=$4
   grid=$5
 
+  ppack=$(basename $pack)
 
-  arch=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $1 ' $pack)
-  opt=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $2 ' $pack)
-
-  out="$GPUPACK_PREFIX/cy49/arp/$grid/ref/$arch.$opt/slurm.out"
+  out="$GPUPACK_PREFIX/cy49/arp/$grid/ref/$ppack/slurm.out"
 
   if [ -f "$out" ]
   then
-  sbatch --switches=3 -N$N -p $p  cy49/arp/arp.sh $pack $grid
+  sbatch --exclusive --switches=3 -N$N -p $p  cy49/arp/arp.sh $pack $grid
   else
   mkdir -p $(dirname $out)
-  sbatch --switches=3 -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+  sbatch --exclusive --switches=3 -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
   fi
 }
 
 
 CYCLE=49t0
-BRANCH=compile_with_pgi_2303-field_api
-
-submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0031
-submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0031
-
-submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1s t0798
-submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2305.1d t0798
-
-exit
-
-submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1s t0031
-submit 1 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1d t0031
-
-submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1s t0798
-submit 3 ndl       cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.NVHPC2303.1d t0798
-
-submit 1 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2s t0031
-submit 1 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2d t0031
-
-submit 3 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2s t0798
-submit 3 normal256 cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.INTEL1805.2d t0798
+BRANCH=openacccpglag
 
 
+for ARCH in NVHPC2309.1s NVHPC2309.1d INTEL1805.2s INTEL1805.2d
+do
+  for TRUNC in t0031 t0107 t0538 t0798
+  do
+
+    if [ "$ARCH" = "INTEL1805.2s" -o "$ARCH" = "INTEL1805.2d" ]
+    then
+      partition=normal256
+    else
+      partition=ndl
+    fi
+    
+    if [ "$TRUNC" = "t0798" ]
+    then
+      nodes=3
+    else
+      nodes=1
+    fi
+
+    submit $nodes $partition cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH} $TRUNC
+
+  done
+done

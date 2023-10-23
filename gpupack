@@ -38,7 +38,7 @@ libraries_install
 # Pick a cycle & a branch
 
 CYCLE=49t0
-BRANCH=rapsgpu+openacc+cpglag
+BRANCH=openacccpglag
 REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor

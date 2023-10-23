@@ -66,7 +66,13 @@ for my $METHOD (qw (OPENMP OPENMPSINGLECOLUMN OPENACCSINGLECOLUMN))
     my $fh = 'FileHandle'->new (">$pack/lparallelmethod.txt.$METHOD");
     for my $section (sort keys (%section2method))
       {
-        my @method = ($METHOD, 'OPENMP', 'UPDATEVIEW');
+        my @method = ($METHOD);
+
+        push @method, 'OPENMPMETHOD'  if ($METHOD =~ m/^OPENMP/o);
+        push @method, 'OPENACCMETHOD' if ($METHOD =~ m/^OPENACC/o);
+          
+        push @method, ('OPENMP', 'UPDATEVIEW');
+
         for my $method (@method)
           {
             if ($section2method{$section}{$method})

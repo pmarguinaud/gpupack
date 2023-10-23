@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --export=GPUPACK_PREFIX
 #SBATCH --job-name=arp
-#SBATCH --time=00:45:00
+#SBATCH --time=01:00:00
 #SBATCH --verbose
 #SBATCH --no-requeue
 
@@ -53,6 +53,7 @@ function nominal_setup ()
   export PARALLEL=0
   unset LPARALLELMETHOD_VERBOSE
   unset CLSTACKSIZE
+  export LLSIMPLE_DGEMM=1
 }
 
 function openmp_setup ()
@@ -64,6 +65,7 @@ function openmp_setup ()
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
   unset CLSTACKSIZE
+  export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMP lparallelmethod.txt
 }
 
@@ -76,6 +78,7 @@ function openmpsinglecolumn_setup ()
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
   export CLSTACKSIZE=65
+  export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMPSINGLECOLUMN lparallelmethod.txt
 }
 
@@ -88,6 +91,7 @@ function openaccsinglecolumn_setup ()
   export PARALLEL=1
   export LPARALLELMETHOD_VERBOSE=1
   export CLSTACKSIZE=65
+  export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENACCSINGLECOLUMN lparallelmethod.txt
 }
 
@@ -173,9 +177,6 @@ then
   exit
 fi
 
-
-ARCH=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $1 ' $PACK)
-OPT=$(perl -e ' use File::Basename; my $pack = shift; $pack = &basename ($pack); $pack =~ m/\.(\w+)\.(\w+)$/o; print $2 ' $PACK)
 
 export PACK
 export GRID
@@ -283,7 +284,9 @@ do
   
   ls -lrt
 
-  ref="$GPUPACK_PREFIX/cy49/arp/$GRID/ref/$ARCH.$OPT/$method/NODE.001_01"
+
+  pack=$(basename $PACK)
+  ref="$GPUPACK_PREFIX/cy49/arp/$GRID/ref/$pack/$method/NODE.001_01"
   if [ ! -f "$ref" ]
   then
     dir=$(dirname $ref)
