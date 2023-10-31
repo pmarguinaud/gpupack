@@ -146,7 +146,7 @@ LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -qopenmp -shared-intel -lrt -lstd
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,/home/gmap/mrpm/marguina/gpupack/install/$ARCH/lib
+LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,$GPUPACK_PREFIX/install/$ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
