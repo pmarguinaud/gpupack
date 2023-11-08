@@ -53,6 +53,8 @@ function nominal_setup ()
   export PARALLEL=0
   unset LPARALLELMETHOD_VERBOSE
   unset CLSTACKSIZE
+  unset CLSTACKSIZE4
+  unset CLSTACKSIZE8
   export LLSIMPLE_DGEMM=1
 }
 
@@ -65,6 +67,8 @@ function openmp_setup ()
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
   unset CLSTACKSIZE
+  unset CLSTACKSIZE4
+  unset CLSTACKSIZE8
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMP lparallelmethod.txt
 }
@@ -77,7 +81,9 @@ function openmpsinglecolumn_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
-  export CLSTACKSIZE=65
+  export CLSTACKSIZE=0
+  export CLSTACKSIZE4=5
+  export CLSTACKSIZE8=65
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMPSINGLECOLUMN lparallelmethod.txt
 }
@@ -90,7 +96,9 @@ function openaccsinglecolumn_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   export LPARALLELMETHOD_VERBOSE=1
-  export CLSTACKSIZE=65
+  export CLSTACKSIZE=0
+  export CLSTACKSIZE4=5
+  export CLSTACKSIZE8=65
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENACCSINGLECOLUMN lparallelmethod.txt
 }
@@ -244,7 +252,7 @@ do
   
   xpnam --delta="
   &NAMDIM
-    NPROMA=-32,
+    NPROMA=-128,
   /
   " --inplace fort.4
   

@@ -28,7 +28,7 @@ function submit ()
 
 
 CYCLE=49t0
-BRANCH=openacccpglag
+BRANCH=openacccpglagstack84
 
 
 for ARCH in NVHPC2309.1s NVHPC2309.1d INTEL1805.2s INTEL1805.2d
