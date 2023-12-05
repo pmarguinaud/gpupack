@@ -20,7 +20,7 @@ function perl_install ()
 
 function fypp_install ()
 {
-  if [ ! -f "$INSTALL/fypp" ] 
+  if [ ! -d "$INSTALL/fypp" ]
   then
     git clone https://github.com/aradi/fypp.git $INSTALL/fypp
   fi
@@ -28,7 +28,7 @@ function fypp_install ()
 
 function yaml_install ()
 {
-  if [ ! -f "$INSTALL/yaml" ]
+  if [ ! -d "$INSTALL/yaml" ]
   then
     git clone https://github.com/yaml/pyyaml.git $INSTALL/yaml
   fi
