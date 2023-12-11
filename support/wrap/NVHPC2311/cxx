@@ -22,7 +22,7 @@ local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
 local $ENV{NVHPC_CUDA_HOME} = "$NVHPC_PREFIX/$CUDA_PREFIX";
 #
 #hack for bug in math lib of NVHPC 23.11, provided by Louis Stuber
-local $ENV{CPATH} = "/home/ext/dsi/nvidia/stuberl/fixed-pgi-math/";
+local $ENV{CPATH} = "$ENV{GPUPACK_PREFIX}/support/wrap/NVHPC2311/pgi-math-wrapper/";
 
 exec ("$NVHPC_PREFIX/compilers/bin/pgc++", @ARGV, 
       "-L$NVHPC_PREFIX/compilers/lib", '-lnvf', '-lnvhpcatm', "-Wl,-rpath,$NVHPC_PREFIX/compilers/lib", 
