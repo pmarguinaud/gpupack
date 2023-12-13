@@ -19,10 +19,20 @@ function submit ()
 
   if [ -f "$out" ]
   then
-  sbatch --exclusive --switches=3 -N$N -p $p  cy49/arp/arp.sh $pack $grid
+    if [ "$p" = "ndl" ]
+    then
+      sbatch --gres=gpu:4 --exclusive --switches=3 -N$N -p $p  cy49/arp/arp.sh $pack $grid
+    else
+      sbatch --exclusive -N$N -p $p  cy49/arp/arp.sh $pack $grid
+    fi
   else
-  mkdir -p $(dirname $out)
-  sbatch --exclusive --switches=3 -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+    mkdir -p $(dirname $out)
+    if [ "$p" = "ndl" ]
+    then
+      sbatch --gres=gpu:4 --exclusive --switches=3 -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+    else
+      sbatch --exclusive -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+    fi
   fi
 }
 
@@ -42,7 +52,7 @@ do
     else
       partition=ndl
     fi
-    
+
     if [ "$TRUNC" = "t0798" ]
     then
       nodes=3

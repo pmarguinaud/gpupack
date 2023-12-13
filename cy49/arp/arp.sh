@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --export=GPUPACK_PREFIX
 #SBATCH --job-name=arp
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --verbose
 #SBATCH --no-requeue
 
@@ -44,6 +44,29 @@ function grib_api_setup ()
   export GRIB_SAMPLES_PATH=$grib_api_prefix/ifs_samples/grib1:$grib_api_prefix/share/eccodes/ifs_samples/grib1
 }
 
+function clean_stack ()
+{
+  unset CLSTACKSIZE
+  unset CLSTACKSIZE4
+  unset CLSTACKSIZE8
+}
+
+function setup_stack ()
+{
+  clean_stack 
+  PREC=$(perl -e ' print substr ($ARGV[0], -1, 1) ' $pack)
+  if [ "$PREC" = "s" ]
+  then
+    export CLSTACKSIZE=0
+    export CLSTACKSIZE4=70
+    export CLSTACKSIZE8=10
+  else
+    export CLSTACKSIZE=0
+    export CLSTACKSIZE4=5
+    export CLSTACKSIZE8=65
+  fi
+}
+
 function nominal_setup ()
 {
   pack=$1
@@ -52,9 +75,7 @@ function nominal_setup ()
   export PERSISTENT=0
   export PARALLEL=0
   unset LPARALLELMETHOD_VERBOSE
-  unset CLSTACKSIZE
-  unset CLSTACKSIZE4
-  unset CLSTACKSIZE8
+  clean_stack
   export LLSIMPLE_DGEMM=1
 }
 
@@ -66,9 +87,7 @@ function openmp_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
-  unset CLSTACKSIZE
-  unset CLSTACKSIZE4
-  unset CLSTACKSIZE8
+  clean_stack 
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMP lparallelmethod.txt
 }
@@ -81,9 +100,7 @@ function openmpsinglecolumn_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
-  export CLSTACKSIZE=0
-  export CLSTACKSIZE4=5
-  export CLSTACKSIZE8=65
+  setup_stack $pack
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMPSINGLECOLUMN lparallelmethod.txt
 }
@@ -96,9 +113,7 @@ function openaccsinglecolumn_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   export LPARALLELMETHOD_VERBOSE=1
-  export CLSTACKSIZE=0
-  export CLSTACKSIZE4=5
-  export CLSTACKSIZE8=65
+  setup_stack $pack
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENACCSINGLECOLUMN lparallelmethod.txt
 }
