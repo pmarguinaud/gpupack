@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use FindBin qw ($Bin);
 
 my @u = qw (CC CXX F77 F90 FC I_MPI_CC I_MPI_CXX I_MPI_F90 I_MPI_FC OMPI_CC OMPI_CXX OMPI_FC);
 delete $ENV{$_} for (@u);
@@ -14,6 +15,13 @@ sub prefix
   die ("Unexpected host : $host");
 }
 
+sub meteofrance
+{
+  use Sys::Hostname;
+  my $host  = &hostname ();
+  return 1 if ($host =~ m/^(?:belenos|taranis)/o);
+}
+
 my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/23.11';
 my $OMPI_PREFIX = "comm_libs/11.8/hpcx/hpcx-2.14/ompi";
 my $CUDA_PREFIX= "cuda/11.8";
@@ -22,8 +30,11 @@ local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX
 local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
 local $ENV{NVHPC_CUDA_HOME} = "$NVHPC_PREFIX/$CUDA_PREFIX";
 
-#hack for bug in math lib of NVHPC 23.11, provided by Louis Stuber
-local $ENV{CPATH} = "$ENV{GPUPACK_PREFIX}/support/wrap/NVHPC2311/pgi-math-wrapper/";
+if (&meteofrance ())
+  {
+    # Hack for bug in math lib of NVHPC 23.11, provided by Louis Stuber (NVIDIA)
+    $ENV{CPATH} = "$Bin/pgi-math-wrapper/";
+  }
 
 my @mpi_libs = ("-L$NVHPC_PREFIX/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_PREFIX/$OMPI_PREFIX/lib", qw (-lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal));
 

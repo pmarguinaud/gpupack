@@ -9,6 +9,8 @@
  *
  */
 
+#undef __GNUC__
 #define __GNUC__ 6
 #include_next <math.h>
+#undef __GNUC__
 #define __GNUC__ 4
