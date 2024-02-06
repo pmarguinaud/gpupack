@@ -352,6 +352,25 @@ for my $dummy (@{ $opts{dummy} })
   \rm $lib.c $lib.o
 }
 
+function cutlass_install ()
+{
+  CUTLASS=cutlass-3.0.0
+  TAR=$CUTLASS.tar.gz
+  cd $TMP
+
+  if [ ! -d "$CUTLASS" ]
+  then
+  tar xvf "$SOURCES/$TAR"
+  fi
+
+  \rm -rf "$CUTLASS-Build"
+  mkdir -p "$CUTLASS-Build"
+  cd "$CUTLASS-Build"
+
+  cmake ../$CUTLASS -DCMAKE_INSTALL_PREFIX=$INSTALL -DCUTLASS_NVCC_ARCHS=$CUDA_CC -DCUTLASS_ENABLE_HEADERS_ONLY=ON -DCUTLASS_ENABLE_TESTS=OFF
+  make -j4 install
+}
+
 
 function libraries_install ()
 {
@@ -376,7 +395,7 @@ function libraries_install ()
 
   for lib in \
     eccodes hdf5 netcdf netcdf_fortran lapack eigen oasisdummy mpidummy \
-    ibmdummy naglitedummy wamdummy fdbdummy gribex bufr rgb
+    ibmdummy naglitedummy wamdummy fdbdummy gribex bufr rgb cutlass
   do
     (
       # Load some specific environment variables 
