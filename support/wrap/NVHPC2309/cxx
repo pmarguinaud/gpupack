@@ -15,7 +15,7 @@ sub prefix
 }
 
 my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/23.9';
-my $CUDA_PREFIX= "cuda/11.8";
+my $CUDA_PREFIX= "cuda/12.2";
 
 local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX/comm_libs/nccl/lib:$NVHPC_PREFIX/math_libs/lib64:$NVHPC_PREFIX/compilers/lib:$NVHPC_PREFIX/cuda/lib64";
 local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
