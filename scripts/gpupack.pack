@@ -5,7 +5,7 @@ function ecSDK_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/ecSDK
   cd $pack/hub/local/src/ecSDK
-  git clone --branch  3.7.0 https://github.com/ecmwf/ecbuild
+  git clone --branch 3.7.0  https://github.com/ecmwf/ecbuild
   git clone --branch 1.19.0 https://github.com/ACCORD-NWP/eckit.git
   git clone --branch 0.9.5  https://github.com/ecmwf/fckit
 }
@@ -15,7 +15,7 @@ function Fiat_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/Fiat
   cd $pack/hub/local/src/Fiat
-  git clone --branch nvtx+single_prec https://github.com/pmarguinaud/fiat.git
+  git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/fiat
 }
 
 function Ectrans_clone ()
@@ -23,7 +23,7 @@ function Ectrans_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/Ectrans
   cd $pack/hub/local/src/Ectrans
-  git clone --branch mirror-CY48T3_mrg48R1.02 https://github.com/ACCORD-NWP/ectrans
+  git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/ectrans
 }
 
 function OOPS_clone ()
@@ -31,7 +31,7 @@ function OOPS_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/OOPS
   cd $pack/hub/local/src/OOPS
-  git clone --branch workaround_for_pgi_2303 https://github.com/pmarguinaud/oops.git oops_src
+  git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/oops oops_src
 }
 
 function FieldAPI_clone ()

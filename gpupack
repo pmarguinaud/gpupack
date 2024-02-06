@@ -29,7 +29,7 @@ common_check_versions
 
 # Choose a compiler
 
-ARCH=NVHPC2309
+ARCH=NVHPC2311
 
 # Install architecture dependent libraries
 
@@ -37,8 +37,8 @@ libraries_install
 
 # Pick a cycle & a branch
 
-CYCLE=49t0
-BRANCH=openacccpglagstack84
+CYCLE=49t1
+BRANCH=openacccpglagstack84CY49T1PGI
 REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor
