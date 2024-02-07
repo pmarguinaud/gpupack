@@ -31,6 +31,7 @@ CUDA_PREFIX="cuda/$CUDA_VERSION"
 NVHPC_CUDA_HOME="$NVHPC_PREFIX/$CUDA_PREFIX"
 
 echo "export NVHPC_CUDA_HOME=$NVHPC_CUDA_HOME"
+echo "export CPATH=$NVHPC_PREFIX/comm_libs/$CUDA_VERSION/hpcx/latest/ompi/include:$CPATH"
 if [ ! -z $GCC_PATH ]; then
 	echo "export PATH=$GCC_PATH:\$PATH"
 	echo "export LD_LIBRARY_PATH=$GCC_LIBARAY_PATH:\$LD_LIBRARY_PATH"
