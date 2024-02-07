@@ -5,6 +5,14 @@ set -e
 
 export GPUPACK_PREFIX=$HOME/gpupack
 
+# Choose a compiler
+
+ARCH=NVHPC2309
+
+#Choose a GPU architecture
+
+export CUDA_CC=70
+
 cd $GPUPACK_PREFIX
 
 # Load gpupack shell functions
@@ -26,10 +34,6 @@ common_install
 # Check versions of Perl & cmake
 
 common_check_versions
-
-# Choose a compiler
-
-ARCH=NVHPC2309
 
 # Install architecture dependent libraries
 

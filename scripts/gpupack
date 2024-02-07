@@ -11,9 +11,12 @@ export PATH=\$GPUPACK_PREFIX/install/common/fypp/bin:\$GPUPACK_PREFIX/install/co
 export ROOTPACK=\$GPUPACK_PREFIX/pack
 export HOMEPACK=\$GPUPACK_PREFIX/pack
 export GMK_SUPPORT=\$GPUPACK_PREFIX/support
+
 export CUDA_CC=$CUDA_CC
 
 EOF
+
+bash $GPUPACK_PREFIX/support/wrap/$ARCH/env.sh >> $GPUPACK_PREFIX/gpupack.sh
 
 }
 
