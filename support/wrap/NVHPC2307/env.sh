@@ -8,17 +8,17 @@ GCC_LIBARAY_PATH=""
 
 case $(hostname) in
 	*belenos*)
-		PREFIX="/opt/softs"
+		PREFIX=/opt/softs
 		GCC_PATH=/opt/softs/gcc/9.2.0/bin
 		GCC_LIBARAY_PATH=/opt/softs/gcc/9.2.0/lib64
 		;;
 	*taranis*)
-		PREFIX="/opt/softs"
+		PREFIX=/opt/softs
 		GCC_PATH=/opt/softs/gcc/9.2.0/bin
 		GCC_LIBARAY_PATH=/opt/softs/gcc/9.2.0/lib64
 		;;
 	*bullx*)
-		PREFIX="/ec/res4/hpcperm/sor/install"
+		PREFIX=/ec/res4/hpcperm/sor/install
 		;;
 	*)
 		echo "Unknown host"
