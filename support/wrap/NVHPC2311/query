@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FileHandle;
+use File::Basename;
+use FindBin qw ($Bin);
+use lib $Bin;
+
+use NVHPC;
+
+exit (0) unless (my $var = shift);
+
+if ($var eq 'NVHPC_ROOT')
+  {
+    print $NVHPC_ROOT;
+  }
+elsif ($var eq 'CUDAToolkit_ROOT')
+  {
+    print "$NVHPC_ROOT/cuda";
+  }
+
