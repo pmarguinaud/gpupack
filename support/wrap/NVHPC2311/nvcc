@@ -1,0 +1,54 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+
+my @u = qw (CC CXX F77 F90 FC I_MPI_CC I_MPI_CXX I_MPI_F90 I_MPI_FC OMPI_CC OMPI_CXX OMPI_FC);
+delete $ENV{$_} for (@u);
+
+sub prefix
+{
+  use Sys::Hostname;
+  my $host  = &hostname ();
+  return '/ec/res4/hpcperm/sor/install' if ($host =~ m/^ac\d+-\d+\.bullx$/o);
+  return '/opt/softs' if ($host =~ m/^(?:belenos|taranis)/o);
+  die ("Unexpected host : $host");
+}
+
+sub meteofrance
+{
+  use Sys::Hostname;
+  my $host  = &hostname ();
+  return 1 if ($host =~ m/^(?:belenos|taranis)/o);
+}
+
+my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/23.11';
+my $CUDA_PREFIX= "cuda/12.3";
+
+local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX/comm_libs/nccl/lib:$NVHPC_PREFIX/math_libs/lib64:$NVHPC_PREFIX/compilers/lib:$NVHPC_PREFIX/cuda/lib64";
+local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
+local $ENV{NVHPC_CUDA_HOME} = "$NVHPC_PREFIX/$CUDA_PREFIX";
+
+my @opt;
+if (meteofrance()){
+  @opt = ("--compiler-bindir", "/opt/softs/gcc/9.2.0/bin/");
+}
+
+my @cmd = ("$NVHPC_PREFIX/compilers/bin/nvcc", @opt, @ARGV);
+
+for (@cmd)
+  {
+    s/^-l\[(\d+)\]/-l_${1}_/go;
+  }
+
+for my $f (<*.a>)
+  {
+    if ((my $g = $f) =~ s/^lib\[(\d+)\]\.a$/lib_${1}_.a/o)
+      {
+        link ($f, $g);
+      }
+  }
+
+
+exec (@cmd);
+
