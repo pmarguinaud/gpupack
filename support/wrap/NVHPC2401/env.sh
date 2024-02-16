@@ -3,16 +3,13 @@ NVHPC_VERSION=24.1
 CUDA_VERSION=12.3
 
 PREFIX=""
-GCC_LIBARAY_PATH=""
 
 case $(hostname) in
 	*belenos*)
 		PREFIX=/opt/softs
-		GCC_LIBARAY_PATH=/opt/softs/gcc/9.2.0/lib64
 		;;
 	*taranis*)
 		PREFIX=/opt/softs
-		GCC_LIBARAY_PATH=/opt/softs/gcc/9.2.0/lib64
 		;;
 	*bullx*)
 		PREFIX=/ec/res4/hpcperm/sor/install
@@ -29,6 +26,3 @@ NVHPC_CUDA_HOME="$NVHPC_PREFIX/$CUDA_PREFIX"
 
 echo "export NVHPC_CUDA_HOME=$NVHPC_CUDA_HOME"
 echo "export CPATH=$NVHPC_PREFIX/comm_libs/$CUDA_VERSION/hpcx/latest/ompi/include\${CPATH:+:\$CPATH}"
-if [ ! -z $GCC_LIBARAY_PATH ]; then
-	echo "export LD_LIBRARY_PATH=$GCC_LIBARAY_PATH\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
-fi

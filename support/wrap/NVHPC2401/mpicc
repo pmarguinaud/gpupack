@@ -49,4 +49,10 @@ my @cmd =
       "-L$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt', '-lnvf',
       "-L$NVHPC_PREFIX/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_PREFIX/$OMPI_PREFIX/lib", '-lopen-rte', '-lopen-pal');
 
+if (&meteofrance ())
+  {
+	  push @cmd,"-Wl,-rpath,/opt/softs/gcc/9.2.0/lib64";
+  }
+
+
 exec (@cmd);
