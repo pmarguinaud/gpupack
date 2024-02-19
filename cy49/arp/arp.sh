@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --export=GPUPACK_PREFIX,LD_LIBRARY_PATH
+#SBATCH --export=GPUPACK_PREFIX
 #SBATCH --job-name=arp
 #SBATCH --time=02:00:00
 #SBATCH --verbose
