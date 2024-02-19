@@ -38,6 +38,14 @@ if (&meteofrance ())
 
 my @mpi_libs = ("-L$NVHPC_PREFIX/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_PREFIX/$OMPI_PREFIX/lib", qw (-lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal));
 
-exec ("$NVHPC_PREFIX/$OMPI_PREFIX/bin/mpic++", @ARGV, 
-      "-L$NVHPC_PREFIX/compilers/lib", "-Wl,-rpath,$NVHPC_PREFIX/compilers/lib", '-lnvf', '-lnvhpcatm', @mpi_libs, 
+my @cmd= ("$NVHPC_PREFIX/$OMPI_PREFIX/bin/mpic++", @ARGV,
+      "-L$NVHPC_PREFIX/compilers/lib", "-Wl,-rpath,$NVHPC_PREFIX/compilers/lib", '-lnvf', '-lnvhpcatm', @mpi_libs,
       "-L$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_PREFIX/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt');
+
+if (&meteofrance ())
+  {
+	  push @cmd,"-Wl,-rpath,/opt/softs/gcc/9.2.0/lib64";
+  }
+
+
+exec (@cmd);
