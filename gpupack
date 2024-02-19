@@ -9,10 +9,6 @@ export GPUPACK_PREFIX=$HOME/gpupack
 
 ARCH=NVHPC2309
 
-#Choose a GPU architecture
-
-export CUDA_CC=70
-
 cd $GPUPACK_PREFIX
 
 # Load gpupack shell functions
