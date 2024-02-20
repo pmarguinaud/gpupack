@@ -55,7 +55,7 @@ function vimpack_install ()
   cd $GPUPACK_PREFIX
   if [ ! -d "$GPUPACK_PREFIX/vimpack" ]
   then
-  git clone -b dotpack https://github.com/pmarguinaud/vimpack.git
+  git clone https://github.com/pmarguinaud/vimpack.git
   fi
 }
 
