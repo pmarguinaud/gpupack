@@ -30,12 +30,6 @@ local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX
 local $ENV{PATH} = "$NVHPC_PREFIX/compilers/bin:$ENV{PATH}";
 local $ENV{NVHPC_CUDA_HOME} = "$NVHPC_PREFIX/$CUDA_PREFIX";
 
-if (&meteofrance ())
-  {
-    # Hack for bug in math lib of NVHPC 23.11, provided by Louis Stuber (NVIDIA)
-    $ENV{CPATH} = "$Bin/pgi-math-wrapper/";
-  }
-
 my @mpi_libs = ("-L$NVHPC_PREFIX/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_PREFIX/$OMPI_PREFIX/lib", qw (-lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal));
 
 my @cmd= ("$NVHPC_PREFIX/$OMPI_PREFIX/bin/mpic++", @ARGV,
