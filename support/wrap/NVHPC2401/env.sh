@@ -20,7 +20,7 @@ case $(hostname) in
 		;;
 esac
 
-NVHPC_PREFIX="$PREFIX/nvidia/hpc_sdk/Linux_x86_64/$NVHPC_VERSION"
+NVHPC_PREFIX="$PREFIX/gcc/9.2.0/hpc_sdk/Linux_x86_64/$NVHPC_VERSION"
 CUDA_PREFIX="cuda/$CUDA_VERSION"
 NVHPC_CUDA_HOME="$NVHPC_PREFIX/$CUDA_PREFIX"
 

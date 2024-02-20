@@ -24,7 +24,7 @@ sub meteofrance
   return 1 if ($host =~ m/^(?:belenos|taranis)/o);
 }
 
-my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/24.1';
+my $NVHPC_PREFIX = &prefix () . '/gcc/9.2.0/hpc_sdk/Linux_x86_64/24.1';
 my $OMPI_PREFIX = "comm_libs/12.3/hpcx/hpcx-2.17.1/ompi";
 my $CUDA_PREFIX= "cuda/12.3";
 
