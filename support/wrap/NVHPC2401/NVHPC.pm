@@ -4,7 +4,7 @@ use strict;
 use FindBin qw ($Bin);
 use base qw (Exporter);
 
-our @EXPORT = qw ($NVHPC_ROOT $OMPI_PREFIX $CUDA_PREFIX &fixEnv &prefix &site &fixLink);
+our @EXPORT = qw ($NVHPC_ROOT $NVHPC_CUDA_HOME $OMPI_PREFIX $CUDA_PREFIX &fixEnv &prefix &site &fixLink);
 
 our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . &version ();
 
@@ -12,6 +12,7 @@ my ($cuda, $hpcx) = ('12.3', '2.17.1');
 
 our $OMPI_PREFIX = "comm_libs/$cuda/hpcx/hpcx-$hpcx/ompi";
 our $CUDA_PREFIX= "cuda/$cuda";
+our $NVHPC_CUDA_HOME = "$NVHPC_ROOT/$CUDA_PREFIX";
 
 sub version
 {
@@ -35,6 +36,7 @@ sub fixEnv
 
   $ENV{LD_LIBRARY_PATH} = "$NVHPC_ROOT/comm_libs/nvshmem/lib:$NVHPC_ROOT/comm_libs/nccl/lib:$NVHPC_ROOT/$OMPI_PREFIX/lib:$NVHPC_ROOT/math_libs/lib64:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/lib64";
   $ENV{PATH} = "$NVHPC_ROOT/compilers/bin:$ENV{PATH}";
+  $ENV{CPATH} = "$NVHPC_ROOT/$OMPI_PREFIX/include" . ($ENV{CPATH} ? ':' . $ENV{CPATH} : '');
   $ENV{NVHPC_CUDA_HOME} = "$NVHPC_ROOT/$CUDA_PREFIX";
 }
 

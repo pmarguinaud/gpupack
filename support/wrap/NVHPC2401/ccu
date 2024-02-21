@@ -7,4 +7,4 @@ use NVHPC;
 
 &fixEnv ();
 
-exec ("$NVHPC_ROOT/compilers/bin/nvcc", @ARGV);
+exec ("$NVHPC_ROOT/compilers/bin/nvcc", "--compiler-bindir", "/opt/softs/gcc/9.2.0/bin/", @ARGV);
