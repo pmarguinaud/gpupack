@@ -23,7 +23,7 @@ function Ectrans_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/Ectrans
   cd $pack/hub/local/src/Ectrans
-  git clone --branch arpege_integration https://github.com/lukasm91/ectrans
+  git clone --branch arpege_integration_for_cy49t1 https://github.com/dareg/ectrans_nvidia ectrans
 }
 
 function OOPS_clone ()
