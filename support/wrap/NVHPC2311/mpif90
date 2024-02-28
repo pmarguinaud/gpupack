@@ -23,7 +23,7 @@ sub meteofrance
 }
 
 my $NVHPC_PREFIX = &prefix () . '/nvidia/hpc_sdk/Linux_x86_64/23.11';
-my $OMPI_PREFIX = "comm_libs/12.2/hpcx/hpcx-2.16/ompi";
+my $OMPI_PREFIX = "comm_libs/12.3/hpcx/hpcx-2.16/ompi";
 my $CUDA_PREFIX= "cuda/12.3";
 
 local $ENV{LD_LIBRARY_PATH} = "$NVHPC_PREFIX/comm_libs/nvshmem/lib:$NVHPC_PREFIX/comm_libs/nccl/lib:$NVHPC_PREFIX/$OMPI_PREFIX/lib:$NVHPC_PREFIX/math_libs/lib64:$NVHPC_PREFIX/compilers/lib:$NVHPC_PREFIX/cuda/lib64";
