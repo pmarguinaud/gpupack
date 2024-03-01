@@ -289,6 +289,7 @@ LD_USR_PARKIND = parkind_sp
 LD_USR_FIAT = fiat
 # ectrans :
 LD_USR_ECTRANS = trans_sp
+LD_USR_ECTRANS_GPU = trans_gpu_sp
 # field_api :
 LD_USR_FIELD_API = field_api_sp
 
