@@ -106,7 +106,7 @@ function pack_compile ()
   fi
 
   lockpack -f
-  \rm -rf hub/local/build/
+# \rm -rf hub/local/build/
 
   $GPUPACK_PREFIX/scripts/parallelmethod.pl .
 }
