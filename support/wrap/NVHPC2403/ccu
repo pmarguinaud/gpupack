@@ -1,0 +1,10 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use NVHPC;
+
+&fixEnv ();
+
+exec ("$NVHPC_ROOT/compilers/bin/nvcc", "--compiler-bindir", "/opt/softs/gcc/9.2.0/bin/", @ARGV);

@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FileHandle;
+use File::Basename;
+use FindBin qw ($Bin);
+use lib $Bin;
+
+use NVHPC;
+
+&fixEnv ();
+
+if ((grep { $_ eq '-E' } @ARGV) && (grep { $_ eq '-P' } @ARGV))
+  {
+    exec ("/usr/bin/cpp", @ARGV);
+  }
+
+exec ("$NVHPC_ROOT/compilers/bin/pgcc", @ARGV, "-L$NVHPC_ROOT/compilers/lib", '-lnvhpcatm', "-Wl,-rpath,$NVHPC_ROOT/compilers/lib",
+      "-L$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt', '-lnvf');
+
+
