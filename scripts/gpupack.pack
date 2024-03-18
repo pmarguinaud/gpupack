@@ -71,7 +71,7 @@ function pack_create ()
   " ld_masterodb
 
 
-  perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=1; export ARCH=$ARCH/go" ics_packages
+  perl -i -pe "s/GMK_THREADS=\d+/GMK_THREADS=16; export ARCH=$ARCH/go" ics_packages
   perl -i -pe "
     s,\\\$GPUPACK_PREFIX\b,$GPUPACK_PREFIX,go; 
     s/\\\$ARCH\b/$ARCH/go; 
@@ -79,7 +79,7 @@ function pack_create ()
     s/\\\$GPU\b/$GPU/go; 
   " .gmkfile/$ARCH
 
-  gitpack --init --repo $REPO --branch $BRANCH
+  gitpack --init --repo $REPO --branch ${CYCLE}_${BRANCH}
 
   for lib in ecSDK Fiat Ectrans OOPS FieldAPI 
   do

@@ -2,7 +2,7 @@
 # ARCHITECTURE FILE FOR LINUX PLATFORMS WITH INTEL COMPILER AND INTEL MPI
 # =======================================================================
 
-ARCH = GNUUB2004
+ARCH = INTEL1805
 
 # Fortran (cross-)compiler
 # ------------------------
@@ -42,13 +42,13 @@ GMK_FYPP_FLAGS = -M $GPUPACK_PREFIX/install/common/yaml/lib -m os -m yaml
 # Fortran compiler default version (stamp)
 # ----------------------------------------
 
-LIBFRT = echo GNUUB2004
+LIBFRT = echo INTEL1805
 
 # Basic compilation flags
 # -----------------------
 
-FRTFLAGS = -c -fconvert=swap -fno-second-underscore -fbacktrace -m64 -fopenmp -Wall -fPIC -ffree-line-length-none -fcray-pointer -fno-range-check
-VCCFLAGS = -c -m64 -fopenmp -Wall -fPIC 
+FRTFLAGS = -c -convert big_endian -assume byterecl -align array64byte,all -traceback -fpic -qopenmp -qopenmp-threadprivate compat -fp-model source -qopt-report=5 -qopt-report-phase=vec -diag-disable=remark,cpu-dispatch
+VCCFLAGS = -c -qopenmp -qopt-report=2 -qopt-report-phase=vec -fpic -malign-double -fp-model precise -diag-disable=remark,cpu-dispatch
 # Option -C in order to create files without compiling inside odb98
 # In order to have any effect from the following -1 or -A options,
 # -O3 optimization level must be activated.
@@ -56,7 +56,7 @@ ODBFLAGS = -C -O3
 
 # Fortran double precision flags
 # ------------------------------
-DBL_FRTFLAGS = -fdefault-real-8
+DBL_FRTFLAGS = -r8
 
 # Fortran Cpp + extensions flags
 # ------------------------------
@@ -67,14 +67,14 @@ F90_NOCPPFLAG =
 
 # Fortran format flag
 # --------------------
-FREE_FRTFLAG = -ffree-form
-FIXED_FRTFLAG = -ffixed-form
+FREE_FRTFLAG = -free
+FIXED_FRTFLAG = -fixed
 
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -g -O0
-OPT_VCCFLAGS = -g -O0
+OPT_FRTFLAGS = -g -O0 -march=core-avx2 
+OPT_VCCFLAGS = -g -O0 -march=core-avx2
 
 # Debugging compilation flag
 # --------------------------
@@ -84,17 +84,17 @@ DBG_FRTFLAGS = -g -O0
 # Bound checking compilation flag
 # -------------------------------
 
-BCD_FRTFLAGS = -fbounds-check
+BCD_FRTFLAGS = -check bounds
 
 # NaN pre-initialisation flag
 # ---------------------------
 
-NAN_FRTFLAGS = -finit-real=nan
+NAN_FRTFLAGS = -init=arrays,snan -fp-stack-check -ftrapuv -fpe0 -fp-speculation=strict -check uninit -check pointers
 
 # Listing compilation flag
 # ------------------------
 
-LIST_FRTFLAGS = 
+LIST_FRTFLAGS = -list -show nomap
 LIST_VCCFLAGS =
 
 # Filename extension for listing
@@ -114,10 +114,10 @@ MACROS_ODB98 = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DXPRIVATE=PRIVATE -UINTERCEPT_A
 
 GMK_FCFLAGS_SATRAD = -D_RTTOV_DO_DISTRIBCOEF -D_RTTOV_HDF -DWITHOUT_EMOSLIB
 
-GMK_FCFLAGS_SURFEX = -fdefault-real-8 -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA -DSFX_LFI -DARO -DOL -DASC -DTXT -DFA -DLFI
-GMK_FCFLAGS_MSE = -DSFX_FA -fdefault-real-8
-GMK_FCFLAGS_MPA = -fdefault-real-8
-GMK_FCFLAGS_PHYEX = -fdefault-real-8
+GMK_FCFLAGS_SURFEX = -r8 -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA -DSFX_LFI -DARO -DOL -DASC -DTXT -DFA -DLFI
+GMK_FCFLAGS_MSE = -DSFX_FA -r8
+GMK_FCFLAGS_MPA = -r8
+GMK_FCFLAGS_PHYEX = -r8
 
 GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS
 GMK_FCFLAGS_ALGOR = -DBLAS
@@ -146,12 +146,12 @@ LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -qopenmp -shared-intel -lrt -lstd
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -v -fopenmp -lrt -lstdc++ -Wl,-rpath,$GPUPACK_PREFIX/install/$ARCH/lib
+LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,$GPUPACK_PREFIX/install/$ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
 
-LNK_CXX_FLAGS = 
+LNK_CXX_FLAGS = -lifcoremt -lifport
 
 # flags for executable targets
 # ----------------------------
@@ -295,9 +295,9 @@ LD_USR_FIELD_API = field_api_dp
 # ----------------------------------------------------
 
 # Lapack:
-LD_LANG01 = $GPUPACK_PREFIX/install/$ARCH/lib/liblapack.a
+LD_LANG01 = 
 # Blas:
-LD_LANG02 = $GPUPACK_PREFIX/install/$ARCH/lib/libblas.a
+LD_LANG02 =
 
 # System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
 # ------------------------------------------------------------------------------
