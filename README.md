@@ -15,7 +15,7 @@ This repository contains :
 
 Compilers :
 
-- NVHPC 23.3, 23.5, 23.7 or 23.9
+- NVHPC 23.11, 24.1, 24.3
 - Intel 18.05
 - Any other C/C++/FORTRAN with MPI support
 
@@ -142,6 +142,7 @@ gpupack is shipped with the following libraries, and can install them :
 - netcdf/fortran
 - lapack
 - eigen
+- cutlass
 
 It can also create dummies for these libraries (which are not required to make an ARPEGE forecast) :
 
@@ -190,9 +191,10 @@ The `pack_compile` function (defined in `scripts/gpupack.pack`) compiles the pac
 If the compilation is successful, then unnecessary files are removed (directory `hub/local/build`), but also 
 with `lockpack` in `src/local`.
 
-It is possible to invoke directory `ics_packages` and `ics_masterodb` from within the pack. Please note that by default
-`ics_packages` will use a single thread (because of dependencies not correctly detected by cmake), which `ics_masterodb`
-will run with 16 threads (it is possible to change this values in `ics_masterodb`).
+It is possible to invoke `ics_packages` and `ics_masterodb` manually from
+within the pack. Please note that by default `ics_packages` and `ics_masterodb`
+will run with 16 threads, but it is possible to change the value by editing
+GMK\_THREADS in those files.
 
 If the compilation is successful, then the `bin/MASTERODB` file should exist and be executable.
 

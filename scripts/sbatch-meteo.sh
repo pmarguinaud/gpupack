@@ -37,8 +37,8 @@ function submit ()
 }
 
 
-CYCLE=49t0
-BRANCH=openacccpglagstack84
+CYCLE=49t1
+BRANCH=openacccpglagstack84CY49T1PGI
 
 
 for ARCH in NVHPC2309.1s NVHPC2309.1d INTEL1805.2s INTEL1805.2d

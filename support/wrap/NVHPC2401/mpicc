@@ -1,0 +1,23 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FileHandle;
+use File::Basename;
+use FindBin qw ($Bin);
+use lib $Bin;
+use NVHPC;
+
+&fixEnv ();
+
+if ((grep { $_ eq '-E' } @ARGV) && (grep { $_ eq '-P' } @ARGV))
+  {
+    exec ("/usr/bin/cpp", @ARGV);
+  }
+
+my @cmd =
+       ("$NVHPC_ROOT/$OMPI_PREFIX/bin/mpicc", @ARGV, 
+      "-L$NVHPC_ROOT/compilers/lib", "-Wl,-rpath,$NVHPC_ROOT/compilers/lib", '-lnvhpcatm',
+      "-L$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt', '-lnvf',
+      "-L$NVHPC_ROOT/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_ROOT/$OMPI_PREFIX/lib", '-lopen-rte', '-lopen-pal');
+
+exec (@cmd);
