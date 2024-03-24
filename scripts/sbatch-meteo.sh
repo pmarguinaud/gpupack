@@ -41,12 +41,13 @@ CYCLE=49t2
 BRANCH=openacc
 
 
-for ARCH in NVHPC2311.1s NVHPC2311.1d INTEL1805.2s INTEL1805.2d
+#for ARCH in NVHPC2311.1s NVHPC2311.1d INTEL1805.2s INTEL1805.2d
+for ARCH in NVHPC2401.1s NVHPC2401.1d INTEL2302.2s INTEL2302.2d
 do
   for TRUNC in t0031 t0107 t0538 t0798
   do
 
-    if [ "$ARCH" = "INTEL1805.2s" -o "$ARCH" = "INTEL1805.2d" ]
+    if [ ${ARCH:0:5} = "INTEL" ]
     then
       partition=normal256
     else

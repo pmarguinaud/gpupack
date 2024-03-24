@@ -26,7 +26,8 @@ function ecmwf_mpirun ()
 function meteo_mpirun ()
 {
   export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
-  /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
+  $HOME/SAVE/mpiauto/mpiauto --nouse-slurm-mpi $*
+# /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
 # /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
 }
 
