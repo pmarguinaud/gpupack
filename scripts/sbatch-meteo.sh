@@ -37,11 +37,11 @@ function submit ()
 }
 
 
-CYCLE=49t0
-BRANCH=openacccpglagstack84
+CYCLE=49t2
+BRANCH=openacc
 
 
-for ARCH in NVHPC2309.1s NVHPC2309.1d INTEL1805.2s INTEL1805.2d
+for ARCH in NVHPC2311.1s NVHPC2311.1d INTEL1805.2s INTEL1805.2d
 do
   for TRUNC in t0031 t0107 t0538 t0798
   do
@@ -56,6 +56,9 @@ do
     if [ "$TRUNC" = "t0798" ]
     then
       nodes=3
+    elif [ "$TRUNC" = "t0538" ]
+    then
+      nodes=2
     else
       nodes=1
     fi

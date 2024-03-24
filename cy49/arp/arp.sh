@@ -27,6 +27,7 @@ function meteo_mpirun ()
 {
   export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
   /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
+# /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
 }
 
 function grib_api_setup ()
@@ -62,8 +63,8 @@ function setup_stack ()
     export CLSTACKSIZE8=10
   else
     export CLSTACKSIZE=0
-    export CLSTACKSIZE4=5
-    export CLSTACKSIZE8=65
+    export CLSTACKSIZE4=10
+    export CLSTACKSIZE8=70
   fi
 }
 
@@ -209,7 +210,7 @@ for method in nominal openmp openmpsinglecolumn openaccsinglecolumn
 do
   mkdir -p $method
   cd $method
-  
+
   for f in $DATADIR/*
   do
     \rm -f $(basename $f)
@@ -284,7 +285,7 @@ do
   cat fort.4
   
   ${method}_setup $PACK
-  
+
   BIN=$PACK/bin/MASTERODB
   
   grib_api_setup $BIN

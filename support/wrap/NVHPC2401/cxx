@@ -1,0 +1,12 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use NVHPC;
+
+&fixEnv ();
+
+exec ("$NVHPC_ROOT/compilers/bin/pgc++", @ARGV, 
+      "-L$NVHPC_ROOT/compilers/lib", '-lnvf', '-lnvhpcatm', "-Wl,-rpath,$NVHPC_ROOT/compilers/lib", 
+      "-L$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt');

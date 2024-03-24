@@ -37,8 +37,8 @@ libraries_install
 
 # Pick a cycle & a branch
 
-CYCLE=49t1
-BRANCH=openacccpglagstack84CY49T1PGI
+CYCLE=49t2
+BRANCH=openacc
 REPO=https://github.com/pmarguinaud/IAL.git
 
 # Choose architecture flavor

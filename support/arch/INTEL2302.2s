@@ -1,9 +1,8 @@
 
-# ARCHITECTURE FILE FOR LINUX PLATFORMS WITH NVHPC COMPILER AND OPENMPI
-# =====================================================================
+# ARCHITECTURE FILE FOR LINUX PLATFORMS WITH INTEL COMPILER AND INTEL MPI
+# =======================================================================
 
-ARCH = NVHPC2401
-GPU = cc70,cc80
+ARCH = INTEL2302
 
 # Fortran (cross-)compiler
 # ------------------------
@@ -16,19 +15,14 @@ FRTNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/mpif90
 VCCNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicc
 
 # C++ (cross-)compiler
-# --------------------
+# ------------------
 
 CXXNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicxx
-
-# CUDA (cross-)compiler
-# ---------------------
-
-CCUNAME = $GPUPACK_PREFIX/support/wrap/$ARCH/ccu
 
 # Native C compiler
 # -----------------
 
-CCNATIVE = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicc
+CCNATIVE = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicc -diag-disable=10441
 
 # Native C linker flags
 # ---------------------
@@ -48,13 +42,13 @@ GMK_FYPP_FLAGS = -M $GPUPACK_PREFIX/install/common/yaml/lib -m os -m yaml
 # Fortran compiler default version (stamp)
 # ----------------------------------------
 
-LIBFRT = echo NVHPC2401
+LIBFRT = echo INTEL2302
 
 # Basic compilation flags
 # -----------------------
 
-FRTFLAGS = -c -mp -fPIC -Minfo -gopt -Mlarge_arrays -Mlist -traceback -Mnofma -Mbyteswapio -Mbackslash -Mstack_arrays
-VCCFLAGS = -c -mp -fPIC -Minfo -gopt -Mlarge_arrays -Mlist -traceback -Mnofma
+FRTFLAGS = -c -convert big_endian -assume byterecl -align array64byte,all -traceback -fpic -qopenmp -qopenmp-threadprivate compat -fp-model source -qopt-report=5 -qopt-report-phase=vec -ftz -diag-disable=remark,cpu-dispatch
+VCCFLAGS = -c -qopenmp -qopt-report=2 -qopt-report-phase=vec -fpic -malign-double -ftz -fp-model precise -diag-disable=remark,cpu-dispatch -diag-disable=10441
 # Option -C in order to create files without compiling inside odb98
 # In order to have any effect from the following -1 or -A options,
 # -O3 optimization level must be activated.
@@ -73,14 +67,14 @@ F90_NOCPPFLAG =
 
 # Fortran format flag
 # --------------------
-FREE_FRTFLAG = 
-FIXED_FRTFLAG = 
+FREE_FRTFLAG = -free
+FIXED_FRTFLAG = -fixed
 
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -acc=gpu -O1 -gopt -gpu=$GPU -Minfo=accel,all,ccff
-OPT_VCCFLAGS = -acc=gpu -O0 -gopt -gpu=$GPU -Minfo=accel,all,ccff
+OPT_FRTFLAGS = -g -O2 -march=core-avx2 -finline-functions -finline-limit=500 -Winline -qopt-prefetch=4 -fast-transcendentals -fimf-use-svml -no-fma
+OPT_VCCFLAGS = -g -O2 -march=core-avx2
 
 # Debugging compilation flag
 # --------------------------
@@ -90,23 +84,23 @@ DBG_FRTFLAGS = -g -O0
 # Bound checking compilation flag
 # -------------------------------
 
-BCD_FRTFLAGS = -Mbounds
+BCD_FRTFLAGS = -check bounds -mcmodel=medium
 
 # NaN pre-initialisation flag
 # ---------------------------
 
-NAN_FRTFLAGS = 
+NAN_FRTFLAGS = -init=arrays,snan -fp-stack-check -ftrapuv -fpe0 -fp-speculation=strict -check uninit -check pointers
 
 # Listing compilation flag
 # ------------------------
 
-LIST_FRTFLAGS = 
+LIST_FRTFLAGS = -list -show nomap
 LIST_VCCFLAGS =
 
 # Filename extension for listing
 # ------------------------------
 
-LIST_EXTENSION = list
+LIST_EXTENSION = lst
 
 # Additive compilation flags
 # --------------------------
@@ -124,10 +118,11 @@ GMK_FCFLAGS_SURFEX = -Din_surfex -DSFX_ARO -DSFX_ASC -DSFX_OL -DSFX_TXT -DSFX_FA
 GMK_FCFLAGS_MSE = -DSFX_FA
 GMK_FCFLAGS_MPA = 
 GMK_FCFLAGS_PHYEX = 
+GMK_FCFLAGS_RADIATION = 
 
 GMK_FCFLAGS_IFSAUX = -DHIGHRES -DBLAS
 GMK_FCFLAGS_ALGOR = -DBLAS
-GMK_CFLAGS_IFSAUX = -DPOINTER_64 -DWITHOUT_CXXDEMANGLE
+GMK_CFLAGS_IFSAUX = -DPOINTER_64
 GMK_CFLAGS_ODB = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H -DCANARI -DHAS_LAPACK -DNO_CURSES -DODB_NMXUPD=4
 GMK_CFLAGS_BLACKLIST = -DSTATIC_LINKING -DXPRIVATE=PRIVATE -DINTERCEPT_ALLOC -DUSE_ALLOCA_H
 
@@ -147,17 +142,22 @@ LNK_MPI = $GPUPACK_PREFIX/support/wrap/$ARCH/mpif90
 # Cc (cross-)linker
 # -----------------
 
-LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -lrt -lstdc++
+LNK_CC = $GPUPACK_PREFIX/support/wrap/$ARCH/cc -qopenmp -shared-intel -lrt -lstdc++
+
+# CXX (cross-)linker (for mixed langages c++ and fortran)
+# -------------------------------------------------------
+
+LNK_CXX = $GPUPACK_PREFIX/support/wrap/$ARCH/mpicxx
 
 # Fortran linking flags
 # ----------------------
 
-LNK_FLAGS = -cuda -acc=gpu -O1 -gopt -gpu=$GPU -v -lrt -lstdc++ -Wl,-rpath,$GPUPACK_PREFIX/install/$ARCH/lib
+LNK_FLAGS = -v -fp-stack-check -qopenmp -qopenmp-threadprivate compat -shared-intel -lrt -lstdc++ -Wl,-rpath,$GPUPACK_PREFIX/install/$ARCH/lib
 
 # Additional linking flags to LNK_FLAGS for c++ executable
 # --------------------------------------------------------
 
-LNK_CXX_FLAGS = 
+LNK_CXX_FLAGS = -lifcoremt -lifport
 
 # flags for executable targets
 # ----------------------------
@@ -227,17 +227,17 @@ GMK_CMAKE_ecbuild = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME}
 
 GMK_CMAKE_eckit = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$GPUPACK_PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_BUILD_TYPE=NONE -DENABLE_ECKIT_CMD=OFF -DENABLE_ECKIT_SQL=OFF -DENABLE_BZIP2=OFF -DENABLE_SNAPPY=OFF -DENABLE_LAPACK=OFF -DENABLE_CURL=OFF -DENABLE_DOCS=OFF -DENABLE_SSL=OFF -DBUILD_SHARED_LIBS=BOTH -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -Deigen_ROOT=$GPUPACK_PREFIX/install/$ARCH
 
-GMK_CMAKE_fckit = -Wno-deprecated -Wno-dev -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_FINAL=OFF -DENABLE_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\"
+GMK_CMAKE_fckit = -Wno-deprecated -Wno-dev -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_FINAL=OFF -DENABLE_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\"
 
-GMK_CMAKE_oops_src = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$GPUPACK_PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_MODULE_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMKLOCAL}/\${GMKSRC}/ecSDK/ecbuild/cmake -DECKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DFCKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=ON -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DEIGEN3_INCLUDE_DIR=$GPUPACK_PREFIX/install/$ARCH/include/eigen3 -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\" -DCMAKE_PREFIX_PATH=$GPUPACK_PREFIX/install/$ARCH
+GMK_CMAKE_oops_src = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"-I$GPUPACK_PREFIX/install/$ARCH/include/eigen3 ${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -DCMAKE_MODULE_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMKLOCAL}/\${GMKSRC}/ecSDK/ecbuild/cmake -DECKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DFCKIT_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=ON -DBUILD_SHARED_LIBS=ON -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DEIGEN3_INCLUDE_DIR=$GPUPACK_PREFIX/install/$ARCH/include/eigen3 -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_PREFIX_PATH=$GPUPACK_PREFIX/install/$ARCH
 
-GMK_CMAKE_atlas = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DATLAS_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\"
+GMK_CMAKE_atlas = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DCMAKE_PREFIX_PATH=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/ecSDK -DENABLE_TESTS=OFF -DBUILD_SHARED_LIBS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DATLAS_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\"
 
-GMK_CMAKE_fiat = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DBUILD_SHARED_LIBS=BOTH -DENABLE_TESTS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1 ${MACROS_FRT}\" -DCUDAToolkit_ROOT=\"$($GPUPACK_PREFIX/support/wrap/$ARCH/query CUDAToolkit_ROOT)\" -DNVHPC_ROOT=\"$($GPUPACK_PREFIX/support/wrap/$ARCH/query NVHPC_ROOT)\"
+GMK_CMAKE_fiat = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CC}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -DBUILD_SHARED_LIBS=BOTH -DENABLE_TESTS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS} ${MACROS_FRT}\"
 
-GMK_CMAKE_ectrans = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DENABLE_TRANSI=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_GPU=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} -g -O1\" -DCMAKE_PREFIX_PATH=$GPUPACK_PREFIX/install/$ARCH
+GMK_CMAKE_ectrans = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_CXX_COMPILER=\${CXXNAME} -DCMAKE_CXX_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS} ${MACROS_CXX}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DENABLE_TRANSI=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_TESTS=OFF -DECBUILD_2_COMPAT=ON -DECBUILD_2_COMPAT_DEPRECATE=OFF -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_GPU=OFF -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_PREFIX_PATH=$GPUPACK_PREFIX/install/$ARCH
 
-GMK_CMAKE_field_api = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DFYPP_PATH=\${GMK_FYPP} -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_ACC=ON -DCMAKE_CUDA_COMPILER=\"${CCUNAME}\" -DBUILD_SHARED_LIBS=OFF
+GMK_CMAKE_field_api = -Wno-deprecated -Wno-dev -DCMAKE_C_COMPILER=\${VCCNAME} -DCMAKE_C_FLAGS=\"${VCCFLAGS} ${OPT_VCCFLAGS}\" -DCMAKE_Fortran_COMPILER=\${FRTNAME} -DCMAKE_Fortran_FLAGS=\"${FRTFLAGS} ${OPT_FRTFLAGS}\" -DCMAKE_BUILD_TYPE=NONE -Decbuild_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMKSRC}/ecSDK -Dfiat_ROOT=\${TARGET_PACK}/\${GMK_HUB_DIR}/\${GMK_LAST_HUB_BRANCH}/\${GMK_HUB_INSTALL}/Fiat -DFYPP_PATH=\${GMK_FYPP} -DENABLE_SINGLE_PRECISION=ON -DENABLE_DOUBLE_PRECISION=OFF -DENABLE_ACC=OFF -DBUILD_SHARED_LIBS=OFF
 
 # User libraries (absolute filename or short name) :
 # ------------------------------------------------
@@ -301,9 +301,9 @@ LD_USR_FIELD_API = field_api_sp
 # ----------------------------------------------------
 
 # Lapack:
-LD_LANG01 = $GPUPACK_PREFIX/install/$ARCH/lib/liblapack.a
+LD_LANG01 = 
 # Blas:
-LD_LANG02 = $GPUPACK_PREFIX/install/$ARCH/lib/libblas.a
+LD_LANG02 =
 
 # System-dependent libraries - ALWAYS LOADED - (absolute filename or short name) :
 # ------------------------------------------------------------------------------
@@ -531,7 +531,7 @@ GMK_NQS_OTHER =
 
 # Compiler feature extension for aeolus software
 # ----------------------------------------------
-GMK_AEOLUS_F90 = pgf90
+GMK_AEOLUS_F90 = ifort
 
 # LatLon handling extension for aeolus software
 # ---------------------------------------------

@@ -1,0 +1,16 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use NVHPC;
+
+&fixEnv ();
+
+my @cmd = ("$NVHPC_ROOT/compilers/bin/pgf90", @ARGV, "-L$NVHPC_ROOT/compilers/lib", '-lnvhpcatm', "-Wl,-rpath,$NVHPC_ROOT/compilers/lib",
+           "-L$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt');
+
+&fixLink (@cmd);
+
+exec (@cmd);
+
