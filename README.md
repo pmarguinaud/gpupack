@@ -212,6 +212,16 @@ Please look at the script `cy49/arp/arp.sh` and see how you can adapt it to your
 
 provides examples of how `cy49/arp/arp.sh` is submitted to ECMWF & Meteo-France batch systems.
 
+# Matrix multiplications in grid-point calculations
+
+These matrix multiplications occur in the following routines :
+- `verint.F90`
+- `verints.F90`
+- `verder.F90`
+
+We normally use DGEMM (from the MKL library) in these routines, but we cannot use DGEMM on accelerators, we coded some simple
+multiplications that we enable with the LLSIMPLE_DGEMM library.
+
 # OpenMP & OpenACC
 
 The script `cy49/arp/arp.sh` run the code in four different modes :
@@ -263,13 +273,4 @@ We consider that these comparison should lead to identical results in the follow
 | openaccsinglecolumn |          |         |                     |           =           |
 +---------------------+----------+---------+---------------------+-----------------------+
 ```
-
-
-
-
-
-
-
-
-
 
