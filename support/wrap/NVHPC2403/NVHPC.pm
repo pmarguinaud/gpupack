@@ -7,7 +7,7 @@ use base qw (Exporter);
 our @EXPORT = qw ($NVHPC_ROOT $NVHPC_CUDA_HOME $OMPI_PREFIX $CUDA_PREFIX &fixEnv &prefix &site &fixLink);
 
 my ($version, $cuda, $hpcx) = ('24.3', '12.3', '2.17.1');
-our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . $version ();
+our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . $version;
 
 our $OMPI_PREFIX = "comm_libs/$cuda/hpcx/hpcx-$hpcx/ompi";
 our $CUDA_PREFIX= "cuda/$cuda";
