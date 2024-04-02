@@ -6,28 +6,12 @@ use base qw (Exporter);
 
 our @EXPORT = qw ($NVHPC_ROOT $NVHPC_CUDA_HOME $OMPI_PREFIX $CUDA_PREFIX &fixEnv &prefix &site &fixLink);
 
-our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . &version ();
-
-my ($cuda, $hpcx) = ('12.3', '2.17.1');
+my ($version, $cuda, $hpcx) = ('24.3', '12.3', '2.17.1');
+our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . $version ();
 
 our $OMPI_PREFIX = "comm_libs/$cuda/hpcx/hpcx-$hpcx/ompi";
 our $CUDA_PREFIX= "cuda/$cuda";
 our $NVHPC_CUDA_HOME = "$NVHPC_ROOT/$CUDA_PREFIX";
-
-sub version
-{
-  use File::Basename;
-  use File::Spec;
-  use Cwd;
- 
-  my $program = 'File::Spec'->rel2abs ($0);
-  my $version = &basename (&dirname ($program));
-
-  my ($yy, $mm) = ($version =~ m/^NVHPC(\d\d)(\d\d)$/o);
-  $mm =~ s/^0//o;
-  $version = "$yy.$mm";
-  return $version;
-}
 
 sub fixEnv
 {
