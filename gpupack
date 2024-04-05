@@ -40,6 +40,7 @@ libraries_install
 CYCLE=49t2
 BRANCH=openacc
 REPO=https://github.com/pmarguinaud/IAL.git
+ECTRANS_GPU=OFF
 
 # Choose architecture flavor
 

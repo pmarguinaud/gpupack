@@ -23,7 +23,18 @@ function Ectrans_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/Ectrans
   cd $pack/hub/local/src/Ectrans
-  git clone --branch arpege_integration_for_cy49t1 https://github.com/dareg/ectrans_nvidia ectrans
+  case "$ECTRANS_GPU" in
+    "ON")
+      git clone --branch arpege_integration_for_cy49t1 https://github.com/dareg/ectrans_nvidia ectrans
+      ;;
+    "OFF")
+      git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/ectrans
+      ;;
+    *)
+      echo "Error, ECTRANS_GPU should be set to either OFF or ON"
+      exit 1
+      ;;
+  esac
 }
 
 function OOPS_clone ()
