@@ -3,7 +3,7 @@
 set -x
 set -e
 
-export GPUPACK_PREFIX=$HOME/gpupack
+export GPUPACK_PREFIX=$HOME/gpupack1
 
 cd $GPUPACK_PREFIX
 
@@ -21,7 +21,7 @@ create_gpupack_sh
 
 # Install common libraries (architecture independent)
 
-common_install
+# common_install
 
 # Check versions of Perl & cmake
 
