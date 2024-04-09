@@ -354,6 +354,12 @@ for my $dummy (@{ $opts{dummy} })
 
 function cutlass_install ()
 {
+
+  #cutlass is only installed with the NVHPC compiler
+  if [[ "$ARCH" != NVHPC* ]]; then
+    return
+  fi
+
   CUTLASS=cutlass-3.0.0
   TAR=$CUTLASS.tar.gz
   cd $TMP
