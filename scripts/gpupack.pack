@@ -111,7 +111,7 @@ function pack_compile ()
   
   for prog in ics_packages ics_masterodb
   do
-    ./$prog > $prog.eo 2>&1
+    ./$prog 2>&1 | tee $prog.eo
   done
 
   if [ ! -f "bin/MASTERODB" ]

@@ -59,7 +59,7 @@ then
   echo "   -r CYCLE  (default $CYCLE)"
   echo "   -b BRANCH (default $BRANCH)"
   echo "   -l ARCH   (default $ARCH) "
-  echo "   -p OPT    (default $OPT)"
+  echo "   -o OPT    (default $OPT)"
   echo "   -R REPO   (default $REPO)"
   echo "   -G (enable ectrans GPU, default NO)"
   echo "   -N (create the pack, do not compile)"
