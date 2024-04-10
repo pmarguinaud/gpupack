@@ -5,52 +5,78 @@ set -e
 
 export GPUPACK_PREFIX=$HOME/gpupack
 
+# Cycle & a branch
+
+export CYCLE=49t2
+export BRANCH=openacc
+export REPO=https://github.com/pmarguinaud/IAL.git
+export ECTRANS_GPU=OFF
+
+# Architecture flavor
+
+export OPT=1d
+
+# Compiler
+
+export ARCH=NVHPC2403
+
+# Do everything and compile
+
+export COMPILE=ON
+
+# Do everything in screen session
+
+export SCREEN=OFF
+
+# gmkpack options subset
+
+err=0
+
+while getopts 'r:b:l:o:R:GNS' option
+do
+   case $option in
+   r)  CYCLE=$OPTARG;;
+   b)  BRANCH=$OPTARG;;
+   l)  ARCH=$OPTARG;;
+   o)  OPT=$OPTARG;;
+   R)  REPO=$OPTARG;;
+   G)  ECTRANS_GPU="ON";;
+   N)  COMPILE="OFF";;
+   S)  SCREEN="ON";;
+   \?) err=1;;
+   esac 
+done
+
+if [ $err -eq 1 ]
+then
+  exit 1
+fi
+
 cd $GPUPACK_PREFIX
 
-# Load gpupack shell functions
+if [ "$SCREEN" == "ON" ]
+then
 
-. $GPUPACK_PREFIX/scripts/gpupack
+  init=$(mktemp --suffix .gpupack.sh)
+  chmod 755 $init
 
-# Create gpupack profile
+  cat > $init << EOF
+if [ -f ~/.bashrc ]
+then
+  source ~/.bashrc
+fi
+source "$GPUPACK_PREFIX/scripts/gpupack"
 
-create_gpupack_sh
+run_gpupack
 
-# Load gpupack profile
+EOF
+  
+  screen -S gpupack bash --rcfile $init -i
 
-. ./gpupack.sh
+else 
 
-# Install common libraries (architecture independent)
+  source "$GPUPACK_PREFIX/scripts/gpupack"
+  run_gpupack
 
-common_install
-
-# Check versions of Perl & cmake
-
-common_check_versions
-
-# Choose a compiler
-
-ARCH=NVHPC2311
-
-# Install architecture dependent libraries
-
-libraries_install  
-
-# Pick a cycle & a branch
-
-CYCLE=49t2
-BRANCH=openacc
-REPO=https://github.com/pmarguinaud/IAL.git
-ECTRANS_GPU=OFF
-
-# Choose architecture flavor
-
-OPT=1d
-
-# Create a pack
-
-pack_create 
-
-# Compile the pack
-
-pack_compile
+fi
 

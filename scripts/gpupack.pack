@@ -99,6 +99,8 @@ function pack_create ()
   done
 
   fi
+
+  cd $PACK
 }
 
 function pack_compile ()

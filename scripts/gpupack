@@ -1,7 +1,5 @@
 #!/bin/bash
 
-declare -F | sort > /tmp/$USER.func.1
-
 function create_gpupack_sh ()
 {
 
@@ -16,11 +14,51 @@ EOF
 
 }
 
+function run_gpupack ()
+{
+# Load gpupack shell functions
+
+  source $GPUPACK_PREFIX/scripts/gpupack
+
+# Create gpupack profile
+
+  create_gpupack_sh
+
+# Load gpupack profile
+
+  source ./gpupack.sh
+
+# Install common libraries (architecture independent)
+
+  if [ ! -d "$GPUPACK_PREFIX/install/common" ]
+  then
+    common_install
+  fi
+
+# Check versions of Perl & cmake
+
+  common_check_versions
+
+# Install architecture dependent libraries
+
+  if [ ! -d "$GPUPACK_PREFIX/install/$ARCH" ]
+  then
+    libraries_install  
+  fi
+
+# Create a pack
+
+  pack_create 
+
+# Compile the pack
+
+  if [ "$COMPILE" == "ON" ]
+  then
+    pack_compile
+  fi
+}
+
 source "$GPUPACK_PREFIX/scripts/gpupack.pack"
 source "$GPUPACK_PREFIX/scripts/gpupack.common"
 source "$GPUPACK_PREFIX/scripts/gpupack.libraries"
   
-declare -F | sort > /tmp/$USER.func.2
-
-comm -3 /tmp/$USER.func.1 /tmp/$USER.func.2
-
