@@ -54,6 +54,7 @@ gpupack accepts the following options (some of them similar to those used by gmk
 * -G; use ectrans GPU library
 * -N; create the pack, but do not compile
 * -S; do everything in a screen session
+* -H; display help message and exit
 
 gpupack will **fetch** a branch named `${RELEASE}_${BRANCH}` in the git $REPOSITORY given by the -R option, and **create**
 a pack named `${RELEASE}_${BRANCH}.01.${ARCH}.${OPT}`.
