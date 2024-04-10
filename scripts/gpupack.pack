@@ -50,7 +50,8 @@ function FieldAPI_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/FieldAPI
   cd $pack/hub/local/src/FieldAPI
-  git clone https://github.com/ecmwf-ifs/field_api
+# git clone https://github.com/ecmwf-ifs/field_api
+  git clone --branch shuffle-restrict-stat https://github.com/pmarguinaud/field_api
 }
 
 function pack_create ()
