@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x
 set -e
 
 export GPUPACK_PREFIX=$HOME/gpupack
@@ -31,8 +30,9 @@ export SCREEN=OFF
 # gmkpack options subset
 
 err=0
+lhp=0
 
-while getopts 'r:b:l:o:R:GNS' option
+while getopts 'r:b:l:o:R:GNSH' option
 do
    case $option in
    r)  CYCLE=$OPTARG;;
@@ -43,6 +43,7 @@ do
    G)  ECTRANS_GPU="ON";;
    N)  COMPILE="OFF";;
    S)  SCREEN="ON";;
+   H)  hlp=1;;
    \?) err=1;;
    esac 
 done
@@ -51,6 +52,22 @@ if [ $err -eq 1 ]
 then
   exit 1
 fi
+
+if [ $hlp -eq 1 ]
+then
+  echo "Usage: $(basename $0)"
+  echo "   -r CYCLE  (default $CYCLE)"
+  echo "   -b BRANCH (default $BRANCH)"
+  echo "   -l ARCH   (default $ARCH) "
+  echo "   -p OPT    (default $OPT)"
+  echo "   -R REPO   (default $REPO)"
+  echo "   -G (enable ectrans GPU, default NO)"
+  echo "   -N (create the pack, do not compile)"
+  echo "   -S (do everything in a screen sesssion)"
+  exit 0
+fi
+
+set -x
 
 cd $GPUPACK_PREFIX
 
