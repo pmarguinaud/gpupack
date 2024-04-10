@@ -42,82 +42,113 @@ $ cd $HOME
 $ ln -s $SCRATCH/gpupack
 ```
 
+# Options of gpupack
+
+gpupack accepts the following options (some of them similar to those used by gmkpack) :
+
+* -r; $RELEASE
+* -b; $BRANCH
+* -l; $ARCH, architecture/compiler name
+* -o; $OPT, architecture/compiler flavor
+* -R; git $REPOSITORY
+* -G; use ectrans GPU library
+* -N; create the pack, but do not compile
+* -S; do everything in a screen session
+
+gpupack will **fetch** a branch named `${RELEASE}_${BRANCH}` in the git $REPOSITORY given by the -R option, and **create**
+a pack named `${RELEASE}_${BRANCH}.01.${ARCH}.${OPT}`.
+
 # Compiling & testing with gpupack
 
-cd to `$HOME/gpupack`, and inspect the content of the script `gpupack` :
+cd to `$HOME/gpupack`, and inspect the content of the scripts `gpupack` and `scripts/gpupack`:
 
 ```
+
 export GPUPACK_PREFIX=$HOME/gpupack
 
-cd $GPUPACK_PREFIX
+# Cycle & a branch
+
+export CYCLE=49t2
+export BRANCH=openacc
+export REPO=https://github.com/pmarguinaud/IAL.git
+export ECTRANS_GPU=OFF
+
+# Architecture flavor
+
+export OPT=1d 
+
+# Compiler
+
+export ARCH=NVHPC2403
+
+...
 
 # Load gpupack shell functions
 
-. $GPUPACK_PREFIX/scripts/gpupack
+  source $GPUPACK_PREFIX/scripts/gpupack
 
 # Create gpupack profile
 
-create_gpupack_sh
+  create_gpupack_sh
 
 # Load gpupack profile
-
-. ./gpupack.sh
+  
+  source ./gpupack.sh
 
 # Install common libraries (architecture independent)
 
-common_install
+  if [ ! -d "$GPUPACK_PREFIX/install/common" ]
+  then
+    common_install
+  fi
 
-# Choose a compiler
+# Check versions of Perl & cmake
 
-ARCH=INTEL1805
+  common_check_versions
 
 # Install architecture dependent libraries
 
-libraries_install  
+  if [ ! -d "$GPUPACK_PREFIX/install/$ARCH" ]
+  then
+    libraries_install
+  fi  
 
-# Pick a cycle & a branch
+# Create a pack
 
-CYCLE=49t0
-BRANCH=compile_with_pgi_2303-field_api
-REPO=https://github.com/pmarguinaud/IAL.git
-
-# Choose architecture flavor
-
-OPT=2d
-
-# Create the pack
-
-pack_create 
+  pack_create 
 
 # Compile the pack
 
-pack_compile
+  if [ "$COMPILE" == "ON" ]
+  then
+    pack_compile
+  fi  
 
 ```
 
 Each step is detailed in the following sections. When you have understood these different steps, you 
 will be able to combine them to automate building and testing in your own script, taking into account
-the constraints if your environment.
+the constraints of your environment.
 
 # Create gpupack profile
 
 The shell function `create_gpupack_sh` (from `scripts/gpupack`) will create gpupack.sh. You will have to manually source this file
-before working with gpupack
+before working with gpupack.
 
 # Install common ancillary libraries & utilities
 
 These are architecture independant libraries.
 
-Perl version 5.26 has a bug which affects strongly the performance of gmkpack; it is therefore required to install a more recent version. 
+- Perl version 5.26 has a bug which affects strongly the performance of gmkpack; it is therefore required to install a more recent version. 
 gpupack is shipped with the source code of Perl 5.38. 
 
-fypp (a Fortran pre-processor) is mandatory to compile ARPEGE source code. gpupack can fetch and install fypp.
+- fypp (a Fortran pre-processor) is mandatory to compile ARPEGE source code. gpupack can fetch and install fypp.
 
-A recent version of cmake is required to compile ARPEGE libraries. gpupack can install cmake 3.26.
+- A recent version of cmake is required to compile ARPEGE libraries. gpupack can install cmake 3.26.
 
-The yaml Python module can also be installed by gpupack.
+- The yaml Python module can also be installed by gpupack.
 
-The utilities from the vimpack repository are required (gitpack & vimpack) and are installed by gpupack.
+- The utilities from the vimpack repository are required (gitpack & vimpack) and are installed by gpupack.
 
 Please look at `scripts/gpupack.common` and see how to adapt it to your environment. 
 
@@ -142,7 +173,7 @@ gpupack is shipped with the following libraries, and can install them :
 - netcdf/fortran
 - lapack
 - eigen
-- cutlass
+- cutlass (only compiled when the nvhpc compiler suite is used)
 
 It can also create dummies for these libraries (which are not required to make an ARPEGE forecast) :
 
@@ -168,7 +199,7 @@ flavors (mostly compilation options or floating point precision); for example, I
 Look at the contents of INTEL1805.2d for instance. If your architecture does not exist, you need to 
 copy INTEL1805.2d into ARCH.OPT, and adapt the contents of ARCH.OPT.
 
-Please note that the NVIDIA target architecture has to be selected in NVHPC2305.1d and NVHPC2305.1s (GPU = cc70 or GPU = cc80).
+Please note that the NVIDIA target architecture has to be selected in NVHPC2401.1d and NVHPC2401.1s (GPU = cc70 or GPU = cc80).
 
 # Create a pack 
 
@@ -188,7 +219,7 @@ The `pack_compile` function (defined in `scripts/gpupack.pack`) compiles the pac
 - compiling the packages (ecbuild, eckit, ...) with `ics_packages`
 - compiling the ARPEGE source code with `ics_masterodb`
 
-If the compilation is successful, then unnecessary files are removed (directory `hub/local/build`), but also 
+If the compilation is successful, then unnecessary files may be removed (directory `hub/local/build`), but also 
 with `lockpack` in `src/local`.
 
 It is possible to invoke `ics_packages` and `ics_masterodb` manually from
@@ -196,7 +227,7 @@ within the pack. Please note that by default `ics_packages` and `ics_masterodb`
 will run with 16 threads, but it is possible to change the value by editing
 GMK\_THREADS in those files.
 
-If the compilation is successful, then the `bin/MASTERODB` file should exist and be executable.
+If the compilation is successful, then the `bin/MASTERODB` file will exist and be executable.
 
 Please note that compiling the code on ECMWF cluster is not possible on login nodes, because of cgroups limitations; it
 is necessary to turn `ics_masterodb` into a batch job and submit it in the `par` queue.
@@ -275,4 +306,5 @@ We consider that these comparison should lead to identical results in the follow
 | openaccsinglecolumn |          |         |                     |           =           |
 +---------------------+----------+---------+---------------------+-----------------------+
 ```
+
 
