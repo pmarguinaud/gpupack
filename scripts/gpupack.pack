@@ -56,6 +56,31 @@ function FieldAPI_clone ()
 
 function pack_create ()
 {
+  if [ "$ECTRANS_GPU" = "ON" ]
+  then
+
+    ARCH_ECTRANS_GPU="${ARCH}ECTRANSGPU"
+
+    if [ ! -f "$GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT" ]
+    then
+      cp $GMK_SUPPORT/arch/$ARCH.$OPT $GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT
+      perl -i -pe "s/$ARCH/$ARCH_ECTRANS_GPU/go;" $GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT
+    fi
+
+    if [ ! -L "$GMK_SUPPORT/wrap/$ARCH_ECTRANS_GPU" ]
+    then
+      ln -s $ARCH $GMK_SUPPORT/wrap/$ARCH_ECTRANS_GPU
+    fi
+
+    if [ ! -L "$GPUPACK_PREFIX/install/$ARCH_ECTRANS_GPU" ]
+    then
+      ln -s $ARCH $GPUPACK_PREFIX/install/$ARCH_ECTRANS_GPU
+    fi
+
+    ARCH=$ARCH_ECTRANS_GPU
+
+  fi
+
   PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
   
   if [ ! -d "$PACK" ]

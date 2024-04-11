@@ -8,3 +8,7 @@ gpupack.sh
 .nfs*
 .mpiauto.machinefile*
 .mpiautotimeout.*.lock
+.*.swp
+support/arch/NVHPC????ECTRANSGPU.1d
+support/wrap/NVHPC????ECTRANSGPU
+
