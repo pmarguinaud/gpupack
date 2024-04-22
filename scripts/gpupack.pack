@@ -15,7 +15,8 @@ function Fiat_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/Fiat
   cd $pack/hub/local/src/Fiat
-  git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/fiat
+# git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/fiat
+  git clone --branch 49t1-mplacc https://github.com/pmarguinaud/fiat.git
 }
 
 function Ectrans_clone ()
@@ -86,7 +87,7 @@ function pack_create ()
   if [ ! -d "$PACK" ]
   then
   
-  gmkpack -r $CYCLE -b $BRANCH -a -n 01 -l $ARCH -o $OPT -p masterodb -K
+  $GPUPACK_PREFIX/gmkpack/util/gmkpack -r $CYCLE -b $BRANCH -a -n 01 -l $ARCH -o $OPT -p masterodb -K
   
   cd $PACK
   

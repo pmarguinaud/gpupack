@@ -2,7 +2,7 @@
 
 set -e
 
-export GPUPACK_PREFIX=$HOME/gpupack
+export GPUPACK_PREFIX=$(dirname $0)
 
 # Cycle & a branch
 
