@@ -3,6 +3,7 @@
 set -e
 
 export GPUPACK_PREFIX=$(dirname $0)
+GPUPACK_PREFIX=$(perl -e ' use File::Spec; print File::Spec->rel2abs ($ARGV[0]) ' $GPUPACK_PREFIX)
 
 # Cycle & a branch
 
