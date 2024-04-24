@@ -31,7 +31,7 @@ export SCREEN=OFF
 # gmkpack options subset
 
 err=0
-lhp=0
+hlp=0
 
 while getopts 'r:b:l:o:R:GNSH' option
 do
