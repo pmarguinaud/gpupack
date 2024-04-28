@@ -30,6 +30,7 @@ sub prefix
   my $host  = &hostname ();
   return '/ec/res4/hpcperm/sor/install/nvidia' if ($host =~ m/^ac\d+-\d+\.bullx$/o);
   return '/opt/softs/gcc/9.2.0' if ($host =~ m/^(?:belenos|taranis)/o);
+  return '/home/marguina/install/nvidia' if ($host eq 'pxalgo9');
   die ("Unexpected host : $host");
 }
 
@@ -42,6 +43,7 @@ sub site
     {
       return 'meteo' if (m/^(?:belenos|taranis)/o);
       return 'ecmwf' if (m/^ac\d+-\d+\.bullx$/o);
+      return 'gmap' if ($_ eq 'pxalgo9');
     }
 
   die;

@@ -31,6 +31,18 @@ function meteo_mpirun ()
 # /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
 }
 
+function cnrm_mpirun ()
+{
+  export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
+  export SLURM_JOBID=1
+  export SLURM_NODELIST=$(hostname)
+  export SLURM_JOB_NODELIST=$(hostname)
+  export SLURM_JOB_NUM_NODES=1
+  $GPUPACK_PREFIX/mpiauto/mpiauto --nouse-slurm-mpi $*
+# /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
+# /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
+}
+
 function grib_api_setup ()
 {
   bin=$1
@@ -159,22 +171,41 @@ SITE=$(perl -e '
       print "meteo";
       exit (0);
     }
+  elsif ($host eq "pxalgo9")
+    {
+      print "cnrm";
+      exit (0);
+    }
   die ("Unexpected host : $host");
 ')
 
 
 export PATH=$GPUPACK_PREFIX/scripts:$PATH
 
+if [ "x$SLURM_JOBID" != "x" ]
+then
+  JOBID=$SLURM_JOBID
+else
+  JOBID=$$
+fi
+
+if [ "x$SLURM_NNODES" != "x" ]
+then
+  NNODES=$SLURM_NNODES
+else
+  NNODES=1
+fi
+
 # Change to a temporary directory
 
 if [ "x$workdir" != "x" ]
 then
-  TMPDIR=$workdir/tmp/arp.$SLURM_JOBID
+  TMPDIR=$workdir/tmp/arp.$JOBID
 elif [ "x$SCRATCH" != "x" ]
 then
-  TMPDIR=$SCRATCH/tmp/arp.$SLURM_JOBID
+  TMPDIR=$SCRATCH/tmp/arp.$JOBID
 else
-  exit
+  TMPDIR=$HOME/tmp/arp.$JOBID
 fi
 
 mkdir -p $TMPDIR
@@ -225,7 +256,7 @@ do
   
   # Set the number of nodes, tasks, threads for the model
   
-  NNODE_FC=$SLURM_NNODES
+  NNODE_FC=$NNODES
   NTASK_FC=4
   NOPMP_FC=32
   

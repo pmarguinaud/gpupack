@@ -15,7 +15,12 @@ function eccodes_install ()
   mkdir -p "$ECCODES-Build"
   cd "$ECCODES-Build"
 
-  cmake ../$ECCODES-Source -DCMAKE_INSTALL_PREFIX=$INSTALL -DENABLE_ECCODES_THREADS=1 -DENABLE_JPG=0 -DENABLE_AEC=OFF
+  cmake ../$ECCODES-Source \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL \
+    -DENABLE_ECCODES_THREADS=1 \
+    -DENABLE_JPG=0 \
+    -DENABLE_AEC=OFF
   make -j4 install
 }
 
@@ -34,7 +39,11 @@ function hdf5_install ()
   mkdir -p "$HDF5-Build"
   cd "$HDF5-Build"
 
-  cmake ../$HDF5 -DCMAKE_INSTALL_PREFIX=$INSTALL -DHDF5_ENABLE_Z_LIB_SUPPORT=ON -DHDF5_BUILD_FORTRAN=ON
+  cmake ../$HDF5 \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL \
+    -DHDF5_ENABLE_Z_LIB_SUPPORT=ON \
+    -DHDF5_BUILD_FORTRAN=ON
   make -j4 install
 }
 
@@ -53,7 +62,9 @@ function netcdf_install ()
   mkdir -p "$NETCDF-Build"
   cd "$NETCDF-Build"
   
-  cmake ../$NETCDF -DCMAKE_INSTALL_PREFIX=$INSTALL 
+  cmake ../$NETCDF \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL
   make -j4 install
 }
 
@@ -72,7 +83,9 @@ function netcdf_fortran_install ()
   mkdir -p "$NETCDF_FORTRAN-Build"
   cd "$NETCDF_FORTRAN-Build"
   
-  cmake ../$NETCDF_FORTRAN -DCMAKE_INSTALL_PREFIX=$INSTALL
+  cmake ../$NETCDF_FORTRAN \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL
   make -j4 install
 }
 
@@ -91,7 +104,10 @@ function lapack_install ()
   mkdir -p "$LAPACK-Build"
   cd "$LAPACK-Build"
 
-  cmake ../$LAPACK -DCMAKE_INSTALL_PREFIX=$INSTALL -DBUILD_SHARED_LIBS=ON
+  cmake ../$LAPACK \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL \
+    -DBUILD_SHARED_LIBS=ON
   make -j4 install
 }
 
@@ -110,7 +126,9 @@ function eigen_install ()
   mkdir -p "$EIGEN-Build"
   cd "$EIGEN-Build"
 
-  cmake ../$EIGEN -DCMAKE_INSTALL_PREFIX=$INSTALL
+  cmake ../$EIGEN \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL
   make -j4 install
 }
 
@@ -373,7 +391,12 @@ function cutlass_install ()
   mkdir -p "$CUTLASS-Build"
   cd "$CUTLASS-Build"
 
-  cmake ../$CUTLASS -DCMAKE_INSTALL_PREFIX=$INSTALL -DCUTLASS_ENABLE_HEADERS_ONLY=ON -DCUTLASS_ENABLE_TESTS=OFF -DCMAKE_CUDA_COMPILER=$GPUPACK_PREFIX/support/wrap/$ARCH/ccu
+  cmake ../$CUTLASS \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL \
+    -DCMAKE_PREFIX_PATH=$INSTALL \
+    -DCUTLASS_ENABLE_HEADERS_ONLY=ON \
+    -DCUTLASS_ENABLE_TESTS=OFF \
+    -DCMAKE_CUDA_COMPILER=$GPUPACK_PREFIX/support/wrap/$ARCH/ccu
   make -j4 install
 }
 
