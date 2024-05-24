@@ -15,7 +15,7 @@ This repository contains :
 
 Compilers :
 
-- NVHPC 23.11, 24.1, 24.3
+- NVHPC 23.11, 24.1, 24.3, 24.5
 - Intel 18.05
 - Any other C/C++/FORTRAN with MPI support
 
