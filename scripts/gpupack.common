@@ -3,6 +3,8 @@
 
 function perl_install ()
 {
+  set -e
+
   PERL=perl-5.38.0
   TAR=$PERL.tar.gz
   cd $TMP
@@ -20,6 +22,7 @@ function perl_install ()
 
 function fypp_install ()
 {
+  set -e
   if [ ! -d "$INSTALL/fypp" ]
   then
     git clone https://github.com/aradi/fypp.git $INSTALL/fypp
@@ -28,6 +31,7 @@ function fypp_install ()
 
 function yaml_install ()
 {
+  set -e
   if [ ! -d "$INSTALL/yaml" ]
   then
     git clone https://github.com/yaml/pyyaml.git $INSTALL/yaml
@@ -36,6 +40,7 @@ function yaml_install ()
 
 function cmake_install ()
 {
+  set -e
   CMAKE=cmake-3.28.2
   TAR=$CMAKE.tar.gz
   cd $TMP
@@ -52,6 +57,7 @@ function cmake_install ()
 
 function vimpack_install ()
 {
+  set -e
   cd $GPUPACK_PREFIX
   if [ ! -d "$GPUPACK_PREFIX/vimpack" ]
   then
@@ -61,6 +67,7 @@ function vimpack_install ()
 
 function common_install ()
 {
+  set -e
   INSTALL=$GPUPACK_PREFIX/install/common
   SOURCES=$GPUPACK_PREFIX/sources
   TMP=$GPUPACK_PREFIX/tmp/$ARCH
@@ -77,6 +84,7 @@ function common_install ()
 
 function check_cmake_version ()
 {
+  set -e
   local res=$(cmake --version | head -n1 | awk '{split($3,a,".");print(a[1]==2 && a[2]<16);}')
   if [ $res -eq 1 ]; then
     echo "Your cmake is too old"
@@ -86,6 +94,7 @@ function check_cmake_version ()
 
 function check_perl_version ()
 {
+  set -e
   local res=$(perl -e 'print $] <= 5.026?"1\n":"0\n";')
   if [ $res -eq 1 ]; then
     echo "Your perl is too old"
@@ -95,6 +104,7 @@ function check_perl_version ()
 
 function common_check_versions ()
 {
+  set -e
   check_cmake_version
   check_perl_version
 }

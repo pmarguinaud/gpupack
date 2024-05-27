@@ -57,6 +57,8 @@ function FieldAPI_clone ()
 
 function pack_create ()
 {
+  set -e
+
   if [ "$ECTRANS_GPU" = "ON" ]
   then
 
@@ -121,6 +123,7 @@ function pack_create ()
 
   for lib in ecSDK Fiat Ectrans OOPS FieldAPI 
   do
+    set -e
     ${lib}_clone $PACK
   done
 
@@ -131,6 +134,10 @@ function pack_create ()
 
 function pack_compile ()
 {
+  set -e
+
+  trap '' ERR
+
   PACK=$GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH}.${OPT}
   
   cd $PACK

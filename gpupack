@@ -83,9 +83,35 @@ if [ -f ~/.bashrc ]
 then
   source ~/.bashrc
 fi
+
+
+function catchError ()
+{
+   set +e
+   init=\$(mktemp --suffix .error.gpupack.sh)
+   cat > \$init << EOE
+echo "An error occurred"
+echo "If you can fix it, then leave this shell with 'exit 0'"
+echo "Otherwise, leave this shell with 'exit 1'"
+export PS1='FIX> '
+EOE
+   bash --rcfile \$init -i
+   c=\$?
+   if [ \$c -ne 0 ]
+   then
+     # Leave the program
+     exit 1
+   fi
+   # Resume build after error
+}
+
+trap 'catchError' ERR
+
 source "$GPUPACK_PREFIX/scripts/gpupack"
 
 run_gpupack
+
+trap '' ERR
 
 EOF
   

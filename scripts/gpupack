@@ -2,6 +2,7 @@
 
 function create_gpupack_sh ()
 {
+  set -e
 
   cat -> $GPUPACK_PREFIX/gpupack.sh << EOF
 export GPUPACK_PREFIX=$GPUPACK_PREFIX
@@ -16,6 +17,8 @@ EOF
 
 function run_gpupack ()
 {
+  set -e
+
 # Load gpupack shell functions
 
   source $GPUPACK_PREFIX/scripts/gpupack

@@ -380,6 +380,8 @@ function cutlass_install ()
 
 function libraries_install ()
 {
+  set -e
+
   export INSTALL=$GPUPACK_PREFIX/install/$ARCH
   export SOURCES=$GPUPACK_PREFIX/sources
   export TMP=$GPUPACK_PREFIX/tmp/$ARCH
@@ -404,6 +406,7 @@ function libraries_install ()
     ibmdummy naglitedummy wamdummy fdbdummy gribex bufr rgb cutlass
   do
     (
+      set -e
       # Load some specific environment variables 
 
       if [ -f "$GPUPACK_PREFIX/scripts/$ARCH/$lib.sh" ]
