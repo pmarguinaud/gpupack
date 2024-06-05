@@ -18,7 +18,7 @@ export OPT=1d
 
 # Compiler
 
-export ARCH=NVHPC2403
+export ARCH=NVHPC2405
 
 # Do everything and compile
 

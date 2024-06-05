@@ -50,7 +50,7 @@ function FieldAPI_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/FieldAPI
   cd $pack/hub/local/src/FieldAPI
-  git clone --branch 49t2_bench.01 https://github.com/pmarguinaud/field_api
+  git clone --branch 49t2_bench.02 https://github.com/pmarguinaud/field_api
 }
 
 function pack_create ()
