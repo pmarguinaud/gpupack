@@ -64,6 +64,8 @@ function pack_create ()
     then
       cp $GMK_SUPPORT/arch/$ARCH.$OPT $GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT
       perl -i -pe "s/$ARCH/$ARCH_ECTRANS_GPU/go;" $GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT
+      perl -i -pe 's/(^GMK_CMAKE_ectrans.*?)BUILD_SHARED_LIBS=OFF/$1BUILD_SHARED_LIBS=ON/' $GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT
+      perl -i -pe 's/(^GMK_CMAKE_fiat.*?)BUILD_SHARED_LIBS=OFF/$1BUILD_SHARED_LIBS=ON/' $GMK_SUPPORT/arch/$ARCH_ECTRANS_GPU.$OPT
     fi
 
     if [ ! -L "$GMK_SUPPORT/wrap/$ARCH_ECTRANS_GPU" ]
