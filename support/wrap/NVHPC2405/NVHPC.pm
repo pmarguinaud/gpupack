@@ -4,7 +4,7 @@ use strict;
 use FindBin qw ($Bin);
 use base qw (Exporter);
 
-our @EXPORT = qw ($NVHPC_ROOT $NVHPC_CUDA_HOME $OMPI_PREFIX $CUDA_PREFIX &fixEnv &prefix &site &fixLink);
+our @EXPORT = qw ($NVHPC_ROOT $NVHPC_CUDA_HOME $OMPI_PREFIX $CUDA_PREFIX &fixEnv &prefix &site &fixLink $CUDA_VERSION $NVHPC_ARCH);
 
 my ($version, $cuda, $hpcx) = ('24.5', '12.4', '2.19');
 our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . $version;
@@ -12,6 +12,8 @@ our $NVHPC_ROOT = &prefix () . '/hpc_sdk/Linux_x86_64/' . $version;
 our $OMPI_PREFIX = "comm_libs/$cuda/hpcx/hpcx-$hpcx/ompi";
 our $CUDA_PREFIX= "cuda/$cuda";
 our $NVHPC_CUDA_HOME = "$NVHPC_ROOT/$CUDA_PREFIX";
+our $CUDA_VERSION = $cuda;
+our $NVHPC_ARCH = 'x86_64-linux';
 
 sub fixEnv
 {

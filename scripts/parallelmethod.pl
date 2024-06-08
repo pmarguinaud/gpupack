@@ -33,7 +33,7 @@ for my $view (@view)
         wanted => sub 
         { 
           my $f = $File::Find::name; 
-          return unless ((-f $f) && ($f =~ m/_parallel\.F90/o)); 
+          return unless ((-f $f) && (($f =~ m/_parallel\d*\.F90/o) || ($f =~ m,/(?:stepo|exchange_ms_modnew|trmtosnew|trstomnew)\.F90$,o))); 
           my $g = 'File::Spec'->abs2rel ($f, "$pack/src/$view");
           $parallel{$g} ||= $f;
         },
