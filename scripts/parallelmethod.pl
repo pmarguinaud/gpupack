@@ -68,8 +68,8 @@ for my $METHOD (qw (OPENMP OPENMPSINGLECOLUMN OPENACCSINGLECOLUMN))
       {
         my @method = ($METHOD);
 
-        push @method, 'OPENMPMETHOD'  if ($METHOD =~ m/^OPENMP/o);
-        push @method, 'OPENACCMETHOD' if ($METHOD =~ m/^OPENACC/o);
+        push @method, ('OPENMPMETHOD')             if ($METHOD =~ m/^OPENMP/o);
+        push @method, ('OPENACCMETHOD', 'OPENACC') if ($METHOD =~ m/^OPENACC/o);
           
         push @method, ('OPENMP', 'UPDATEVIEW');
 
