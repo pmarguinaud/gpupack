@@ -21,25 +21,24 @@ function submit ()
   then
     if [ "$p" = "ndl" ]
     then
-      sbatch --gres=gpu:4 --exclusive --switches=3 -N$N -p $p  cy49/arp/arp.sh $pack $grid
+      sbatch --gres=gpu:4 --exclusive --switches=3 -N$N -p $p  $script $pack $grid
     else
-      sbatch --exclusive -N$N -p $p  cy49/arp/arp.sh $pack $grid
+      sbatch --exclusive -N$N -p $p  $script $pack $grid
     fi
   else
     mkdir -p $(dirname $out)
     if [ "$p" = "ndl" ]
     then
-      sbatch --gres=gpu:4 --exclusive --switches=3 -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+      sbatch --gres=gpu:4 --exclusive --switches=3 -o $out -N$N -p $p  $script $pack $grid
     else
-      sbatch --exclusive -o $out -N$N -p $p  cy49/arp/arp.sh $pack $grid
+      sbatch --exclusive -o $out -N$N -p $p  $script $pack $grid
     fi
   fi
 }
 
 
 CYCLE=49t2
-BRANCH=openacc
-
+BRANCH=openacc-bench
 
 
 for ARCH in NVHPC2405ECTRANSGPU.1d NVHPC2405ECTRANSGPU.1s NVHPC2405.1d NVHPC2405.1s INTEL2302.2s INTEL2302.2d
@@ -64,7 +63,7 @@ do
       nodes=1
     fi
 
-    submit $nodes $partition cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH} $TRUNC
+    submit $nodes $partition cy49/arp/arp-ecrad.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH} $TRUNC
 
   done
 done
