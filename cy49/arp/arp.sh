@@ -31,6 +31,20 @@ function meteo_mpirun ()
 # /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
 }
 
+function leonardo_mpirun ()
+{
+  set +x
+  if [ "x$NVHPC_ROOT" = "x" ]
+  then
+    export MODULEPATH=~pmarguin/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
+    module load nvhpc-hpcx/24.5
+    source $NVHPC_ROOT/comm_libs/12.4/hpcx/hpcx-2.19/hpcx-mt-init.sh hpcx_load
+  fi
+  set -x
+  export SLURM_EXPORT_ENV=ALL
+  ~pmarguin/install/mpiauto/mpiauto --nouse-slurm-mpi $*
+}
+
 function grib_api_setup ()
 {
   bin=$1
@@ -157,6 +171,11 @@ SITE=$(perl -e '
   elsif ($host =~ m/^(?:belenos|taranis)/o)
     {
       print "meteo";
+      exit (0);
+    }
+  elsif ($host =~ m/leonardo/o)
+    {
+      print "leonardo";
       exit (0);
     }
   die ("Unexpected host : $host");
