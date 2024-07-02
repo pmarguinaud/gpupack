@@ -25,7 +25,7 @@ function Ectrans_clone ()
   cd $pack/hub/local/src/Ectrans
   case "$ECTRANS_GPU" in
     "ON")
-      git clone --branch arpege_integration_for_cy49t1 https://github.com/dareg/ectrans_nvidia ectrans
+      git clone --branch arpege_integration_for_cy49t2 https://github.com/dareg/ectrans_nvidia ectrans
       ;;
     "OFF")
       git clone --branch for-CY49T1 https://github.com/ACCORD-NWP/ectrans
