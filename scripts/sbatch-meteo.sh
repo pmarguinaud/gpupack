@@ -63,7 +63,7 @@ do
       nodes=1
     fi
 
-    submit $nodes $partition cy49/arp/arp-ecrad.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH} $TRUNC
+    submit $nodes $partition cy49/arp/arp.sh $GPUPACK_PREFIX/pack/${CYCLE}_${BRANCH}.01.${ARCH} $TRUNC
 
   done
 done

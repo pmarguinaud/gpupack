@@ -77,8 +77,18 @@ function nominal_setup ()
   export PERSISTENT=0
   export PARALLEL=0
   unset LPARALLELMETHOD_VERBOSE
+
+  export SLCOMMACC=0
+  export SLEXTPOLACC=0
+
   clean_stack
   export LLSIMPLE_DGEMM=1
+
+  # ECRAD
+
+  LECRADACC=.FALSE.
+  ECRADSOLVER='McICA'
+  ECRADARCH=CPU
 }
 
 function openmp_setup ()
@@ -89,9 +99,19 @@ function openmp_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
+
+  export SLCOMMACC=0
+  export SLEXTPOLACC=0
+
   clean_stack 
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMP lparallelmethod.txt
+
+  # ECRAD
+
+  LECRADACC=.FALSE.
+  ECRADSOLVER='McICA'
+  ECRADARCH=CPU
 }
 
 function openmpsinglecolumn_setup ()
@@ -102,9 +122,19 @@ function openmpsinglecolumn_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   unset LPARALLELMETHOD_VERBOSE
+
+  export SLCOMMACC=0
+  export SLEXTPOLACC=0
+
   setup_stack $pack
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENMPSINGLECOLUMN lparallelmethod.txt
+
+  # ECRAD
+
+  LECRADACC=.FALSE.
+  ECRADSOLVER='McICA ACC'
+  ECRADARCH=GPU
 }
 
 function openaccsinglecolumn_setup ()
@@ -115,9 +145,21 @@ function openaccsinglecolumn_setup ()
   export PERSISTENT=1
   export PARALLEL=1
   export LPARALLELMETHOD_VERBOSE=1
+
+  # SLCOMM on device
+
+  export SLCOMMACC=1
+  export SLEXTPOLACC=1
+
   setup_stack $pack
   export LLSIMPLE_DGEMM=1
   cp $pack/lparallelmethod.txt.OPENACCSINGLECOLUMN lparallelmethod.txt
+
+  # ECRAD 
+
+  LECRADACC=.TRUE.
+  ECRADSOLVER='McICA ACC'
+  ECRADARCH=GPU
 }
 
 
@@ -243,7 +285,11 @@ do
   # Set forecast term; reduce it for debugging
   
   STOP=6
+
+  # Setup
   
+  ${method}_setup $PACK
+
   # Modify namelist
   
   xpnam --delta="
@@ -269,7 +315,7 @@ do
   
   xpnam --delta="
   &NAMDIM
-    NPROMA=-128,
+    NPROMA=-32,
   /
   " --inplace fort.4
   
@@ -281,12 +327,26 @@ do
   /
   " --inplace fort.4
   
+  # Number of points for ECRAD
+
+  NECRADLEN=1024
+
+  xpnam --delta="
+  &NAERAD
+    CECRADARCH='$ECRADARCH',
+    NECRADLEN=$NECRADLEN,
+    LECRADACC=$LECRADACC,
+  /
+  &RADIATION
+    SW_SOLVER_NAME='$ECRADSOLVER',
+    LW_SOLVER_NAME='$ECRADSOLVER',
+  /
+  " --inplace fort.4
+
   ls -lrt
   
   cat fort.4
   
-  ${method}_setup $PACK
-
   BIN=$PACK/bin/MASTERODB
   
   grib_api_setup $BIN
