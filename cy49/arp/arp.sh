@@ -13,7 +13,7 @@ function ecmwf_mpirun ()
   set +x
   if [ "x$NVHPC_ROOT" = "x" ]
   then
-    export MODULEPATH=$HPCPERM/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
+    export MODULEPATH=/ec/res4/hpcperm/sor/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
     module purge
     module load nvhpc-hpcx/23.5
     source $NVHPC_ROOT/comm_libs/11.8/hpcx/hpcx-2.14/hpcx-mt-init.sh hpcx_load
