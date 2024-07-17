@@ -27,6 +27,7 @@ function meteo_mpirun ()
 {
   export MPIAUTOCONFIG=~marguina/.mpiautorc/mpiauto.PGI.conf
   ~marguina/SAVE/mpiauto/mpiauto --nouse-slurm-mpi $*
+# DR_NVTX=1 ~marguina/SAVE/mpiauto/mpiauto --prefix-command /home/gmap/mrpm/marguina/bin/nsys.sh --nouse-slurm-mpi $*
 # /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
 # /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
 }
@@ -81,6 +82,9 @@ function nominal_setup ()
   export SLCOMMACC=0
   export SLEXTPOLACC=0
 
+  export CLLEGACY_SCAN2M=0
+  export CNT4_COPY=0
+
   clean_stack
   export LLSIMPLE_DGEMM=1
 
@@ -102,6 +106,9 @@ function openmp_setup ()
 
   export SLCOMMACC=0
   export SLEXTPOLACC=0
+
+  export CLLEGACY_SCAN2M=0
+  export CNT4_COPY=0
 
   clean_stack 
   export LLSIMPLE_DGEMM=1
@@ -125,6 +132,9 @@ function openmpsinglecolumn_setup ()
 
   export SLCOMMACC=0
   export SLEXTPOLACC=0
+
+  export CLLEGACY_SCAN2M=0
+  export CNT4_COPY=0
 
   setup_stack $pack
   export LLSIMPLE_DGEMM=1
@@ -150,6 +160,14 @@ function openaccsinglecolumn_setup ()
 
   export SLCOMMACC=1
   export SLEXTPOLACC=1
+
+  # Transfer data in legacy PGFL/PGMV
+
+  export CLLEGACY_SCAN2M=1
+
+  # Single copy of YDMODEL
+
+  export CNT4_COPY=1
 
   setup_stack $pack
   export LLSIMPLE_DGEMM=1
@@ -355,10 +373,12 @@ do
   
   openacc-bind --nn $NNODE_FC --nnp $NTASK_FC --np $NPROC_FC ; cat openacc_bind.txt
 
+  set +e
   ${SITE}_mpirun \
    --verbose --wrap --wrap-stdeo \
       --nnp $NTASK_FC --nn $NNODE_FC --openmp $NOPMP_FC -- $BIN \
    -- --nnp $NTASK_IO --nn $NNODE_IO --openmp $NOPMP_IO -- $BIN 
+  set -e
 
   if [ "x$SITE" = "x" ]
   then
