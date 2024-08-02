@@ -19,41 +19,40 @@ function submit ()
 
   if [ -f "$out" ]
   then
-    if [ "$p" = "gpu" ]
+    if [ "$p" = "boost_usr_prod" ]
     then
-      sbatch --partition gpu --mem=247000 --ntasks-per-node 256 -N$N --gres=gpu:4 $script $pack $grid
+      sbatch --gres=gpu:4 --exclusive -A DestE_330_24 -N$N -p $p  $script $pack $grid
     else
-      sbatch --partition par -N$N $script $pack $grid
+      sbatch --exclusive -N$N -p $p  $script $pack $grid
     fi
   else
     mkdir -p $(dirname $out)
-    if [ "$p" = "gpu" ]
+    if [ "$p" = "boost_usr_prod" ]
     then
-      sbatch -o $out --partition gpu --mem=247000 --ntasks-per-node 256 -N$N --gres=gpu:4 $script $pack $grid
+      sbatch --gres=gpu:4 --exclusive -o $out -A DestE_330_24 -N$N -p $p  $script $pack $grid
     else
-      sbatch -o $out --partition par -N$N $script $pack $grid
+      sbatch --exclusive -o $out -N$N -p $p  $script $pack $grid
     fi
   fi
 }
 
-
-set -x
 
 CYCLE=49t2
 BRANCH=openacc
 
 
 
-for ARCH in NVHPC2405ECTRANSGPU.1d NVHPC2405ECTRANSGPU.1s NVHPC2405.1d NVHPC2405.1s INTEL2302.2s INTEL2302.2d
+#for ARCH in NVHPC2405ECTRANSGPU.1d NVHPC2405ECTRANSGPU.1s NVHPC2405.1d NVHPC2405.1s INTEL2302.2s INTEL2302.2d
+for ARCH in NVHPC2405.1d NVHPC2405.1s 
 do
   for TRUNC in t0031 t0107 t0538 t0798
   do
 
     if [ ${ARCH:0:5} = "INTEL" ]
     then
-      partition=par
+      partition=normal256
     else
-      partition=gpu
+      partition=boost_usr_prod
     fi
 
     if [ "$TRUNC" = "t0798" ]

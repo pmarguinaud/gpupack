@@ -30,6 +30,7 @@ sub prefix
 {
   use Sys::Hostname;
   my $host  = &hostname ();
+  return '/leonardo/home/userexternal/pmarguin/install/nvidia' if ($host =~ m/leonardo/o);
   return '/ec/res4/hpcperm/sor/install/nvidia' if ($host =~ m/^ac\d+-\d+\.bullx$/o);
   return '/opt/softs/gcc/9.2.0' if ($host =~ m/^(?:belenos|taranis)/o);
   die ("Unexpected host : $host");
@@ -42,6 +43,7 @@ sub site
 
   for ($host)
     {
+      return 'leonardo' if (m/leonardo/o);
       return 'meteo' if (m/^(?:belenos|taranis)/o);
       return 'ecmwf' if (m/^ac\d+-\d+\.bullx$/o);
     }

@@ -13,7 +13,7 @@ function ecmwf_mpirun ()
   set +x
   if [ "x$NVHPC_ROOT" = "x" ]
   then
-    export MODULEPATH=$HPCPERM/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
+    export MODULEPATH=/ec/res4/hpcperm/sor/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
     module purge
     module load nvhpc-hpcx/23.5
     source $NVHPC_ROOT/comm_libs/11.8/hpcx/hpcx-2.14/hpcx-mt-init.sh hpcx_load
@@ -30,6 +30,20 @@ function meteo_mpirun ()
 # DR_NVTX=1 ~marguina/SAVE/mpiauto/mpiauto --prefix-command /home/gmap/mrpm/marguina/bin/nsys.sh --nouse-slurm-mpi $*
 # /opt/softs/mpiauto/mpiauto --nouse-slurm-mpi $*
 # /opt/softs/mpiauto/mpiauto --prefix-command /opt/softs/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin/compute-sanitizer --nouse-slurm-mpi $*
+}
+
+function leonardo_mpirun ()
+{
+  set +x
+  if [ "x$NVHPC_ROOT" = "x" ]
+  then
+    export MODULEPATH=~pmarguin/install/nvidia/hpc_sdk/modulefiles:$MODULEPATH
+    module load nvhpc-hpcx/24.5
+    source $NVHPC_ROOT/comm_libs/12.4/hpcx/hpcx-2.19/hpcx-mt-init.sh hpcx_load
+  fi
+  set -x
+  export SLURM_EXPORT_ENV=ALL
+  ~pmarguin/install/mpiauto/mpiauto --nouse-slurm-mpi $*
 }
 
 function grib_api_setup ()
@@ -217,6 +231,11 @@ SITE=$(perl -e '
   elsif ($host =~ m/^(?:belenos|taranis)/o)
     {
       print "meteo";
+      exit (0);
+    }
+  elsif ($host =~ m/leonardo/o)
+    {
+      print "leonardo";
       exit (0);
     }
   die ("Unexpected host : $host");
