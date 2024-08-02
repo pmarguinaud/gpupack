@@ -1,0 +1,29 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FileHandle;
+use File::Basename;
+use FindBin qw ($Bin);
+use lib $Bin;
+
+use NVHPC;
+
+exit (0) unless (my $what = shift);
+
+if ($what eq 'NVHPC_ROOT')
+  {
+    print $NVHPC_ROOT;
+  }
+elsif ($what eq 'NVHPC_CUDA_HOME')
+  {
+    print "$NVHPC_CUDA_HOME";
+  }
+elsif ($what eq 'CUDAToolkit_ROOT')
+  {
+    print "$NVHPC_ROOT/cuda";
+  }
+elsif ($what eq 'nvcc')
+  {
+    print "$NVHPC_ROOT/compilers/bin/nvcc";
+  }
+

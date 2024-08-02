@@ -1,0 +1,24 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use NVHPC;
+
+&fixEnv ();
+
+my @cmd = ("$NVHPC_ROOT/$OMPI_PREFIX/bin/mpif90", @ARGV, 
+           "-L$NVHPC_ROOT/compilers/lib", "-Wl,-rpath,$NVHPC_ROOT/compilers/lib", '-lnvhpcatm',
+           "-L$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt',
+           "-L$NVHPC_ROOT/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_ROOT/$OMPI_PREFIX/lib", '-lopen-rte', '-lopen-pal',
+           "-L$NVHPC_ROOT/math_libs/$CUDA_VERSION/targets/$NVHPC_ARCH/lib", '-cudalib=cublas', "-Wl,-rpath,$NVHPC_ROOT/math_libs/$CUDA_VERSION/targets/$NVHPC_ARCH/lib");
+
+if (&site eq "meteo")
+  {
+	  push @cmd,"-Wl,-rpath,/opt/softs/gcc/9.2.0/lib64";
+  }
+
+&fixLink (@cmd);
+
+exec (@cmd);
+

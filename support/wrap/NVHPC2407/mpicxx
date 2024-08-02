@@ -1,0 +1,14 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use NVHPC;
+
+&fixEnv ();
+
+my @mpi_libs = ("-L$NVHPC_ROOT/$OMPI_PREFIX/lib", "-Wl,-rpath,$NVHPC_ROOT/$OMPI_PREFIX/lib", qw (-lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lopen-rte -lopen-pal));
+
+exec ("$NVHPC_ROOT/$OMPI_PREFIX/bin/mpic++", @ARGV, 
+      "-L$NVHPC_ROOT/compilers/lib", "-Wl,-rpath,$NVHPC_ROOT/compilers/lib", '-lnvf', '-lnvhpcatm', @mpi_libs, 
+      "-L$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", "-Wl,-rpath,$NVHPC_ROOT/$CUDA_PREFIX/targets/x86_64-linux/lib", '-lnvhpcwrapnvtx', '-lnvToolsExt');
