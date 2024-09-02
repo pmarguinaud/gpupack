@@ -192,6 +192,10 @@ function openaccsinglecolumn_setup ()
   LECRADACC=.TRUE.
   ECRADSOLVER='McICA ACC'
   ECRADARCH=GPU
+
+  # IO with cuda-aware MPI
+  
+  export CLIOACC=1
 }
 
 
@@ -356,11 +360,16 @@ do
   /
   " --inplace fort.4
   
-  # Disable output
-  
+  if [ $NPROC_IO != 0 ]
+  then
+    N1HIS=1
+  else
+    N1HIS=0
+  fi
+
   xpnam --delta="
   &NAMCT1
-    N1HIS=0,
+    N1HIS=$N1HIS,
   /
   " --inplace fort.4
   
