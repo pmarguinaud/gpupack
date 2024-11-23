@@ -107,7 +107,7 @@ for file in $(echo $1) ; do
   for branch in $(echo $GMKVIEW) ; do
     found_file=$(eval echo $MKTOP/$branch/$file)
     if [ -f $found_file ] ; then
-      \cp $found_file .
+      \cp -f $found_file .
     fi
   done
   if [ -s $(basename $found_file) ] && [ $(grep -c $(basename $found_file .o) entry_list) -eq 0 ] ; then

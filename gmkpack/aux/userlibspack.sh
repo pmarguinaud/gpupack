@@ -167,7 +167,7 @@ for project in $(echo $ICS_PROJLIBS) ; do
             find . -name "*.o" -print | xargs $AR -qvS $abslib
             ranlib -a -no_warning_for_no_symbols $abslib 2>/dev/null
           else
-            find . -name "*.o" -print | xargs $AR -qv $abslib
+            find . -name "*.o" -print | sort | xargs $AR -qv $abslib
           fi
         fi
 #       Control the unicity of symbols in the text section of the library 
