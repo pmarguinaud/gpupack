@@ -1,0 +1,15 @@
+*.o
+*.mod
+*.optrpt
+*.lst
+*.x
+compile.cpu*
+compile.gpu*
+*.F90.xml
+tmp/
+drhook.prof.*
+drhook_lock
+*.svg
+attic
+slurm-*.out
+.*.swp

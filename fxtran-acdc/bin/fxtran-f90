@@ -1,0 +1,142 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FileHandle;
+use Data::Dumper;
+use File::Temp;
+use File::Basename;
+use File::Spec;
+use FindBin qw ($Bin);
+use Cwd;
+
+my $f90 = shift; 
+
+
+sub concatenateSource
+{
+  my %args = @_;
+
+  my @opts = @{ $args{opts} };
+  my ($obj, $f90, $F90) = @args{qw (obj f90 F90)};
+
+  my $fho;
+
+  for my $f ($F90, <*.F90>)
+    {
+      $fho ||= 'FileHandle'->new ('>' . &basename ($F90));
+      my $code = do { my $fh = 'FileHandle'->new ("<$f"); local $/ = undef; <$fh> };
+      $fho->print ($code);
+      $fho->print ("\n" x 3);
+    }
+
+  $fho->close ();
+
+  system ($f90, @opts, -o => $obj, &basename ($F90)) && die;
+}
+
+sub concatenateObject
+{
+  my %args = @_;
+
+  my @opts = @{ $args{opts} };
+  my ($obj, $f90, $F90) = @args{qw (obj f90 F90)};
+
+  my @obj;
+
+  for my $f ($F90, <*.F90>)
+    {
+      system ($f90, @opts, $f) && die;
+      (my $obj = &basename ($f)) =~ s/\.F90$/.o/o;
+      unshift @obj, $obj;
+    }
+
+  if (scalar (@obj) == 1)
+    {
+      rename ($obj[0], $obj);
+    }
+  else
+    {
+      my @ld = ('ld', '-r', '-o', $obj, @obj);
+      print "@ld\n";
+      system (@ld) && die;
+    }
+
+}
+
+sub openacc
+{
+  shift;
+  my %args = @_;
+
+  my @cmd = @{ $args{cmd} };
+  my $F90 = $args{F90};
+
+  push @cmd, '--dir', '.';
+
+  system (@cmd, $F90) && die;
+
+  &concatenateObject (%args);
+}
+
+sub generateStructureMethods
+{
+  shift;
+  my %args = @_;
+
+  my @cmd = @{ $args{cmd} };
+  my $F90 = $args{F90};
+  my $dir = $args{dir};
+
+  push @cmd, 
+    '--types-fieldapi-dir', "$dir/types-fieldapi",
+    '--types-constant-dir', "$dir/types-constant";
+
+  system (@cmd, $F90) && die;
+
+  &concatenateObject (%args);
+
+}
+
+my $c = grep { $_ eq '-c' } @ARGV;
+
+unless ($c)
+  {
+    exec ($f90, @ARGV);
+  }
+
+my @F90 = grep { m/\.F90$/o } @ARGV;
+my @opts = grep { ! m/\.F90$/o } @ARGV;
+
+my $dir = &cwd ();
+
+for my $F90 (@F90)
+  {
+    my $tmp = 'File::Temp'->newdir (CLEANUP => 0, DIR => 'tmp');
+    chdir ($tmp);
+
+    $F90 = 'File::Spec'->rel2abs ($F90, $dir);
+
+    (my $obj = $F90) =~ s/\.F90$/.o/o;
+
+    push @opts, "-I$dir";
+
+    my @text = do { my $fh = 'FileHandle'->new ("<$F90"); <$fh> };
+
+    if (my ($ACDC) = map { m/^\!\$ACDC (\S.*)$/o ? ($1) : () } @text)
+      {
+        my ($method) = ($ACDC =~ m/^(\w+)/o);
+        my @cmd = split (m/\s+/o, $ACDC);
+        $cmd[0] = "$Bin/$cmd[0]";
+        'main'->$method (obj => $obj, f90 => $f90, F90 => $F90, opts => \@opts, cmd => \@cmd, dir => $dir);
+      }
+    else
+      {
+        system ($f90, @opts, -o => $obj, $F90) && die;
+      }
+  }
+
+for my $mod (<*.mod>)
+  {
+    rename ($mod, "$dir/$mod");
+  }
+
