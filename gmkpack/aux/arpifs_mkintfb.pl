@@ -1,4 +1,4 @@
-#!/usr/bin/env perl  
+#!/usr/bin/perl -w
 #
 #
 use strict;
@@ -12,6 +12,9 @@ use FileHandle;
 use File::Basename;
 use Data::Dumper;
 
+use Interface;
+
+my $log = 'FileHandle'->new (">>/tmp/intfb.log");
 
 
 ########################################################################
@@ -338,26 +341,11 @@ sub make_intfbl1
 
     unless($prog_info{is_module}) 
       {
-        &create_interface_block (\@statements,\@interface_block);
-        &cont_lines (\@interface_block,\@lines,\@line_hash);
         my $int_block_fname = $fname;
         $int_block_fname =~ s/\.F90/.intfb.h/;
         $int_block_fname =~ s,.*/(.+)$,$1,;
-        my $ofname = "$intfbldir/$int_block_fname";
-        my $remake = 1;
-        if (-f $ofname) 
-	  {
-            my @oldlines=&readfile($ofname);
-            $remake=0 if (&eq_array(\@oldlines, \@lines));
-            print "INTERFACE BLOCK $int_block_fname UNCHANGED \n" unless ($remake);
-          }
-        if ($remake) 
-	  {
-            print "WRITE INTERFACE BLOCK $int_block_fname \n";
-            $int_block_fname = "$locintfbldir/$int_block_fname";
-            print "$int_block_fname \n";
-            &writefile ($int_block_fname,\@lines);
-          }
+        $int_block_fname = "$locintfbldir/$int_block_fname";
+        &Interface::intfb (file => $fname, output => $int_block_fname, log => $log, defines => []);
       }
   }
 
@@ -373,5 +361,4 @@ sub eq_array
     }
   return 1;
 }
-
 

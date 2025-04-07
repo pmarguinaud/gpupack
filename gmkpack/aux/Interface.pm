@@ -1,0 +1,357 @@
+package Interface;
+
+use strict;
+use FileHandle;
+use Data::Dumper;
+use File::Basename;
+use File::Path;
+use File::Spec;
+use Getopt::Long;
+use FindBin qw ($Bin);
+use lib "$Bin/../../lib";
+
+use local::lib;
+
+use fxtran;
+use fxtran::xpath;
+use fxtran::parser;
+
+sub stmt
+{
+  my $e = shift;
+  my @anc = reverse &F ('./ancestor::*', $e);
+  my ($stmt) = grep { $_->nodeName =~ m/-stmt$/o } @anc;
+  return $stmt;
+}
+
+sub intfbBody
+{
+  my $doc = shift;
+  
+  my @pu = &F ('./object/file/program-unit', $doc);
+  
+  for my $pu (@pu)
+    {
+      for (&F ('.//program-unit', $pu))
+        {
+          $_->unbindNode ();
+        }
+
+      for (&F ('.//cpp-section|.//cpp', $pu))
+        {
+          $_->unbindNode ();
+        }
+
+      my $first = $pu->firstChild;
+   
+      if ($first->nodeName =~ m/^(?:module|program)-stmt$/o)
+        {
+          $pu->unbindNode ();
+          next;
+        }
+  
+      # Strip blocks (these may contain use statements)
+      
+      for (&F ('.//ANY-construct', $pu))
+        {
+          $_->unbindNode ();
+        }
+  
+      (my $kind = $first->nodeName ()) =~ s/-stmt$//o;
+  
+      my ($name) = &F ('./' . $kind . '-N/N/n/text()', $first, 1);
+      my @args = &F ('.//dummy-arg-LT//arg-N/N/n/text()', $first, 1);
+      
+      my %stmt;
+      
+      # Keep first & last statements
+      
+      $stmt{$pu->firstChild} = $pu->firstChild;
+      $stmt{$pu->lastChild}  = $pu->lastChild;
+      
+      # %symb holds symbols whose declaration should be kept
+      # %undf holds symbols which are not defined with T-decl-stmt nor imported by use statements
+
+      my (%symb, %undf);
+
+      for my $arg (@args)
+        {
+          $symb{$arg} = 1;
+        }
+      
+      # Keep result declaration (function)
+
+      if ($first->nodeName eq 'function-stmt')
+        {
+          my ($result) = &F ('./result-spec/N', $first, 1);
+           
+          unless ($result)
+            {
+              ($result) = &F ('./function-N', $first, 1);
+            }
+
+          $symb{$result} = 1;
+        }
+
+      # Index decl statements
+
+      my %s2d;
+
+      for my $decl (&F ('./ANY-stmt[.//EN-decl]', $pu))
+        {
+          for my $symb (&F ('.//EN-N', $decl, 1))
+            {
+              push @{ $s2d{$symb} }, $decl;
+            }
+        }
+
+      # Index use statements
+      
+      my %s2u;
+
+      for my $use (&F ('./use-stmt', $pu))
+        {
+          for my $symb (&F ('.//use-N', $use, 1))
+            {
+              push @{ $s2u{$symb} }, $use;
+            }
+        }
+      
+      
+      # Symbols used in decl statements of arguments
+      
+      my @symb = sort keys (%symb);
+
+      while (my $symb = shift (@symb))
+        {
+          if (my @decl = @{ $s2d{$symb} || [] })
+            {
+              for my $decl (@decl)
+                {
+                  $stmt{$decl} = $decl;
+                  for my $s (&F ('.//named-E/N', $decl), &F ('.//T-N', $decl))
+                    {
+                      my $t = $s->parentNode;
+                      if ($t->nodeName ne 'intrinsic-T-spec')
+                        {
+                          $s = $s->textContent;
+                          push @symb, $s unless ($symb{$s});
+                          $symb{$s} = 1; 
+                        }
+                    }
+                }
+            }
+          elsif (my @use = @{ $s2u{$symb} || [] })
+            {
+              for my $use (@use)
+                {
+                  $stmt{$use} = $use; 
+                }
+            }
+          else
+            {
+              $undf{$symb} = 1;
+            }
+        }
+
+      if (%undf)
+        {
+          # Keep use statements without ONLY list : they may import some of the undefined symbols
+
+          for my $use (&F ('./use-stmt[not(./rename-LT)]', $pu))
+            {
+              $stmt{$use} = $use;
+            }
+        }
+
+      my @stmt = &F ('./ANY-stmt', $pu);
+      
+      for my $stmt (@stmt)
+        {
+          next if ($stmt->nodeName eq 'implicit-none-stmt');
+          $stmt->unbindNode () unless ($stmt{$stmt});
+        }
+  
+    }
+  
+
+  # Strip labels
+  for (&F ('.//label', $doc))
+    {
+      $_->unbindNode ();
+    }
+  
+  # Strip comments
+  
+  for (&F ('.//C', $doc))
+    {
+      next if ($_->textContent =~ m/^!\$acc\s+routine/o);
+      $_->unbindNode ();
+    }
+  
+  # Strip includes
+  
+  for (&F ('.//include', $doc))
+    {
+      $_->unbindNode ();
+    }
+
+  # Strip defines
+
+  for (&F ('.//cpp[starts-with (text(),"#define ")]', $doc))
+    {
+      $_->unbindNode ();
+    }
+
+
+  for (&F ('.//unseen', $doc))
+    {
+      $_->unbindNode ();
+    }
+
+
+  $doc->documentElement->normalize ();
+
+  my @text = &F ('.//text()[translate(.," ?","")=""]', "\n", $doc);
+
+  for my $text (@text)
+    {
+      if ($text->data =~ m/\n/goms)
+        {
+          $text->setData ("\n");
+        }
+    }
+
+
+}
+
+sub fold
+{
+  my $d = shift;
+  my @stmt = &F ('.//ANY-stmt', $d);
+  for my $stmt (@stmt)
+    {
+      my $s = $stmt->textContent;
+      my @s;
+      while (length ($s))
+        {
+          push @s, substr ($s, 0, 64, '');
+          if ($s =~ s/^(\w+)//o)
+            {
+              $s[-1] .= $1;
+            }
+        }
+      $s = join ("&\n&", @s);
+      $stmt->replaceNode (&t ($s));
+    }
+}
+
+sub intfb
+{
+  my %args = @_;
+
+  my ($defines, $file) = @args{qw (defines file)};
+
+  my $text = '';
+
+  if (-s $file)
+    {
+      my $tmpdir = $ENV{TMPDIR} || '/tmp';
+      $tmpdir = &dirname ($tmpdir . 'File::Spec'->rel2abs ($file));
+      &mkpath ($tmpdir);
+      
+      my $doc = &parse (location => $file, fopts => [@$defines, '-canonic', '-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
+      
+      &intfbBody ($doc);
+
+      &fold ($doc);
+      
+      # Strip empty lines
+      
+      $text = $doc->textContent ();
+      
+      $text =~ s/^\s*\n$//goms;
+    }
+
+  if ($text)
+    {
+      $text = << "EOF";
+INTERFACE
+$text
+END INTERFACE
+EOF
+    }
+
+  &writefile (%args, data => $text);
+}
+
+sub modi
+{
+  my %args = @_;
+
+  my ($defines, $file) = @args{qw (defines file)};
+
+  my $TEXT = '';
+
+  if (-s $file)
+    {
+      my $tmpdir = $ENV{TMPDIR} || '/tmp';
+      $tmpdir = &dirname ($tmpdir . 'File::Spec'->rel2abs ($file));
+      &mkpath ($tmpdir);
+     
+      my $doc = &parse (location => $file, fopts => [@$defines, '-canonic', '-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
+      
+      &intfbBody ($doc);
+
+      for my $pu (&F ('.//program-unit', $doc))
+        {
+     
+          my ($stmt) = &F ('./ANY-stmt', $pu);
+          my ($N) = &F ('./ANY-N', $stmt, 1);
+
+          &fold ($pu);
+      
+          # Strip empty lines
+          
+          my $text = $pu->textContent ();
+          
+          $text =~ s/^\s*\n$//goms;
+
+          $TEXT .= << "EOF";
+
+MODULE MODI_$N
+
+INTERFACE
+
+$text
+
+END INTERFACE
+
+END MODULE
+
+EOF
+        }
+
+    }
+
+  &writefile (%args, data => $TEXT);
+}
+
+sub writefile
+{
+  my %args = @_;
+  my $data = &slurp ("<$args{output}");
+  'FileHandle'->new (">$args{output}")->print ($args{data}) 
+    unless ($data eq $args{data});
+}
+
+sub slurp
+{
+  my $file = shift;
+  (my $fh = 'FileHandle'->new ("<$file")) or return '';
+  local $/ = undef;
+  my $data = <$fh>;
+  return $data;
+}
+
+1;
