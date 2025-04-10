@@ -14,9 +14,6 @@ use Data::Dumper;
 
 use Interface;
 
-my $log = 'FileHandle'->new (">>/tmp/intfb.log");
-
-
 ########################################################################
 #
 #    Script mkintfb
@@ -87,8 +84,6 @@ sub cat
       print $line;
     }
 }
-
-local $SIG{__WARN__} = sub { die ("@_") };
 
 #
 
@@ -344,21 +339,13 @@ sub make_intfbl1
         my $int_block_fname = $fname;
         $int_block_fname =~ s/\.F90/.intfb.h/;
         $int_block_fname =~ s,.*/(.+)$,$1,;
+        my $ofname = "$intfbldir/$int_block_fname";
         $int_block_fname = "$locintfbldir/$int_block_fname";
-        &Interface::intfb (file => $fname, output => $int_block_fname, log => $log, defines => []);
+
+        &Interface::intfb (file => $fname, output => $int_block_fname, 
+                           defines => [], reference => $ofname);
       }
   }
 
-}
-
-sub eq_array 
-{
-  my ($ra, $rb) = @_;
-  return 0 unless ($#$ra == $#$rb);
-  for my $i (0 .. $#$ra) 
-    {
-      return 0 unless ($ra->[$i] eq $rb->[$i]);
-    }
-  return 1;
 }
 

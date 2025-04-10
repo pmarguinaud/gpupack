@@ -8,13 +8,15 @@ use File::Path;
 use File::Spec;
 use Getopt::Long;
 use FindBin qw ($Bin);
-use lib "$Bin/../../lib";
+use lib "$Bin/../../../fxtran-acdc/lib";
 
 use local::lib;
 
 use fxtran;
 use fxtran::xpath;
 use fxtran::parser;
+
+use Bt;
 
 sub stmt
 {
@@ -254,6 +256,8 @@ sub intfb
 
   my $text = '';
 
+  my $text_acc = '';
+
   if (-s $file)
     {
       my $tmpdir = $ENV{TMPDIR} || '/tmp';
@@ -261,8 +265,28 @@ sub intfb
       &mkpath ($tmpdir);
       
       my $doc = &parse (location => $file, fopts => [@$defines, '-canonic', '-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
+
+      my ($openacc) = map { m/^!\$ACDC (openacc.pl.*)/o ? ($1) : ()  } do { my $fh = 'FileHandle'->new ("<$file"); <$fh> };
       
       &intfbBody ($doc);
+
+      if ($openacc)
+        {    
+          my $tmp = 'File::Temp'->new (SUFFIX => '.F90', UNLINK => 1);
+          my $Bin = "/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/bin";
+          $tmp->print ($doc->textContent);
+          $tmp->close ();
+
+          system ("$Bin/$openacc $tmp") && die ("$Bin/$openacc $tmp failed\n");
+
+          (my $tmp_openacc = $tmp) =~ s/\.F90$/_openacc.F90/go;
+
+          my $doc_acc = &parse (location => $tmp_openacc, fopts => ['-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
+          $_->unbindNode () for (&F ('.//a-stmt', $doc_acc), &F ('.//call-stmt', $doc_acc));
+          $text_acc = $doc_acc->textContent ();
+          $text_acc =~ s/^\s*\n$//goms;
+
+        }    
 
       &fold ($doc);
       
@@ -278,6 +302,7 @@ sub intfb
       $text = << "EOF";
 INTERFACE
 $text
+$text_acc
 END INTERFACE
 EOF
     }
@@ -340,9 +365,17 @@ EOF
 sub writefile
 {
   my %args = @_;
-  my $data = &slurp ("<$args{output}");
-  'FileHandle'->new (">$args{output}")->print ($args{data}) 
-    unless ($data eq $args{data});
+  my $data = &slurp ($args{reference});
+
+  if ($data eq $args{data})
+    {
+      print ("INTERFACE BLOCK $args{output} UNCHANGED \n");
+    }
+  else
+    {
+      print ("WRITE INTERFACE BLOCK $args{output} \n");
+      'FileHandle'->new (">$args{output}")->print ($args{data}) 
+    }
 }
 
 sub slurp

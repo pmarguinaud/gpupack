@@ -6,11 +6,19 @@ use Data::Dumper;
 use File::Temp;
 use File::Basename;
 use File::Spec;
+use File::Copy;
 use FindBin qw ($Bin);
 use Cwd;
 
 my $f90 = shift; 
 
+sub runCommand
+{
+  my @cmd = @_;
+# print "@cmd\n";
+  system (@cmd) 
+    && die ("Command `@cmd' failed");
+}
 
 sub concatenateSource
 {
@@ -21,7 +29,7 @@ sub concatenateSource
 
   my $fho;
 
-  for my $f ($F90, <*.F90>)
+  for my $f ($F90, sort <*.F90>)
     {
       $fho ||= 'FileHandle'->new ('>' . &basename ($F90));
       my $code = do { my $fh = 'FileHandle'->new ("<$f"); local $/ = undef; <$fh> };
@@ -31,7 +39,7 @@ sub concatenateSource
 
   $fho->close ();
 
-  system ($f90, @opts, -o => $obj, &basename ($F90)) && die;
+  &runCommand ($f90, @opts, -o => $obj, &basename ($F90));
 }
 
 sub concatenateObject
@@ -43,9 +51,9 @@ sub concatenateObject
 
   my @obj;
 
-  for my $f ($F90, <*.F90>)
+  for my $f ($F90, sort <*.F90>)
     {
-      system ($f90, @opts, $f) && die;
+      &runCommand ($f90, @opts, $f);
       (my $obj = &basename ($f)) =~ s/\.F90$/.o/o;
       unshift @obj, $obj;
     }
@@ -57,8 +65,7 @@ sub concatenateObject
   else
     {
       my @ld = ('ld', '-r', '-o', $obj, @obj);
-      print "@ld\n";
-      system (@ld) && die;
+      &runCommand (@ld);
     }
 
 }
@@ -73,7 +80,7 @@ sub openacc
 
   push @cmd, '--dir', '.';
 
-  system (@cmd, $F90) && die;
+  &runCommand (@cmd, $F90);
 
   &concatenateObject (%args);
 }
@@ -87,11 +94,16 @@ sub generateStructureMethods
   my $F90 = $args{F90};
   my $dir = $args{dir};
 
+  my $pack = $ENV{TARGET_PACK};
+
+  $dir = $pack if ($pack);
+
   push @cmd, 
     '--types-fieldapi-dir', "$dir/types-fieldapi",
-    '--types-constant-dir', "$dir/types-constant";
+    '--types-constant-dir', "$dir/types-constant",
+    '--sorted';
 
-  system (@cmd, $F90) && die;
+  &runCommand (@cmd, $F90);
 
   &concatenateObject (%args);
 
@@ -104,19 +116,34 @@ unless ($c)
     exec ($f90, @ARGV);
   }
 
-my @F90 = grep { m/\.F90$/o } @ARGV;
-my @opts = grep { ! m/\.F90$/o } @ARGV;
+
+# Absolute path for includes
+
+for my $i (0 .. $#ARGV)
+  {
+    if ($ARGV[$i] eq '-I')
+      {
+        $ARGV[$i+1] = 'File::Spec'->rel2abs ($ARGV[$i+1]);
+      }
+    elsif (my ($inc) = ($ARGV[$i] =~ m/^-I(.*)$/o))
+      {
+        $ARGV[$i] = '-I' . 'File::Spec'->rel2abs ($inc);
+      }
+  }
+
+my @F90 = grep { m/\.(?:F90|F)$/io } @ARGV;
+my @opts = grep { ! m/\.(?:F90|F)$/io } @ARGV;
 
 my $dir = &cwd ();
 
-for my $F90 (@F90)
+FILE: for my $F90 (@F90)
   {
-    my $tmp = 'File::Temp'->newdir (CLEANUP => 0, DIR => 'tmp');
+    my $tmp = 'File::Temp'->newdir (CLEANUP => 0, DIR => "$ENV{GPUPACK_PREFIX}/tmp");
     chdir ($tmp);
 
     $F90 = 'File::Spec'->rel2abs ($F90, $dir);
 
-    (my $obj = $F90) =~ s/\.F90$/.o/o;
+    (my $obj = $F90) =~ s/\.(?:F90|F)$/.o/io;
 
     push @opts, "-I$dir";
 
@@ -127,16 +154,24 @@ for my $F90 (@F90)
         my ($method) = ($ACDC =~ m/^(\w+)/o);
         my @cmd = split (m/\s+/o, $ACDC);
         $cmd[0] = "$Bin/$cmd[0]";
-        'main'->$method (obj => $obj, f90 => $f90, F90 => $F90, opts => \@opts, cmd => \@cmd, dir => $dir);
+
+        if ('main'->can ($method))
+          {
+            'main'->$method (obj => $obj, f90 => $f90, F90 => $F90, opts => \@opts, cmd => \@cmd, dir => $dir);
+            next FILE;
+          }
+
       }
-    else
-      {
-        system ($f90, @opts, -o => $obj, $F90) && die;
-      }
+
+NORMAL:
+
+    &runCommand ($f90, @opts, -o => $obj, $F90);
   }
 
 for my $mod (<*.mod>)
   {
-    rename ($mod, "$dir/$mod");
+    &move ($mod, "$dir/$mod");
   }
+
+
 
