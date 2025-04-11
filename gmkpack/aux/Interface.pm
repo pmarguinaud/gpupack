@@ -248,15 +248,20 @@ sub fold
     }
 }
 
+sub runCommand
+{
+  my @cmd = @_;
+  system (@cmd)
+    && die ("Command `@cmd' failed");
+}
+
 sub intfb
 {
   my %args = @_;
 
   my ($defines, $file) = @args{qw (defines file)};
 
-  my $text = '';
-
-  my $text_acc = '';
+  my ($text, $text_openacc, $text_parallel) = ('', '', '');
 
   if (-s $file)
     {
@@ -266,7 +271,10 @@ sub intfb
       
       my $doc = &parse (location => $file, fopts => [@$defines, '-canonic', '-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
 
-      my ($openacc) = map { m/^!\$ACDC (openacc.pl.*)/o ? ($1) : ()  } do { my $fh = 'FileHandle'->new ("<$file"); <$fh> };
+      my @text = do { my $fh = 'FileHandle'->new ("<$file"); <$fh> };
+
+      my ($openacc) = map { m/^!\$ACDC (openacc.pl.*)/o ? ($1) : ()  } @text;
+      my ($parallel) = map { m/^!\$ACDC (pointerParallel.pl.*)/o ? ($1) : ()  } @text;
       
       &intfbBody ($doc);
 
@@ -277,14 +285,33 @@ sub intfb
           $tmp->print ($doc->textContent);
           $tmp->close ();
 
-          system ("$Bin/$openacc $tmp") && die ("$Bin/$openacc $tmp failed\n");
+          &runCommand ("$Bin/$openacc $tmp");
 
           (my $tmp_openacc = $tmp) =~ s/\.F90$/_openacc.F90/go;
 
-          my $doc_acc = &parse (location => $tmp_openacc, fopts => ['-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
-          $_->unbindNode () for (&F ('.//a-stmt', $doc_acc), &F ('.//call-stmt', $doc_acc));
-          $text_acc = $doc_acc->textContent ();
-          $text_acc =~ s/^\s*\n$//goms;
+          my $doc_openacc = &parse (location => $tmp_openacc, fopts => ['-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
+          $_->unbindNode () for (&F ('.//a-stmt', $doc_openacc), &F ('.//call-stmt', $doc_openacc));
+          $text_openacc = $doc_openacc->textContent ();
+          $text_openacc =~ s/^\s*\n$//goms;
+
+        }    
+
+      if ($parallel)
+        {    
+          my $tmp = 'File::Temp'->new (SUFFIX => '.F90', UNLINK => 1);
+          my $Bin = "/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/bin";
+          $tmp->print ($doc->textContent);
+          $tmp->close ();
+
+          my $PACK = $ENV{TARGET_PACK};
+          &runCommand ("$Bin/$parallel --types-fieldapi-dir $PACK/types-fieldapi $tmp");
+
+          (my $tmp_parallel = $tmp) =~ s/\.F90$/_parallel.F90/go;
+
+          my $doc_parallel = &parse (location => $tmp_parallel, fopts => ['-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
+          $_->unbindNode () for (&F ('.//a-stmt', $doc_parallel), &F ('.//call-stmt', $doc_parallel));
+          $text_parallel = $doc_parallel->textContent ();
+          $text_parallel =~ s/^\s*\n$//goms;
 
         }    
 
@@ -302,7 +329,8 @@ sub intfb
       $text = << "EOF";
 INTERFACE
 $text
-$text_acc
+$text_openacc
+$text_parallel
 END INTERFACE
 EOF
     }

@@ -1,8 +1,8 @@
 
 mkdir -p /tmp/$USER
 
-export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/cy49t1:$PATH
-export PATH=/home/gmap/mrpm/marguina/fxtran-acdc/bin:$PATH
+export PATH=/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/cy49t1:$PATH
+export PATH=/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/bin:$PATH
 
 function resolve ()
 {

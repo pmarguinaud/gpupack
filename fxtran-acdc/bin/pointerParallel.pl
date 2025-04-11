@@ -233,7 +233,7 @@ sub processSingleRoutine
   
   # Add modules
   
-  my @use = qw (FIELD_MODULE FIELD_FACTORY_MODULE FIELD_ACCESS_MODULE YOMPARALLELMETHOD STACK_MOD);
+  my @use = qw (FIELD_MODULE FIELD_FACTORY_MODULE FIELD_ACCESS_MODULE YOMPARALLELMETHOD STACK_MOD YOMHOOK);
   
   if ($opts{'use-acpy'})
     {
@@ -248,10 +248,10 @@ sub processSingleRoutine
   ($d,  
     'INTEGER(KIND=JPIM) :: JBLK',
     'TYPE(CPG_BNDS_TYPE) :: YLCPG_BNDS', 
+    'TYPE(STACK) :: YLSTACK',
     'REAL(KIND=JPHOOK) :: ZHOOK_HANDLE_FIELD_API',
     'REAL(KIND=JPHOOK) :: ZHOOK_HANDLE_PARALLEL',
     'REAL(KIND=JPHOOK) :: ZHOOK_HANDLE_COMPUTE',
-    'TYPE(STACK) :: YLSTACK',
   );
   
   my $t = &Pointer::SymbolTable::getSymbolTable 
@@ -347,8 +347,8 @@ sub processSingleRoutine
             {
               my ($include) = &F ('.//include[./filename[string(.)="?" or string(.)="?"]', lc ($name) . '.intfb.h', lc ($name) . '.h', $d);
               $include or die $call->textContent;
-              $include->parentNode->insertAfter (&n ('<include>#include "<filename>' . lc ($name) . '_parallel.intfb.h</filename>"</include>'), $include);
-              $include->parentNode->insertAfter (&t ("\n"), $include);
+#             $include->parentNode->insertAfter (&n ('<include>#include "<filename>' . lc ($name) . '_parallel.intfb.h</filename>"</include>'), $include);
+#             $include->parentNode->insertAfter (&t ("\n"), $include);
             }
           $name->setData ($name->data . uc ($suffix));
         }
@@ -358,7 +358,7 @@ sub processSingleRoutine
   
   &Pointer::Parallel::setupLocalFields ($d, $t, '', $opts{gpumemstat});
   
-  &Include::removeUnusedIncludes ($d);
+# &Include::removeUnusedIncludes ($d);
   
   my $useUtilMod = 0;
   
@@ -421,9 +421,9 @@ sub processSingleRoutine
    
       if (grep { $proc eq $_ } @called)
         {
-          my $include_openacc = &n ('<include>#include "<filename>' . lc ($proc) . '.intfb.h</filename>"</include>');
-          $include->parentNode->insertAfter ($include_openacc, $include);
-          $include->parentNode->insertAfter (&t ("\n"), $include);
+#         my $include_openacc = &n ('<include>#include "<filename>' . lc ($proc) . '.intfb.h</filename>"</include>');
+#         $include->parentNode->insertAfter ($include_openacc, $include);
+#         $include->parentNode->insertAfter (&t ("\n"), $include);
         }
       
     }
@@ -477,6 +477,9 @@ my %opts = ('types-fieldapi-dir' => 'types-fieldapi', skip => 'PGFL,PGFLT1,PGMVT
 my @opts_f = qw (help only-if-newer version stdout addYDCPG_OPTS redim-arguments stack84 use-acpy inline-contains gpumemstat contiguous);
 my @opts_s = qw (skip nproma types-fieldapi-dir types-constant-dir post-parallel dir cycle jlon types-fieldapi-non-blocked files base);
 
+my @include = grep { m/^-I/o } @ARGV;
+@ARGV = grep { ! m/^-I/o } @ARGV;
+
 &GetOptions
 (
   (map { ($_, \$opts{$_}) } @opts_f),
@@ -522,13 +525,13 @@ if ($opts{'only-if-newer'})
 
 my $NAME = uc (&basename ($F90out, qw (.F90)));
 
-my $find = 'Finder'->new (files => $opts{files}, base => $opts{base});
+my $find = 'Finder'->new (files => $opts{files}, base => $opts{base}, I => \@include);
 
 my $types = &Storable::retrieve ("$opts{'types-fieldapi-dir'}/decls.dat");
 
 &fxtran::setOptions (qw (Fragment -construct-tag -no-include -line-length 512));
 
-my $d = &Fxtran::parse (location => $F90, fopts => [qw (-line-length 800 -no-include -no-cpp -construct-tag -directive ACDC -canonic)]);
+my $d = &Fxtran::parse (location => $F90, fopts => [qw (-line-length 1500 -no-include -no-cpp -construct-tag -directive ACDC -canonic)]);
 
 for my $pu (&F ('./object/file/program-unit', $d))
   {
