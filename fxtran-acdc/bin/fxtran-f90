@@ -125,9 +125,20 @@ sub pointerParallel
 
   my @inc = grep { m/^-I/ } @opts;
 
+  for my $dt ('types-fieldapi', 'types-constant')
+    {
+      if (-d "$dir/$dt")
+        {
+          &runCommand ('cp', '-r', "$dir/$dt", "$dt");
+        }
+    }
+
+  &runCommand ("$Bin/fieldRB.pl");
+  &runCommand ("$Bin/linkTypes.pl");
+
   push @cmd, 
-    '--types-fieldapi-dir', "$dir/types-fieldapi",
-    '--types-constant-dir', "$dir/types-constant",
+    '--types-fieldapi-dir', "types-fieldapi",
+    '--types-constant-dir', "types-constant",
     '--dir', '.', @inc;
 
   &runCommand (@cmd, $F90);

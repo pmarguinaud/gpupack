@@ -6,6 +6,7 @@ use Data::Dumper;
 use File::Basename;
 use File::Path;
 use File::Spec;
+use File::Temp;
 use Getopt::Long;
 use FindBin qw ($Bin);
 use lib "$Bin/../../../fxtran-acdc/lib";
@@ -265,9 +266,7 @@ sub intfb
 
   if (-s $file)
     {
-      my $tmpdir = $ENV{TMPDIR} || '/tmp';
-      $tmpdir = &dirname ($tmpdir . 'File::Spec'->rel2abs ($file));
-      &mkpath ($tmpdir);
+      my $tmpdir = 'File::Temp'->newdir (CLEANUP => 0, DIR => "$ENV{GPUPACK_PREFIX}/tmp");
       
       my $doc = &parse (location => $file, fopts => [@$defines, '-canonic', '-construct-tag', '-no-include', '-line-length' => 500], dir => $tmpdir);
 
@@ -304,7 +303,19 @@ sub intfb
           $tmp->close ();
 
           my $PACK = $ENV{TARGET_PACK};
-          &runCommand ("$Bin/$parallel --types-fieldapi-dir $PACK/types-fieldapi $tmp");
+
+          for my $dt ('types-fieldapi', 'types-constant')
+            {   
+              if (-d "$PACK/$dt")
+                {
+                  &runCommand ('cp', '-r', "$PACK/$dt", "$tmpdir/$dt");
+                }
+            }   
+         
+          &runCommand ("$Bin/fieldRB.pl", '--types-fieldapi-dir' => "$tmpdir/types-fieldapi");
+          &runCommand ("$Bin/linkTypes.pl", '--types-fieldapi-dir' => "$tmpdir/types-fieldapi");
+
+          &runCommand ("$Bin/$parallel --types-fieldapi-dir $tmpdir/types-fieldapi $tmp");
 
           (my $tmp_parallel = $tmp) =~ s/\.F90$/_parallel.F90/go;
 
