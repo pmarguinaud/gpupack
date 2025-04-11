@@ -413,6 +413,7 @@ sub writefile
   else
     {
       print ("WRITE INTERFACE BLOCK $args{output} \n");
+      &mkpath (&dirname ($args{output}));
       'FileHandle'->new (">$args{output}")->print ($args{data}) 
     }
 }
