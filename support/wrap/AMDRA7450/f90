@@ -1,0 +1,17 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use AMDRA;
+
+&fixEnv ();
+
+my @cmd = ("$AMDRA_PREFIX/bin/amdflang", 
+           "-Qunused-arguments",
+           @ARGV, "-L$AMDRA_PREFIX/lib", "-Wl,-rpath,$AMDRA_PREFIX/lib");
+
+&fixLink (@cmd);
+
+exec (@cmd);
+
