@@ -5,9 +5,9 @@ function ecSDK_clone ()
   pack=$1
   mkdir -p $pack/hub/local/src/ecSDK
   cd $pack/hub/local/src/ecSDK
-  git clone --branch 3.7.0  https://github.com/ecmwf/ecbuild
-  git clone --branch 1.19.0 https://github.com/ACCORD-NWP/eckit.git
-  git clone --branch 0.9.5  https://github.com/ecmwf/fckit
+  git clone --branch 3.7.0       https://github.com/ecmwf/ecbuild
+  git clone --branch 1.19.0-afar https://github.com/pmarguinaud/eckit.git
+  git clone --branch 0.9.5       https://github.com/ecmwf/fckit
 }
 
 function Fiat_clone ()

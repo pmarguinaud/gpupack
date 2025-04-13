@@ -9,7 +9,8 @@ use AMDRA;
 
 my @cmd = ("$AMDRA_PREFIX/$OMPI_PREFIX/bin/mpif90", 
            "-Qunused-arguments",
-           @ARGV, "-L$AMDRA_PREFIX/lib", "-Wl,-rpath,$AMDRA_PREFIX/lib");
+           @ARGV, "-L$AMDRA_PREFIX/lib", "-Wl,-rpath,$AMDRA_PREFIX/lib",
+           "-L/usr/lib/gcc/x86_64-linux-gnu/13", "-Wl,-rpath,/usr/lib/gcc/x86_64-linux-gnu/13");
 
 &fixLink (@cmd);
 

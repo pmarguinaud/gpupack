@@ -73,13 +73,13 @@ FIXED_FRTFLAG = -ffixed-form
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -O0 
-OPT_VCCFLAGS = -O0 
+OPT_FRTFLAGS = -O1 
+OPT_VCCFLAGS = -O1 
 
 # Debugging compilation flag
 # --------------------------
 
-DBG_FRTFLAGS = -g -O0
+DBG_FRTFLAGS = -g -O1
 
 # Bound checking compilation flag
 # -------------------------------

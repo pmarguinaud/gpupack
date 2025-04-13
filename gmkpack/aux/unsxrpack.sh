@@ -57,7 +57,14 @@ if [ -d $MKTOP/$GMKUNSX ] ; then
           if [ "$dir" = "$GMKUNSX_QUIET" ] ; then
             echo "long long int ${file}() { return 0L; }" > $MyTmp/$file.c
           else
-            echo "long long int ${file}() { printf(\"${file} : dummy external reference by gmkpack\\\n\"); return 0L; }" > $MyTmp/$file.c
+            cat > $file.c << EOF
+#include <stdio.h>
+long long int ${file}() 
+{ 
+  printf("${file} : dummy external reference by gmkpack\n\); 
+  return 0L; 
+}
+EOF
           fi
         fi
       fi

@@ -215,7 +215,14 @@ if [ -s ddlfiles.list ] ; then
       locfile=$(basename $file)
       label=$(echo $locfile | cut -d"_" -f1)
       outfile=$TARGET_PACK/$GMKSRC/$GMKUNSX/$GMKUNSX_VERBOOSE/${label}_Sstatic.c
-      echo "void ${label}_static_init() { printf(\"${label}_static_init : dummy subroutine by gmkpack\\\n\"); return; }" > $outfile
+      cat > $outfile << EOF
+#include <stdio.h>
+void ${label}_static_init() 
+{ 
+  printf("${label}_static_init : dummy subroutine by gmkpack\n"); 
+  return; 
+}
+EOF
     done
     comm -23 $packlist dummystatic.list >  packlist.upd
     \mv packlist.upd $packlist
@@ -230,7 +237,14 @@ if [ -s ddlfiles.list ] ; then
     for file in $(grep "\.ddl$" $packlist | sort -u) ; do
       label=$(basename $file .ddl)
       outfile=$TARGET_PACK/$GMKSRC/$GMKUNSX/$GMKUNSX_VERBOOSE/${label}_Sstatic.c
-      echo "void ${label}_static_init() { printf(\"${label}_static_init : dummy subroutine by gmkpack\\\n\"); return; }" > $outfile
+      cat > $outfile << EOF
+#include <stdio.h>
+void ${label}_static_init() 
+{ 
+  printf("${label}_static_init : dummy subroutine by gmkpack\n"); 
+  return; 
+}
+EOF
       echo ${label}_static_init.c
     done
 # Add odbglue if needed : the action below is quite critical
