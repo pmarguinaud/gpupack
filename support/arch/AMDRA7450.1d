@@ -73,8 +73,8 @@ FIXED_FRTFLAG = -ffixed-form
 # Optimized compilation flag
 # --------------------------
 
-OPT_FRTFLAGS = -O1 
-OPT_VCCFLAGS = -O1 
+OPT_FRTFLAGS = -O1 -g
+OPT_VCCFLAGS = -O1 -g
 
 # Debugging compilation flag
 # --------------------------
