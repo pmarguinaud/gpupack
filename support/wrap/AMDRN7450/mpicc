@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FileHandle;
+use File::Basename;
+use FindBin qw ($Bin);
+use lib $Bin;
+use AMDRA;
+
+&fixEnv ();
+
+if ((grep { $_ eq '-E' } @ARGV) && (grep { $_ eq '-P' } @ARGV))
+  {
+    exec ("/usr/bin/cpp", @ARGV);
+  }
+
+my @cmd = ("$AMDRA_PREFIX/$OMPI_PREFIX/bin/mpicc", 
+           "-Qunused-arguments", @ARGV,
+           "-L$AMDRA_PREFIX/lib", "-Wl,-rpath,$AMDRA_PREFIX/lib", '-lm');
+
+exec (@cmd);
