@@ -6,7 +6,7 @@ use base qw (Exporter);
 
 our @EXPORT = qw (&fixEnv &prefix &site &fixLink $AMDRA_PREFIX $OMPI_PREFIX);
 
-our $AMDRA_PREFIX="/home/marguina/install/rocm-afar-7450-drop-6.0.0";
+our $AMDRA_PREFIX= &prefix ();
 
 our $OMPI_PREFIX = "openmpi-5.0.7-new";
 
@@ -22,6 +22,8 @@ sub prefix
 {
   use Sys::Hostname;
   my $host  = &hostname ();
+  return '/perm/sor/rocm-afar-7450-drop-6.0.0' if ($host =~ m/^ac\d+-\d+\.bullx$/o);
+  return '/home/marguina/install/rocm-afar-7450-drop-6.0.0' if ($host =~ m/^sxalgo1/o);
   return $AMDRA_PREFIX;
   die ("Unexpected host : $host");
 }
