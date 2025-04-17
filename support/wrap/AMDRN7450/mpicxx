@@ -1,0 +1,16 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin qw ($Bin);
+use lib $Bin;
+use AMDRA;
+
+&fixEnv ();
+
+exec ("$AMDRA_PREFIX/$OMPI_PREFIX/bin/mpic++", 
+      "-Qunused-arguments",
+      "-I/usr/include/c++/13",
+      "-I/usr/include/x86_64-linux-gnu/c++/13",
+      @ARGV, 
+      "-L$AMDRA_PREFIX/lib", "-Wl,-rpath,$AMDRA_PREFIX/lib", 
+      "-L/usr/lib/gcc/x86_64-linux-gnu/13", "-Wl,-rpath,/usr/lib/gcc/x86_64-linux-gnu/13");
