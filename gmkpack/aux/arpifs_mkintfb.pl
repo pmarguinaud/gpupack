@@ -254,7 +254,9 @@ if (@all)
 	rmtree ($LOC_INTFBDIR);
 	exit (1);
       }
+
     my $fh = 'FileHandle'->new (">$intfblist");
+    $fh or die;
     find ({wanted => sub { m/\.intfb\.h$/o && $fh->print ("$File::Find::name\n") }, no_chdir => 1}, 
 	  $GMKINTFB);
   }
@@ -331,8 +333,6 @@ sub make_intfbl1
     $study_called=0;
 
     &study(\@statements,\%prog_info);
-
-    print Dumper(\%prog_info);
 
     unless($prog_info{is_module}) 
       {
