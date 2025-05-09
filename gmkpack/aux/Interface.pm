@@ -249,6 +249,12 @@ sub fold
     }
 }
 
+
+sub pp
+{
+  'FileHandle'->new (">>/tmp/runCommand.log")->print ("@_\n");
+}
+
 sub runCommand
 {
   my @cmd = @_;
@@ -272,19 +278,20 @@ sub intfb
 
       my @text = do { my $fh = 'FileHandle'->new ("<$file"); <$fh> };
 
-      my ($openacc) = map { m/^!\$ACDC (openacc.pl.*)/o ? ($1) : ()  } @text;
-      my ($parallel) = map { m/^!\$ACDC (pointerParallel.pl.*)/o ? ($1) : ()  } @text;
+      my ($openacc) = map { m/^!\$ACDC (singlecolumn.*)/o ? ($1) : ()  } @text;
+      my ($parallel) = map { m/^!\$ACDC (pointerparallel.*)/o ? ($1) : ()  } @text;
       
       &intfbBody ($doc);
 
       if ($openacc)
         {    
-          my $tmp = 'File::Temp'->new (SUFFIX => '.F90', UNLINK => 1);
+          my $tmp = 'File::Temp'->new (SUFFIX => '.F90', UNLINK => 0);
+
           my $Bin = "/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/bin";
           $tmp->print ($doc->textContent);
           $tmp->close ();
 
-          &runCommand ("$Bin/$openacc $tmp");
+          &runCommand ("$Bin/fxtran-gen $openacc --dir " . &dirname ($tmp) .  " $tmp");
 
           (my $tmp_openacc = $tmp) =~ s/\.F90$/_openacc.F90/go;
 
@@ -315,7 +322,7 @@ sub intfb
           &runCommand ("$Bin/fieldRB.pl", '--types-fieldapi-dir' => "$tmpdir/types-fieldapi");
           &runCommand ("$Bin/linkTypes.pl", '--types-fieldapi-dir' => "$tmpdir/types-fieldapi");
 
-          &runCommand ("$Bin/$parallel --types-fieldapi-dir $tmpdir/types-fieldapi $tmp");
+          &runCommand ("$Bin/fxtran-gen $parallel --types-fieldapi-dir $tmpdir/types-fieldapi --dir " . &dirname ($tmp) . " $tmp");
 
           (my $tmp_parallel = $tmp) =~ s/\.F90$/_parallel.F90/go;
 

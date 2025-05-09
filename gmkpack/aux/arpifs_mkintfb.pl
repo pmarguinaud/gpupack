@@ -5,6 +5,8 @@ use strict;
 use FindBin qw ($Bin);
 use lib "$Bin/../../aux";
 
+use lib "/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/lib";
+
 use File::Find;
 use File::Path;
 use File::Copy;
