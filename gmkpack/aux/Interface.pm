@@ -17,7 +17,7 @@ use fxtran;
 use fxtran::xpath;
 use fxtran::parser;
 
-use Bt;
+use Fxtran::Bt;
 
 sub stmt
 {
@@ -285,7 +285,7 @@ sub intfb
 
       if ($openacc)
         {    
-          my $tmp = 'File::Temp'->new (SUFFIX => '.F90', UNLINK => 0);
+          my $tmp = 'File::Temp'->new (SUFFIX => '.F90', UNLINK => 1);
 
           my $Bin = "/home/gmap/mrpm/marguina/gpupack-w/fxtran-acdc/bin";
           $tmp->print ($doc->textContent);
@@ -300,6 +300,7 @@ sub intfb
           $text_openacc = $doc_openacc->textContent ();
           $text_openacc =~ s/^\s*\n$//goms;
 
+          unlink ("$tmp.xml");
         }    
 
       if ($parallel)
@@ -311,18 +312,7 @@ sub intfb
 
           my $PACK = $ENV{TARGET_PACK};
 
-          for my $dt ('types-fieldapi', 'types-constant')
-            {   
-              if (-d "$PACK/$dt")
-                {
-                  &runCommand ('cp', '-r', "$PACK/$dt", "$tmpdir/$dt");
-                }
-            }   
-         
-          &runCommand ("$Bin/fieldRB.pl", '--types-fieldapi-dir' => "$tmpdir/types-fieldapi");
-          &runCommand ("$Bin/linkTypes.pl", '--types-fieldapi-dir' => "$tmpdir/types-fieldapi");
-
-          &runCommand ("$Bin/fxtran-gen $parallel --types-fieldapi-dir $tmpdir/types-fieldapi --dir " . &dirname ($tmp) . " $tmp");
+          &runCommand ("$Bin/fxtran-gen $parallel --types-fieldapi-dir $PACK/types-fieldapi --dir " . &dirname ($tmp) . " $tmp");
 
           (my $tmp_parallel = $tmp) =~ s/\.F90$/_parallel.F90/go;
 
@@ -331,6 +321,7 @@ sub intfb
           $text_parallel = $doc_parallel->textContent ();
           $text_parallel =~ s/^\s*\n$//goms;
 
+          unlink ("$tmp.xml");
         }    
 
       &fold ($doc);
