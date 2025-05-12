@@ -8,7 +8,7 @@ GPUPACK_PREFIX=$(perl -e ' use File::Spec; print File::Spec->rel2abs ($ARGV[0]) 
 # Cycle & a branch
 
 export CYCLE=49t2
-export BRANCH=openacc-bench
+export BRANCH=openacc-bench-afar
 export REPO=https://github.com/pmarguinaud/IAL.git
 export ECTRANS_GPU=OFF
 
